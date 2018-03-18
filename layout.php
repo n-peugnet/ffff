@@ -28,9 +28,7 @@ if (!empty($this->params['styles'])) {
 			<h2 class="nav"><a href="<?= $basePath ?>/a-propos/">à propos</a> | <a href="<?= $basePath ?>/contact/">Contact</a> | <a href="<?= $basePath ?>/cv/" target="_blank">CV</a></h2>
 			<h1><?= $title ?></h1>
 		</div>
-		<p>
 			<?= $content ?>
-		</p>
 	</section>
 </body>
 </html>

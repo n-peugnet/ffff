@@ -31,24 +31,38 @@ class Page extends Dir
 	public function render()
 	{
 		$content = "";
-		$content .= $this->dumpDirs();
+		$content .= $this->renderDirs();
 		$content .= $this->renderFiles();
 		return $content;
 	}
 
+	public function renderDirs()
+	{
+		$ignore = $this->getIgnoredDirs();
+		$str = "<pre>";
+		foreach ($this->listDirs as $id => $dir) {
+			if (array_search($dir->getName(), $ignore) === false)
+				$str .= $dir->toString($this->router->genUrl($dir->getPath()));
+		}
+		return $str . "</pre>";
+	}
+
 	public function renderFiles()
 	{
+		$ignore = $this->getIgnoredFiles();
 		$str = "";
 		foreach ($this->listFiles as $index => $file) {
-			switch ($file->type()) {
-				case 'image':
-					$str .= '<img class="CadrePhoto" src="' . $this->router->genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
-					break;
+			if (array_search($file->getName(), $ignore) === false) {
+				switch ($file->type()) {
+					case 'image':
+						$str .= '<img class="CadrePhoto" src="' . $this->router->genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
+						break;
 
-				case 'text':
-					$contenu = file_get_contents($file->getPath());
-					$str .= "<p>" . $contenu . "</p>";
-					break;
+					case 'text':
+						$contenu = file_get_contents($file->getPath());
+						$str .= "<p>" . $contenu . "</p>";
+						break;
+				}
 			}
 		}
 		$str .= "</pre>";
@@ -90,6 +104,31 @@ class Page extends Dir
 	public function loadParams()
 	{
 		$this->params = Spyc::YAMLLoad($this->path . 'params.yaml');
+	}
+
+	public function getIgnoredDirs()
+	{
+		return $this->getIgnored("dir");
+	}
+
+	public function getIgnoredFiles()
+	{
+		return $this->getIgnored("file");
+	}
+
+	public function getIgnored($type)
+	{
+		$ignore = [];
+		if (!empty($this->params['ignore'])) {
+			foreach ($this->params['ignore'] as $name) {
+				$isDir = substr($name, -1) == '/';
+				if ($isDir)
+					$name = substr($name, 0, -1);
+				if (($type == "dir" && $isDir) || ($type == "file" && !$isDir))
+					array_push($ignore, $name);
+			}
+		}
+		return $ignore;
 	}
 }
 

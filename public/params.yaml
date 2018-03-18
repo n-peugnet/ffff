@@ -1,3 +1,4 @@
 ignore:
   - 403/
   - 404/
+  - assets/
