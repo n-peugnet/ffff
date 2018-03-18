@@ -4,6 +4,7 @@
 <?php
 require "lib/class.ffrouter.php";
 require "lib/class.diacritics.php";
+require "lib/class.file.php";
 require "lib/class.dir.php";
 require "lib/class.page.php";
 

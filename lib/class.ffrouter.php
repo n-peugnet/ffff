@@ -27,7 +27,7 @@ class FFRouter
 		$routePath = $this->escapeRoute($routePath);
 		if (!$dir->isEmpty()) {
 			$this->routes[$routePath] = $dir->getPath();
-			foreach ($dir->getListSubDir() as $subDir) {
+			foreach ($dir->getListDirs() as $subDir) {
 				$this->mapRoutes($subDir, $routePath);
 			}
 		}

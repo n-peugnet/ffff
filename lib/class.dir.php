@@ -1,63 +1,27 @@
 <?php
-class Dir
+class Dir extends File
 {
-	protected $name;
-	protected $path = "";
-	protected $listSubDir = [];
+	protected $listDirs = [];
 	protected $listFiles = [];
-	protected $level = 0;
-
-	public function __construct($path, $dirName = "", $level = 0)
-	{
-		$this->setName($dirName);
-		$this->path = $path;
-		$this->level = $level;
-	}
 
 	public function getListFiles()
 	{
 		return $this->listFiles;
 	}
 
-	public function getListSubDir()
+	public function getListDirs()
 	{
-		return $this->listSubDir;
-	}
-
-	public function getLevel()
-	{
-		return $this->level;
-	}
-
-	public function getName()
-	{
-		return $this->name;
-	}
-
-	public function getPath()
-	{
-		return $this->path;
-	}
-
-	public function setNameFromPath()
-	{
-		$pieces = explode(DIRECTORY_SEPARATOR, $this->path);
-		$this->setName($pieces[count($pieces) - 2]);
-	}
-
-	public function setName($str)
-	{
-		$this->name = utf8_encode($str);
+		return $this->listDirs;
 	}
 
 	public function isEmpty()
 	{
-		return $this->nbSubDir() + $this->nbFiles() == 0;
+		return $this->nbDirs() + $this->nbFiles() == 0;
 	}
 
 	public function hasChild()
 	{
-		return $this->nbSubDir() > 0;
+		return $this->nbDirs() > 0;
 	}
 
 	public function hasFiles()
@@ -65,9 +29,9 @@ class Dir
 		return $this->nbFiles() > 0;
 	}
 
-	public function nbSubDir()
+	public function nbDirs()
 	{
-		return count($this->listSubDir);
+		return count($this->listDirs);
 	}
 
 	public function nbFiles()
@@ -75,14 +39,14 @@ class Dir
 		return count($this->listFiles);
 	}
 
-	public function addSubDir($path, $name)
+	public function addDir($path, $name)
 	{
-		$this->listSubDir[$name] = new static($path, $name, $this->level + 1);
+		$this->listDirs[$name] = new static($path, $name, $this->level + 1);
 	}
 
-	public function addFile($fileName)
+	public function addFile($path, $name)
 	{
-		$this->listFiles[] = $fileName;
+		$this->listFiles[$name] = new File($path, $name, $this->level + 1);
 	}
 
 	function list($recursive = true, $dirOnly = false)
@@ -91,13 +55,14 @@ class Dir
 			while (($element = readdir($dir)) !== false) //pour tous les elements de ce dossier...
 			{
 				if ($element != '.' && $element != '..') {
+					$path = $this->path . $element . DIRECTORY_SEPARATOR;
 					if (is_dir($this->path . $element)) //si c'est un dossier...
 					{
-						$this->addSubDir($this->path . $element . DIRECTORY_SEPARATOR, $element);
+						$this->addDir($path, $element);
 						if ($recursive)
-							$this->listSubDir[$element]->list();
+							$this->listDirs[$element]->list();
 					} elseif (!$dirOnly) {
-						$this->addFile($element);
+						$this->addFile($path, $element);
 					}
 				}
 			}
@@ -108,8 +73,8 @@ class Dir
 	public function alphaSort()
 	{
 		sort($this->listFiles, SORT_NATURAL | SORT_FLAG_CASE);
-		ksort($this->listSubDir, SORT_NATURAL | SORT_FLAG_CASE);
-		foreach ($this->listSubDir as $subDir)
+		ksort($this->listDirs, SORT_NATURAL | SORT_FLAG_CASE);
+		foreach ($this->listDirs as $subDir)
 			$subDir->triAlpha();
 	}
 

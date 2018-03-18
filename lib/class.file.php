@@ -4,6 +4,39 @@ class File
 	protected $name;
 	protected $path;
 
+	public function __construct($path, $name = "", $level = 0)
+	{
+		$this->setName($name);
+		$this->level = $level;
+		$this->path = $path;
+	}
+
+	public function getLevel()
+	{
+		return $this->level;
+	}
+
+	public function getName()
+	{
+		return $this->name;
+	}
+
+	public function getPath()
+	{
+		return $this->path;
+	}
+
+	public function setNameFromPath()
+	{
+		$pieces = explode(DIRECTORY_SEPARATOR, $this->path);
+		$this->setName($pieces[count($pieces) - 2]);
+	}
+
+	public function setName($str)
+	{
+		$this->name = utf8_encode($str);
+	}
+
 	public function ext()
 	{
 		$pieces = explode('.', $this->name);

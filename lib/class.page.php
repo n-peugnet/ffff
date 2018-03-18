@@ -34,27 +34,27 @@ class Page extends Dir
 	public function render()
 	{
 		$content = "";
-		$content .= $this->renderSubDirs();
+		$content .= $this->renderDirs();
 		$content .= $this->renderFiles();
 		return $content;
 	}
 
-	public function renderSubDirs()
+	public function renderDirs()
 	{
-		$size = count($this->listSubDir);
-		$str = "<pre><i>protected</i> 'listSubDir' <font color='#888a85'>=&gt;</font>
+		$size = count($this->listDirs);
+		$str = "<pre><i>protected</i> 'listDirs' <font color='#888a85'>=&gt;</font>
   <b>array</b> <i>(size=$size)</i>\n";
-		foreach ($this->listSubDir as $id => $dir) {
+		foreach ($this->listDirs as $id => $dir) {
 			$url = $this->router->genUrl($dir->getPath());
 			$size = strlen($id);
 			$name = $dir->getName();
 			$sName = strlen($name);
-			$sSubDir = $dir->nbSubDir();
+			$sDirs = $dir->nbDirs();
 			$sFiles = $dir->nbFiles();
 			$str .= "    <a href='$url'>$id</a> <font color='#888a85'>=&gt;</font>
       <b>object</b>(<i>Page</i>)
         <i>protected</i> 'name' <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'$name'</font> <i>(length=$sName)</i>
-        <i>protected</i> 'listSubDir' <font color='#888a85'>=&gt;</font> <b>array</b> (size=$sSubDir)
+        <i>protected</i> 'listDirs' <font color='#888a85'>=&gt;</font> <b>array</b> (size=$sDirs)
         <i>protected</i> 'listFiles' <font color='#888a85'>=&gt;</font> <b>array</b> (size=$sFiles)\n";
 		}
 		$str .= "</pre>";
@@ -67,8 +67,9 @@ class Page extends Dir
 		$str = "<pre><i>protected</i> 'listFiles' <font color='#888a85'>=&gt;</font>
   <b>array</b> <i>(size=$size)</i>\n";
 		foreach ($this->listFiles as $index => $file) {
-			$size = strlen($file);
-			$str .= "    $index <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'$file'</font> <i>(length=$size)</i>\n";;
+			$name = $file->getName();
+			$size = strlen($name);
+			$str .= "    $index <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'$name'</font> <i>(length=$size)</i>\n";;
 		}
 		$str .= "</pre>";
 		return $str;
