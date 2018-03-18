@@ -1,34 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
 
-<?php include("head.php"); ?>
-
-	<title>Nicolas Peugnet</title>
-	<meta name="Title" content="Nicolas Peugnet - Projets"/>
-	<meta name="Keywords" content=""/>
-	<meta name="Description" content=""/>
-</head>
-<body>
-	
-<?php include_once("lib/analyticstracking.php"); ?>
-	
-	<section id="accueil">
-	<div class="titre">
-
-	<?php include("nav.php"); ?> 
-		<h1>Nicolas Peugnet - Projets</h1>
-	</div>
+<?php // include_once("lib/analyticstracking.php"); ?>
 
 <?php
-require "lib/class.dossier.php";
 require "lib/class.ffrouter.php";
-require 'lib/functions.php';
+require "lib/class.diacritics.php";
+require "lib/class.dir.php";
+require "lib/class.page.php";
 
-$router = new FFRouter("public", "/nicolaspeugnet");
+$basePath = $_SERVER['BASE_PATH']; // comes from the .htaccess
+$router = new FFRouter("public", $basePath);
+if ($path = $router->matchRoute()) {
+	$page = new Page($path);
+	$page->init($basePath);
+	$page->show();
+}
 var_dump($router->getRoutes());
-var_dump($router->matchRoute());
-die;
+
+
+
+
+
+
 function couverture($path, $niveau)
 {
 	$fichiers = false;
@@ -64,7 +56,7 @@ function couverture($path, $niveau)
 }
 }  //fin de la fonction
 			//SETUP
-if ($dossierProjets = opendir('./projets')) {
+if (false) {
 	echo "<ul>";
 	while (($element = readdir($dossierProjets)) == true) {
 		$dossierTri[] = $element;
@@ -82,9 +74,7 @@ couverture($element, 0);
 }
 }
 echo "</ul>";
-} else {
-	echo "il n'y a pas de projets";
+// } else {
+echo "il n'y a pas de projets";
 }
-?></section>
-</body>
-</html>
+?>

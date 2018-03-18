@@ -1,5 +1,5 @@
 <?php
-class Dossier
+class Dir
 {
 	protected $name;
 	protected $path = "";
@@ -7,10 +7,10 @@ class Dossier
 	protected $listFiles = [];
 	protected $level = 0;
 
-	public function __construct($dirName, $path, $level = 0)
+	public function __construct($path, $dirName = "", $level = 0)
 	{
-		$this->name = $dirName;
-		$this->path = $path . DIRECTORY_SEPARATOR;
+		$this->setName($dirName);
+		$this->path = $path;
 		$this->level = $level;
 	}
 
@@ -39,6 +39,17 @@ class Dossier
 		return $this->path;
 	}
 
+	public function setNameFromPath()
+	{
+		$pieces = explode(DIRECTORY_SEPARATOR, $this->path);
+		$this->setName($pieces[count($pieces) - 2]);
+	}
+
+	public function setName($str)
+	{
+		$this->name = utf8_encode($str);
+	}
+
 	public function isEmpty()
 	{
 		return $this->nbSubDir() + $this->nbFiles() == 0;
@@ -64,9 +75,9 @@ class Dossier
 		return count($this->listFiles);
 	}
 
-	public function addSubDir($name, $path)
+	public function addSubDir($path, $name)
 	{
-		$this->listSubDir[$name] = new static($name, $path, $this->level + 1);
+		$this->listSubDir[$name] = new static($path, $name, $this->level + 1);
 	}
 
 	public function addFile($fileName)
@@ -74,27 +85,27 @@ class Dossier
 		$this->listFiles[] = $fileName;
 	}
 
-	function listage($recursive = true, $dirOnly = false)
+	function list($recursive = true, $dirOnly = false)
 	{
-		if ($dossier = opendir($this->path)) {
-			while (($element = readdir($dossier)) !== false) //pour tous les elements de ce dossier...
+		if ($dir = opendir($this->path)) {
+			while (($element = readdir($dir)) !== false) //pour tous les elements de ce dossier...
 			{
 				if ($element != '.' && $element != '..') {
 					if (is_dir($this->path . $element)) //si c'est un dossier...
 					{
-						$this->addSubDir($element, $this->path . $element);
+						$this->addSubDir($this->path . $element . DIRECTORY_SEPARATOR, $element);
 						if ($recursive)
-							$this->listSubDir[$element]->listage();
+							$this->listSubDir[$element]->list();
 					} elseif (!$dirOnly) {
 						$this->addFile($element);
 					}
 				}
 			}
+			closedir($dir);
 		}
-		closedir($dossier);
 	}
 
-	public function triAlpha()
+	public function alphaSort()
 	{
 		sort($this->listFiles, SORT_NATURAL | SORT_FLAG_CASE);
 		ksort($this->listSubDir, SORT_NATURAL | SORT_FLAG_CASE);
