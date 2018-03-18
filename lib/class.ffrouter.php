@@ -27,11 +27,9 @@ class FFRouter
 	{
 		$routePath = $path . $dir->getName() . '/';
 		$routePath = $this->escapeRoute($routePath);
-		if (!$dir->isEmpty()) {
-			$this->routes[$routePath] = $dir->getPath();
-			foreach ($dir->getListDirs() as $subDir) {
-				$this->mapRoutes($subDir, $routePath);
-			}
+		$this->routes[$routePath] = $dir->getPath();
+		foreach ($dir->getListDirs() as $subDir) {
+			$this->mapRoutes($subDir, $routePath);
 		}
 	}
 
@@ -43,6 +41,11 @@ class FFRouter
 	public function staticFilesBasePath()
 	{
 		return $this->basePath . '/' . $this->publicPath . '/';
+	}
+
+	public function getBasePath()
+	{
+		return $this->basePath;
 	}
 
 	public function setBasePath($str)

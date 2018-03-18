@@ -1,1 +1,0 @@
-<h2 class="nav"><a href="about.php">à propos</a> | <a href="contact.php">Contact</a> | <a href="cv/" target="_blank">CV</a></h2>

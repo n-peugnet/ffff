@@ -16,7 +16,6 @@ if ($path = $router->matchRoute()) {
 	$page->init($router);
 	$page->show();
 }
-var_dump($router->getRoutes());
 
 
 

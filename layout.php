@@ -3,8 +3,18 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width" />
-	<link rel="stylesheet" href="<?= $basePath ?>/assets/css/nicolaspeugnet.css" />
-	<link rel="icon" type="image/png" href="<?= $basePath ?>/assets/img/favicon.png" />
+<?php if (empty($this->params['remove default style'])) : ?>
+	<link rel="stylesheet" href="<?= $basePath ?>/public/assets/css/nicolaspeugnet.css" />
+<?php endif; ?>
+<?php
+if (!empty($this->params['styles'])) {
+	foreach ($this->params['styles'] as $style) { ?>
+	<link rel="stylesheet" href="<?= $basePath ?>/<?= $this->path . $style ?>" />
+<?php 
+}
+}
+?>
+	<link rel="icon" type="image/png" href="<?= $basePath ?>/public/assets/img/favicon.png" />
 	<meta name="Revisit-After" content="15 days"/>
 	<meta name="Robots" content="All"/>
 	<title><?= $title ?> - <?= $siteName ?></title>
@@ -15,8 +25,7 @@
 <body>
 	<section id="accueil">
 		<div class="titre">
-
-		<?php include("nav.php"); ?> 
+			<h2 class="nav"><a href="<?= $basePath ?>/a-propos/">à propos</a> | <a href="<?= $basePath ?>/contact/">Contact</a> | <a href="<?= $basePath ?>/cv/" target="_blank">CV</a></h2>
 			<h1><?= $title ?></h1>
 		</div>
 		<p>
