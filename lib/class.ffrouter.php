@@ -82,7 +82,9 @@ class FFRouter
 
 	public function genStaticFileUrl($path)
 	{
-		$path = '/' . str_replace(DIRECTORY_SEPARATOR, '/', $path);
+		$path = '/' . str_replace(DIRECTORY_SEPARATOR, '/', $path); // replace '\' with '/' if on windows
+		$path = rawurlencode(utf8_encode($path)); // replace special characters such as accentued chars
+		$path = str_replace("%2F", '/', $path); // replace '/' html notation with the normal '/' char
 		return $path;
 	}
 

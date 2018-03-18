@@ -9,9 +9,9 @@ RewriteEngine On
 RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
 RewriteRule ^(.*) - [E=BASE_PATH:%1]
 
-# Pas de réécriture sur les vrais fichiers
+# No rewrite on static files
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule .? - [L]
 
-# Réécrit tout le reste à public/index.php.
+# rewrite everything else to public/index.php.
 RewriteRule .? %{ENV:BASE_PATH}/index.php [L]
