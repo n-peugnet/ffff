@@ -30,10 +30,11 @@ class File
 	{
 		$class = get_called_class();
 		$size = strlen($this->name);
-		$str = !empty($url) ? "    <a href='$url'>$this->name</a>" : "    $this->name";
-		$str .= " <font color='#888a85'>=&gt;</font>
-      <b>object</b>(<i>$class</i>)
-        <i>protected</i> 'name' <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'$this->name'</font> <i>(length=$size)</i>\n";
+		$str = str_repeat(' ', $this->level * 8 - 4);
+		$str .= !empty($url) ? "<a href='$url'>$this->name</a>" : "$this->name";
+		$str .= " <font color='#888a85'>=&gt;</font>\n";
+		$str .= str_repeat(' ', $this->level * 8 - 2) . "<b>object</b>(<i>$class</i>)\n";
+		$str .= str_repeat(' ', $this->level * 8) . "<i>protected</i> 'name' <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'$this->name'</font> <i>(length=$size)</i>\n";
 		return $str;
 	}
 

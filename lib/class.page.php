@@ -31,18 +31,18 @@ class Page extends Dir
 	public function render()
 	{
 		$content = "";
-		$content .= $this->renderDirs();
 		$content .= $this->renderFiles();
+		$content .= $this->renderDirs(2);
 		return $content;
 	}
 
-	public function renderDirs()
+	public function renderDirs($level = 1)
 	{
 		$ignore = $this->getIgnoredDirs();
 		$str = "<pre>";
 		foreach ($this->listDirs as $id => $dir) {
 			if (array_search($dir->getName(), $ignore) === false)
-				$str .= $dir->toString($this->router->genUrl($dir->getPath()));
+				$str .= $dir->toString($this->router->genUrl($dir->getPath()), $level);
 		}
 		return $str . "</pre>";
 	}
@@ -60,6 +60,10 @@ class Page extends Dir
 
 					case 'text':
 						$contenu = file_get_contents($file->getPath());
+						if ($file->ext() == "md") {
+							$mdParser = new MarkdownExtra_Parser();
+							$contenu = $mdParser->transform($contenu);
+						}
 						$str .= "<p>" . $contenu . "</p>";
 						break;
 				}
@@ -106,6 +110,11 @@ class Page extends Dir
 		$this->params = Spyc::YAMLLoad($this->path . 'params.yaml');
 	}
 
+	public function relativeUrl($path)
+	{
+		return $this->router->genUrl($this->path . '/' . $path);
+	}
+
 	public function getIgnoredDirs()
 	{
 		return $this->getIgnored("dir");
@@ -129,6 +138,12 @@ class Page extends Dir
 			}
 		}
 		return $ignore;
+	}
+
+	public function addDir($path, $name)
+	{
+		parent::addDir($path, $name);
+		$this->listDirs[$name]->init($this->router);
 	}
 }
 

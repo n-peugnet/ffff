@@ -9,7 +9,7 @@
 <?php
 if (!empty($this->params['styles'])) {
 	foreach ($this->params['styles'] as $style) { ?>
-	<link rel="stylesheet" href="<?= $basePath ?>/<?= $this->path . $style ?>" />
+	<link rel="stylesheet" href="<?= $this->relativeUrl($style) ?>" />
 <?php 
 }
 }
@@ -25,7 +25,7 @@ if (!empty($this->params['styles'])) {
 <body>
 	<section id="accueil">
 		<div class="titre">
-			<h2 class="nav"><a href="<?= $basePath ?>/a-propos/">à propos</a> | <a href="<?= $basePath ?>/contact/">Contact</a> | <a href="<?= $basePath ?>/cv/" target="_blank">CV</a></h2>
+			<h2 class="nav"><a href="<?= $basePath ?>/a-propos/">à propos</a> | <a href="<?= $basePath ?>/contact/">Contact</a> | <a href="<?= $basePath ?>/a-propos/cv/" target="_blank">CV</a></h2>
 			<h1><?= $title ?></h1>
 		</div>
 			<?= $content ?>

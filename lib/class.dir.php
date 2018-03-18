@@ -14,13 +14,15 @@ class Dir extends File
 		return $this->listDirs;
 	}
 
-	public function toString($url = null)
+	public function toString($url = null, $level = 1)
 	{
 		$sDirs = $this->nbDirs();
 		$sFiles = $this->nbFiles();
 		$str = parent::toString($url);
-		$str .= "        <i>protected</i> 'listDirs' <font color='#888a85'>=&gt;</font> <b>array</b> (size=$sDirs)
-        <i>protected</i> 'listFiles' <font color='#888a85'>=&gt;</font> <b>array</b> (size=$sFiles)\n";
+		$str .= str_repeat(' ', $this->level * 8) . "<i>protected</i> 'listDirs' <font color='#888a85'>=&gt;</font> <b>array</b> (size=$sDirs)\n";
+		if ($this->level < $level)
+			$str .= $this->renderDirs();
+		$str .= str_repeat(' ', $this->level * 8) . "<i>protected</i> 'listFiles' <font color='#888a85'>=&gt;</font> <b>array</b> (size=$sFiles)\n";
 		return $str;
 	}
 

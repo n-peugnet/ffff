@@ -1,3 +1,3 @@
-# Index
+## Index
 
-This is the public index of the website
+This is the _public_ index of the website
