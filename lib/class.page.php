@@ -19,7 +19,7 @@ class Page extends Dir
 
 	public function show()
 	{
-		$basePath = $this->router->getBasePath();
+		$basePath = $this->router->staticFilesBasePath();
 		$title = $this->name;
 		$siteName = "test";
 		$content = $this->render();
@@ -45,17 +45,7 @@ class Page extends Dir
 		$str = "<pre><i>protected</i> 'listDirs' <font color='#888a85'>=&gt;</font>
   <b>array</b> <i>(size=$size)</i>\n";
 		foreach ($this->listDirs as $id => $dir) {
-			$url = $this->router->genUrl($dir->getPath());
-			$size = strlen($id);
-			$name = $dir->getName();
-			$sName = strlen($name);
-			$sDirs = $dir->nbDirs();
-			$sFiles = $dir->nbFiles();
-			$str .= "    <a href='$url'>$id</a> <font color='#888a85'>=&gt;</font>
-      <b>object</b>(<i>Page</i>)
-        <i>protected</i> 'name' <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'$name'</font> <i>(length=$sName)</i>
-        <i>protected</i> 'listDirs' <font color='#888a85'>=&gt;</font> <b>array</b> (size=$sDirs)
-        <i>protected</i> 'listFiles' <font color='#888a85'>=&gt;</font> <b>array</b> (size=$sFiles)\n";
+			$str .= $dir->toString($this->router->genUrl($dir->getPath()));
 		}
 		$str .= "</pre>";
 		return $str;
@@ -67,15 +57,11 @@ class Page extends Dir
 		$str = "<pre><i>protected</i> 'listFiles' <font color='#888a85'>=&gt;</font>
   <b>array</b> <i>(size=$size)</i>\n";
 		foreach ($this->listFiles as $index => $file) {
-			$name = $file->getName();
-			$size = strlen($name);
-			$str .= "    $index <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'$name'</font> <i>(length=$size)</i>\n";;
+			$str .= $file->toString($this->router->genUrl($file->getPath()));
 		}
 		$str .= "</pre>";
 		return $str;
 	}
-
-
 }
 
 ?>

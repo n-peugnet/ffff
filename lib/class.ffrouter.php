@@ -1,18 +1,20 @@
 <?php
 class FFRouter
 {
+	protected $publicPath = "";
 	protected $basePath = "";
 	protected $escapeChars = [];
 	protected $routes = [];
 
-	public function __construct($path, $basePath = "")
+	public function __construct($publicPath = "public", $basePath = "")
 	{
+		$this->publicPath = $publicPath;
 		$this->basePath = $basePath;
 		$this->escapeChars = [
 			["dir" => " ", "url" => "-", ],
 			["dir" => "'", "url" => "-", ]
 		];
-		$dir = new Dir($path . DIRECTORY_SEPARATOR);
+		$dir = new Dir($publicPath . DIRECTORY_SEPARATOR);
 		$dir->list(true, true);
 		$this->mapRoutes($dir);
 	}
@@ -38,9 +40,9 @@ class FFRouter
 		return $this->routes;
 	}
 
-	public function getBasePath()
+	public function staticFilesBasePath()
 	{
-		return $this->basePath;
+		return $this->basePath . '/' . $this->publicPath . '/';
 	}
 
 	public function setBasePath($str)
@@ -70,12 +72,18 @@ class FFRouter
 		// Check if named route exists
 		$route = array_search($path, $this->routes);
 		if ($route === false) {
-			throw new \Exception("Route '{$path}' does not exist.");
+			$route = $this->genStaticFileUrl($path);
 		}
 		
 		// prepend base path to route url again
 		$url = $this->basePath . $route;
 		return $url;
+	}
+
+	public function genStaticFileUrl($path)
+	{
+		$path = '/' . str_replace(DIRECTORY_SEPARATOR, '/', $path);
+		return $path;
 	}
 
 	protected function escapeRoute($route)

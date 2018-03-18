@@ -14,6 +14,16 @@ class Dir extends File
 		return $this->listDirs;
 	}
 
+	public function toString($url = null)
+	{
+		$sDirs = $this->nbDirs();
+		$sFiles = $this->nbFiles();
+		$str = parent::toString($url);
+		$str .= "        <i>protected</i> 'listDirs' <font color='#888a85'>=&gt;</font> <b>array</b> (size=$sDirs)
+        <i>protected</i> 'listFiles' <font color='#888a85'>=&gt;</font> <b>array</b> (size=$sFiles)\n";
+		return $str;
+	}
+
 	public function isEmpty()
 	{
 		return $this->nbDirs() + $this->nbFiles() == 0;
@@ -55,10 +65,10 @@ class Dir extends File
 			while (($element = readdir($dir)) !== false) //pour tous les elements de ce dossier...
 			{
 				if ($element != '.' && $element != '..') {
-					$path = $this->path . $element . DIRECTORY_SEPARATOR;
+					$path = $this->path . $element;
 					if (is_dir($this->path . $element)) //si c'est un dossier...
 					{
-						$this->addDir($path, $element);
+						$this->addDir($path . DIRECTORY_SEPARATOR, $element);
 						if ($recursive)
 							$this->listDirs[$element]->list();
 					} elseif (!$dirOnly) {

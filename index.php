@@ -1,12 +1,13 @@
 
-<?php // include_once("lib/analyticstracking.php"); ?>
-
 <?php
-require "lib/class.ffrouter.php";
-require "lib/class.diacritics.php";
-require "lib/class.file.php";
-require "lib/class.dir.php";
-require "lib/class.page.php";
+function __autoload($className)
+{
+	require_once('lib/class.' . $className . '.php');
+}
+
+foreach (glob("inc/*.php") as $fileName) {
+	include_once $fileName;
+}
 
 $basePath = $_SERVER['BASE_PATH']; // comes from the .htaccess
 $router = new FFRouter("public", $basePath);
