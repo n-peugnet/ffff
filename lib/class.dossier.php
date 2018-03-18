@@ -19,6 +19,11 @@ class Dossier
 		return $this->listFiles;
 	}
 
+	public function getListSubDir()
+	{
+		return $this->listSubDir;
+	}
+
 	public function getLevel()
 	{
 		return $this->level;
@@ -27,6 +32,11 @@ class Dossier
 	public function getName()
 	{
 		return $this->name;
+	}
+
+	public function getPath()
+	{
+		return $this->path;
 	}
 
 	public function isEmpty()
@@ -56,7 +66,7 @@ class Dossier
 
 	public function addSubDir($name, $path)
 	{
-		$this->listSubDir[$name] = new Dossier($name, $path, $this->level + 1);
+		$this->listSubDir[$name] = new static($name, $path, $this->level + 1);
 	}
 
 	public function addFile($fileName)
@@ -64,7 +74,7 @@ class Dossier
 		$this->listFiles[] = $fileName;
 	}
 
-	function listage()
+	function listage($recursive = true, $dirOnly = false)
 	{
 		if ($dossier = opendir($this->path)) {
 			while (($element = readdir($dossier)) !== false) //pour tous les elements de ce dossier...
@@ -73,13 +83,15 @@ class Dossier
 					if (is_dir($this->path . $element)) //si c'est un dossier...
 					{
 						$this->addSubDir($element, $this->path . $element);
-						$this->listSubDir[$element]->listage();
-					} else {
+						if ($recursive)
+							$this->listSubDir[$element]->listage();
+					} elseif (!$dirOnly) {
 						$this->addFile($element);
 					}
 				}
 			}
 		}
+		closedir($dossier);
 	}
 
 	public function triAlpha()

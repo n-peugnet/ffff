@@ -19,14 +19,15 @@
 	<?php include("nav.php"); ?> 
 		<h1>Nicolas Peugnet - Projets</h1>
 	</div>
-	
+
 <?php
 require "lib/class.dossier.php";
+require "lib/class.ffrouter.php";
 require 'lib/functions.php';
 
-$projets = new Dossier("projets", "projets");
-$projets->listage();
-var_dump($projets);
+$router = new FFRouter("public", "/nicolaspeugnet");
+var_dump($router->getRoutes());
+var_dump($router->matchRoute());
 die;
 function couverture($path, $niveau)
 {
