@@ -11,7 +11,7 @@ $basePath = $_SERVER['BASE_PATH']; // comes from the .htaccess
 $router = new FFRouter("public", $basePath);
 if ($path = $router->matchRoute()) {
 	$page = new Page($path);
-	$page->init($basePath);
+	$page->init($router);
 	$page->show();
 }
 var_dump($router->getRoutes());

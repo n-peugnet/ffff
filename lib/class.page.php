@@ -1,12 +1,16 @@
 <?php
 class Page extends Dir
 {
-	protected $basePath;
+	protected $router;
 	protected $layout;
 
-	public function init($basePath, $layout = "layout.php")
+	/**
+	 * @param FFRouter $router
+	 * @param string $layout
+	 */
+	public function init($router, $layout = "layout.php")
 	{
-		$this->basePath = $basePath;
+		$this->router = $router;
 		$this->layout = $layout;
 		$this->list(true, false);
 		if (empty($this->name))
@@ -15,7 +19,7 @@ class Page extends Dir
 
 	public function show()
 	{
-		$basePath = $this->basePath;
+		$basePath = $this->router->getBasePath();
 		$title = $this->name;
 		$siteName = "test";
 		$content = $this->render();
@@ -41,12 +45,13 @@ class Page extends Dir
 		$str = "<pre><i>protected</i> 'listSubDir' <font color='#888a85'>=&gt;</font>
   <b>array</b> <i>(size=$size)</i>\n";
 		foreach ($this->listSubDir as $id => $dir) {
+			$url = $this->router->genUrl($dir->getPath());
 			$size = strlen($id);
 			$name = $dir->getName();
 			$sName = strlen($name);
 			$sSubDir = $dir->nbSubDir();
 			$sFiles = $dir->nbFiles();
-			$str .= "    $id <font color='#888a85'>=&gt;</font>
+			$str .= "    <a href='$url'>$id</a> <font color='#888a85'>=&gt;</font>
       <b>object</b>(<i>Page</i>)
         <i>protected</i> 'name' <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'$name'</font> <i>(length=$sName)</i>
         <i>protected</i> 'listSubDir' <font color='#888a85'>=&gt;</font> <b>array</b> (size=$sSubDir)

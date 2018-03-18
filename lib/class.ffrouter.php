@@ -38,6 +38,11 @@ class FFRouter
 		return $this->routes;
 	}
 
+	public function getBasePath()
+	{
+		return $this->basePath;
+	}
+
 	public function setBasePath($str)
 	{
 		return $this->basePath = $str;
@@ -58,6 +63,19 @@ class FFRouter
 		}
 		$path = isset($this->routes[$uri]) ? $this->routes[$uri] : false;
 		return $path;
+	}
+
+	public function genUrl($path)
+	{
+		// Check if named route exists
+		$route = array_search($path, $this->routes);
+		if ($route === false) {
+			throw new \Exception("Route '{$path}' does not exist.");
+		}
+		
+		// prepend base path to route url again
+		$url = $this->basePath . $route;
+		return $url;
 	}
 
 	protected function escapeRoute($route)

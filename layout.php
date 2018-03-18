@@ -19,7 +19,9 @@
 		<?php include("nav.php"); ?> 
 			<h1><?= $title ?></h1>
 		</div>
-		<?= $content ?>
+		<p>
+			<?= $content ?>
+		</p>
 	</section>
 </body>
 </html>
