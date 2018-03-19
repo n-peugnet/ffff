@@ -82,20 +82,33 @@ class Dir extends File
 		}
 	}
 
-	public function alphaSort($order = "asc", $recursive = true)
+	public function sortAlpha($order = SORT_ASC, $recursive = true)
 	{
-		if ($order == "asc") {
+		if ($order == SORT_ASC) {
 			ksort($this->listFiles, SORT_NATURAL | SORT_FLAG_CASE);
 			ksort($this->listDirs, SORT_NATURAL | SORT_FLAG_CASE);
-		} else {
+		} elseif ($order == SORT_DESC) {
 			krsort($this->listFiles, SORT_NATURAL | SORT_FLAG_CASE);
 			krsort($this->listDirs, SORT_NATURAL | SORT_FLAG_CASE);
 		}
 		if ($recursive) {
 			foreach ($this->listDirs as $subDir)
-				$subDir->alphaSort($order, $recursive);
+				$subDir->sortAlpha($order, $recursive);
 		}
 	}
+
+	public function sortLastModif($order = SORT_ASC, $recursive = true)
+	{
+		uasort($this->listDirs, function ($f1, $f2) use ($order) {
+			$cmp = File::compareLastModif($f1, $f2);
+			return $order == SORT_ASC ? $cmp : !$cmp;
+		});
+		if ($recursive) {
+			foreach ($this->listDirs as $subDir)
+				$subDir->sortLastModif($order, $recursive);
+		}
+	}
+
 
 	public function makeDir($dirName)
 	{

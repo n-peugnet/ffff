@@ -112,12 +112,15 @@ class Page extends Dir
 
 	public function sort()
 	{
-		$order = !empty($this->params['sort']['order']) ? $this->params['sort']['order'] : 'asc';
+		$order = !empty($this->params['sort']['order']) ? $this->params['sort']['order'] == 'asc' ? SORT_ASC : SORT_DESC : SORT_ASC;
 		$type = !empty($this->params['sort']['type']) ? $this->params['sort']['type'] : 'alpha';
 		$recursive = isset($this->params['sort']['recursive']) ? $this->params['sort']['recursive'] : false;
 		switch ($type) {
 			case 'alpha':
-				$this->alphaSort($order, $recursive);
+				$this->sortAlpha($order, $recursive);
+				break;
+			case 'lastModif':
+				$this->sortLastModif();
 				break;
 		}
 		foreach ($this->listDirs as $subDir) {

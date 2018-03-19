@@ -66,6 +66,21 @@ class File
 			return 'text';
 		return 'unknown';
 	}
+
+	public function lastModif()
+	{
+		$date = new DateTimeImmutable();
+		return $date->setTimestamp(filemtime($this->path));
+	}
+
+	/**
+	 * @param File $f1
+	 * @param File $f2
+	 */
+	public static function compareLastModif($f1, $f2)
+	{
+		return $f1->lastModif() > $f2->lastModif();
+	}
 }
 
 ?>
