@@ -82,12 +82,19 @@ class Dir extends File
 		}
 	}
 
-	public function alphaSort()
+	public function alphaSort($order = "asc", $recursive = true)
 	{
-		sort($this->listFiles, SORT_NATURAL | SORT_FLAG_CASE);
-		ksort($this->listDirs, SORT_NATURAL | SORT_FLAG_CASE);
-		foreach ($this->listDirs as $subDir)
-			$subDir->triAlpha();
+		if ($order == "asc") {
+			ksort($this->listFiles, SORT_NATURAL | SORT_FLAG_CASE);
+			ksort($this->listDirs, SORT_NATURAL | SORT_FLAG_CASE);
+		} else {
+			krsort($this->listFiles, SORT_NATURAL | SORT_FLAG_CASE);
+			krsort($this->listDirs, SORT_NATURAL | SORT_FLAG_CASE);
+		}
+		if ($recursive) {
+			foreach ($this->listDirs as $subDir)
+				$subDir->alphaSort($order, $recursive);
+		}
 	}
 
 	public function makeDir($dirName)

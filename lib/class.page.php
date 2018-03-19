@@ -110,6 +110,22 @@ class Page extends Dir
 		$this->params = Spyc::YAMLLoad($this->path . 'params.yaml');
 	}
 
+	public function sort()
+	{
+		$order = !empty($this->params['sort']['order']) ? $this->params['sort']['order'] : 'asc';
+		$type = !empty($this->params['sort']['type']) ? $this->params['sort']['type'] : 'alpha';
+		$recursive = isset($this->params['sort']['recursive']) ? $this->params['sort']['recursive'] : false;
+		switch ($type) {
+			case 'alpha':
+				$this->alphaSort($order, $recursive);
+				break;
+		}
+		foreach ($this->listDirs as $subDir) {
+			if (!empty($subDir->params['sort']))
+				$subDir->sort();
+		}
+	}
+
 	public function relativeUrl($path)
 	{
 		return $this->router->genUrl($this->path . '/' . $path);

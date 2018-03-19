@@ -4,3 +4,8 @@ ignore:
   - assets/
   - À propos/
   - Contact/
+
+sort:
+  order: desc
+  type: alpha
+  recursive: false
