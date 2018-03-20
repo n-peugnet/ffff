@@ -3,17 +3,16 @@ class FFRouter
 {
 	protected $publicPath = "";
 	protected $basePath = "";
-	protected $escapeChars = [];
 	protected $routes = [];
+	protected $escapeChars = [
+		["dir" => " ", "url" => "-", ],
+		["dir" => "'", "url" => "-", ]
+	];
 
 	public function __construct($publicPath = "public", $basePath = "")
 	{
 		$this->publicPath = $publicPath;
 		$this->basePath = $basePath;
-		$this->escapeChars = [
-			["dir" => " ", "url" => "-", ],
-			["dir" => "'", "url" => "-", ]
-		];
 		$dir = new Dir($publicPath . DIRECTORY_SEPARATOR);
 		$dir->list(true, true);
 		$this->mapRoutes($dir);

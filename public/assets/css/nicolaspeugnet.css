@@ -1,11 +1,45 @@
-html, body, section {
-	height: 100%;
+* {
 	box-sizing: border-box;
 }
 
-a, p, input, textarea {
+/* Typos et couleurs communes */
+h1, h1 a, h2, h3, h4, h5, h6, a, p, li, input, textarea {
 	font-family: Source Code Pro, consolas, Monospace, sans-serif;
+	color:rgb(77, 77, 77);
+}
+
+h4, a, p, li, input, textarea {
 	font-size: 14px;
+}
+
+h1, h2, h3, h4 {
+	font-weight: 700;
+	margin: 25px 0 10px;
+}
+
+h1, h1 a {
+	font-family: Arial, sans-serif;
+	text-decoration: none;
+	font-size: 26px;
+}
+
+h1 {
+	text-transform: capitalize;
+	margin-top: 12px;
+	display: inline-block;
+}
+
+h2 {
+	font-size:20px;
+}
+
+h3 {
+	font-size:17px;
+}
+
+h4 {
+	margin-top: 20px;
+	font-weight: 600;
 }
 
 a {
@@ -14,30 +48,12 @@ a {
 }
 
 p {
-	color:rgb(77, 77, 77);
 	margin: 10px;
 	margin-left: 0px;
 }
 
-h1, h1 a {
-	font-family: Arial, sans-serif;
-	color: rgb(77, 77, 77);
-	text-decoration: none; 
-	font-weight: 700;
-	font-size: 26px;
-}
-h1 {
-	text-transform: capitalize;
-	margin-top: 12px;
-	margin-bottom: 18px;
-	display: inline-block;
-	
-}
-
 ul {
-	padding:0;
 	margin: 0;
-	list-style-type: none;
 }
 
 canvas {
@@ -51,6 +67,10 @@ pre {
 
 code {
 	font-size: 15px;
+}
+
+.titre {
+	margin-bottom: 10px;
 }
 
 .nav {
@@ -72,15 +92,6 @@ a:hover {
 
 h1 a:hover {
 	color: black;
-}
-
-h2, .mail {
-	font-family: Source Code Pro, Arial, sans-serif;
-	color: rgb(77, 77, 77);
-	font-weight: 900;
-	font-size:18px;
-	margin: 10px;
-	margin-left: 0px;
 }
 
 form {
@@ -117,6 +128,7 @@ section {
 	display: block;
 	width: 900px;
 	margin-left: 140px;
+	margin-bottom: 100px !important;
 	transform: translateX(none);
 	transition-property: transform;
 	transition-duration: 200ms;
@@ -258,7 +270,7 @@ nav a{
 .CadrePhoto {
 	display: inline-block;
 	max-width: 100%;
-	margin-top: 5px;
+	margin-top: 10px;
 }
 
 .CadrePhoto img {
@@ -390,29 +402,29 @@ div#footer, div#header {
 	display: none;
 }
 
+/* ---------- PETIT ECRAN ---------- passage au format centré */
 @media (max-width: 1189px) {
 	section, #accueil {
 		margin: auto
 	}
 }
 
-
+/* -------- FORMAT TABLETTE -------- passage en 3 colonnes */
 @media (max-width: 920px) {
 	section, #accueil {
 		width: 675px;
 	}
 }
 
-
+/* -------- FORMAT PHABLETTE ------- passage en 2 colonnes */
 @media (max-width: 695px) {
 	section, #accueil {
 		width: 450px;
 	}
 }
 	
-	
+/* ------- FORMAT SMARTPHONE ------- reduction de la taille des vignettes */
 @media (max-width: 470px) {
-	
 	.couverture {
     width: 49%;
     height: 48vw;
@@ -428,11 +440,8 @@ div#footer, div#header {
 	}
 }
 
-	
+/* -------- PETIT SMARTPHONE ------- passage en 1 colonne */
 @media (max-width: 350px) {
-	#accueil {
-	}
-	
 	.couverture {
 		width: 100%;
 		height: 150px;

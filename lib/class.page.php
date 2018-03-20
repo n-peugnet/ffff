@@ -9,13 +9,14 @@ class Page extends Dir
 	 * @param FFRouter $router
 	 * @param string $layout
 	 */
-	public function init($router, $layout = "layout.php")
+	public function init(&$router, $layout = "layout.php")
 	{
 		$this->router = $router;
 		$this->layout = $layout;
-		$this->list(true, false);
 		if (empty($this->name))
-			$this->setNameFromPath();
+			$this->autoSetName();
+		if (empty($this->parent))
+			$this->autoSetParent();
 		$this->loadParams();
 	}
 
@@ -23,6 +24,7 @@ class Page extends Dir
 	{
 		$basePath = $this->router->getBasePath();
 		$title = $this->name;
+		$breadcrumb = $this->genBreadcrumb();
 		$siteName = "test";
 		$content = $this->render();
 		include $this->layout;
@@ -53,23 +55,25 @@ class Page extends Dir
 		$str = "";
 		foreach ($this->listFiles as $index => $file) {
 			if (array_search($file->getName(), $ignore) === false) {
-				switch ($file->type()) {
-					case 'image':
-						$str .= '<img class="CadrePhoto" src="' . $this->router->genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
-						break;
-
-					case 'text':
-						$contenu = file_get_contents($file->getPath());
-						if ($file->ext() == "md") {
+				$type = $file->type();
+				if ($type == 'image') {
+					$str .= '<img class="CadrePhoto" src="' . $this->router->genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
+				} elseif ($type == 'text') {
+					$contenu = file_get_contents($file->getPath());
+					$ext = $file->ext();
+					switch ($ext) {
+						case 'md':
 							$mdParser = new MarkdownExtra_Parser();
 							$contenu = $mdParser->transform($contenu);
-						}
-						$str .= "<p>" . $contenu . "</p>";
-						break;
+							break;
+						case 'txt':
+							$contenu = "<p>" . $contenu . "</p>";
+							break;
+					}
+					$str .= $contenu;
 				}
 			}
 		}
-		$str .= "</pre>";
 		return $str;
 	}
 
@@ -102,6 +106,18 @@ class Page extends Dir
 			$str .= $file->toString($this->router->genUrl($file->getPath()));
 		}
 		$str .= "</pre>";
+		return $str;
+	}
+
+	public function genBreadcrumb()
+	{
+		$p = $this->parent;
+		$str = "";
+		if (!empty($p)) {
+			$url = $p->router->genUrl($p->path);
+			$str = "<a href=\"$url\">$p->name</a> › ";
+			$str = $p->genBreadcrumb() . $str;
+		}
 		return $str;
 	}
 
@@ -164,6 +180,15 @@ class Page extends Dir
 		parent::addDir($path, $name);
 		$this->listDirs[$name]->init($this->router);
 	}
+
+	public function autoSetParent()
+	{
+		parent::autoSetParent();
+		if (empty($this->parent)) return false;
+		$this->parent->init($this->router);
+		return $this;
+	}
+
 }
 
 ?>

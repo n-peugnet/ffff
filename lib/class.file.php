@@ -3,12 +3,20 @@ class File
 {
 	protected $name;
 	protected $path;
+	protected $parent;
 
-	public function __construct($path, $name = "", $level = 0)
+	/**
+	 * @param string $path
+	 * @param string $name
+	 * @param int $level
+	 * @param Dir $parent
+	 */
+	public function __construct($path, $name = "", $level = 0, &$parent = null)
 	{
 		$this->setName($name);
 		$this->level = $level;
 		$this->path = $path;
+		$this->parent = $parent;
 	}
 
 	public function getLevel()
@@ -26,6 +34,24 @@ class File
 		return $this->path;
 	}
 
+	public function getParent()
+	{
+		return $this->parent;
+	}
+
+	protected function findParentPath()
+	{
+		return substr($this->path, 0, -mb_strlen($this->name));
+	}
+
+	public function autoSetParent()
+	{
+		$parentPath = $this->findParentPath();
+		if (empty($parentPath)) return false;
+		$this->parent = new Dir($parentPath);
+		return $this;
+	}
+
 	public function toString($url = null)
 	{
 		$class = get_called_class();
@@ -38,15 +64,17 @@ class File
 		return $str;
 	}
 
-	public function setNameFromPath()
+	public function autoSetName()
 	{
-		$pieces = explode(DIRECTORY_SEPARATOR, $this->path);
-		$this->setName($pieces[count($pieces) - 2]);
+		$pieces = preg_split('/[\\' . DIRECTORY_SEPARATOR . ']/', $this->path, -1, PREG_SPLIT_NO_EMPTY);
+		$this->setName($pieces[count($pieces) - 1]);
+		return $this;
 	}
 
 	public function setName($str)
 	{
 		$this->name = utf8_encode($str);
+		return $this;
 	}
 
 	public function ext()

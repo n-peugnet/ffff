@@ -14,6 +14,19 @@ class Dir extends File
 		return $this->listDirs;
 	}
 
+	public function findParentPath()
+	{
+		return substr(parent::findParentPath(), 0, -1);
+	}
+
+	public function autoSetParent()
+	{
+		$parentPath = $this->findParentPath();
+		if (empty($parentPath)) return false;
+		$this->parent = new static($parentPath);
+		return $this;
+	}
+
 	public function toString($url = null, $level = 1)
 	{
 		$sDirs = $this->nbDirs();
@@ -53,12 +66,14 @@ class Dir extends File
 
 	public function addDir($path, $name)
 	{
-		$this->listDirs[$name] = new static($path, $name, $this->level + 1);
+		$this->listDirs[$name] = new static($path, $name, $this->level + 1, $this);
+		return $this;
 	}
 
 	public function addFile($path, $name)
 	{
-		$this->listFiles[$name] = new File($path, $name, $this->level + 1);
+		$this->listFiles[$name] = new File($path, $name, $this->level + 1, $this);
+		return $this;
 	}
 
 	function list($recursive = true, $dirOnly = false)
@@ -72,7 +87,7 @@ class Dir extends File
 					{
 						$this->addDir($path . DIRECTORY_SEPARATOR, $element);
 						if ($recursive)
-							$this->listDirs[$element]->list();
+							$this->listDirs[$element]->list($recursive = true, $dirOnly = false);
 					} elseif (!$dirOnly) {
 						$this->addFile($path, $element);
 					}
@@ -80,6 +95,7 @@ class Dir extends File
 			}
 			closedir($dir);
 		}
+		return $this;
 	}
 
 	public function sortAlpha($order = SORT_ASC, $recursive = true)
@@ -95,6 +111,7 @@ class Dir extends File
 			foreach ($this->listDirs as $subDir)
 				$subDir->sortAlpha($order, $recursive);
 		}
+		return $this;
 	}
 
 	public function sortLastModif($order = SORT_ASC, $recursive = true)
@@ -107,12 +124,14 @@ class Dir extends File
 			foreach ($this->listDirs as $subDir)
 				$subDir->sortLastModif($order, $recursive);
 		}
+		return $this;
 	}
 
 
 	public function makeDir($dirName)
 	{
 		mkdir($this->path . DIRECTORY_SEPARATOR . $dirName);
+		return $this;
 	}
 }
 ?>
