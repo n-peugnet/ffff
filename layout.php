@@ -3,17 +3,17 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width" />
+
 <?php if (empty($this->params['remove default style'])) : ?>
 	<link rel="stylesheet" href="<?= $basePath ?>/public/assets/css/nicolaspeugnet.css" />
 <?php endif; ?>
-<?php
-if (!empty($this->params['styles'])) {
-	foreach ($this->params['styles'] as $style) { ?>
+
+<?php if (!empty($this->params['styles'])) : ?>
+	<?php foreach ($this->params['styles'] as $style) : ?>
 	<link rel="stylesheet" href="<?= $this->relativeUrl($style) ?>" />
-<?php 
-}
-}
-?>
+	<?php endforeach; ?>
+<?php endif; ?>
+
 	<link rel="icon" type="image/png" href="<?= $basePath ?>/public/assets/img/favicon.png" />
 	<meta name="Revisit-After" content="15 days"/>
 	<meta name="Robots" content="All"/>

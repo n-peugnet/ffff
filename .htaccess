@@ -13,5 +13,5 @@ RewriteRule ^(.*) - [E=BASE_PATH:%1]
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule .? - [L]
 
-# rewrite everything else to public/index.php.
+# rewrite everything else to ./index.php
 RewriteRule .? %{ENV:BASE_PATH}/index.php [L]
