@@ -25,8 +25,7 @@ if (!empty($this->params['styles'])) {
 <body>
 	<section id="accueil">
 		<div class="titre">
-			<h2 class="nav"><a href="<?= $basePath ?>/a-propos/">à propos</a> | <a href="<?= $basePath ?>/contact/">Contact</a> | <a href="<?= $basePath ?>/a-propos/cv/" target="_blank">CV</a></h2>
-			<h1><?= $breadcrumb . $title ?></h1>
+			<h1><?= $breadcrumb . $title ?></h1><h2 class="nav"><a href="<?= $basePath ?>/a-propos/">à propos</a> | <a href="<?= $basePath ?>/contact/">Contact</a> | <a href="<?= $basePath ?>/a-propos/cv/">CV</a></h2>
 		</div>
 			<?= $content ?>
 	</section>

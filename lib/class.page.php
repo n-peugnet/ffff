@@ -11,13 +11,13 @@ class Page extends Dir
 	 */
 	public function init(&$router, $layout = "layout.php")
 	{
+		$this->loadParams();
 		$this->router = $router;
 		$this->layout = $layout;
 		if (empty($this->name))
 			$this->autoSetName();
 		if (empty($this->parent))
 			$this->autoSetParent();
-		$this->loadParams();
 	}
 
 	public function show()
@@ -114,7 +114,7 @@ class Page extends Dir
 		$p = $this->parent;
 		$str = "";
 		if (!empty($p)) {
-			$url = $p->router->genUrl($p->path);
+			$url = $p->getRoute();
 			$str = "<a href=\"$url\">$p->name</a> › ";
 			$str = $p->genBreadcrumb() . $str;
 		}
@@ -150,6 +150,11 @@ class Page extends Dir
 		return $this->router->genUrl($this->path . '/' . $path);
 	}
 
+	public function getRoute(Type $var = null)
+	{
+		return $this->router->genUrl($this->path);
+	}
+
 	public function getIgnoredDirs()
 	{
 		return $this->getIgnored("dir");
@@ -179,6 +184,15 @@ class Page extends Dir
 	{
 		parent::addDir($path, $name);
 		$this->listDirs[$name]->init($this->router);
+	}
+
+	public function autoSetName()
+	{
+		if (empty($this->params['title']))
+			parent::autoSetName();
+		else
+			$this->name = $this->params['title'];
+		return $this;
 	}
 
 	public function autoSetParent()

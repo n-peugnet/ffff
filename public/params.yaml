@@ -4,9 +4,12 @@ ignore:
   - assets/
   - À propos/
   - Contact/
+  - README.md
 
 sort:
   order: desc
   type: alpha
   recursive: false
   custom:
+
+title: Nicolas Peugnet
