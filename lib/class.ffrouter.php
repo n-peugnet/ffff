@@ -9,13 +9,18 @@ class FFRouter
 		["dir" => "'", "url" => "-", ]
 	];
 
-	public function __construct($publicPath = "public", $basePath = "")
+	public function __construct($publicPath = "public", $basePath = "", $cacheLoc = "tmp/routes.cache")
 	{
 		$this->publicPath = $publicPath;
 		$this->basePath = $basePath;
+		if (is_file($cacheLoc))
+			$this->routes = unserialize(file_get_contents($cacheLoc));
 		$dir = new Dir($publicPath . DIRECTORY_SEPARATOR);
 		$dir->list(true, true);
-		$this->mapRoutes($dir);
+		if (!$this->checkRoutes($dir)) {
+			$this->mapRoutes($dir);
+			file_put_contents($cacheLoc, serialize($this->routes));
+		}
 	}
 
 	/**
@@ -57,6 +62,15 @@ class FFRouter
 
 	}
 
+	public function checkRoutes($dir)
+	{
+		$dirsPath = $dir->dirsPath_recursive();
+		return is_array($this->routes)
+			&& is_array($dirsPath)
+			&& count($this->routes) == count($dirsPath)
+			&& array_diff($this->routes, $dirsPath) === array_diff($dirsPath, $this->routes);
+	}
+
 	public function matchRoute()
 	{
 		$uri = substr($this->uri(), strlen($this->basePath));
@@ -92,8 +106,8 @@ class FFRouter
 
 	protected function escapeRoute($route)
 	{
+		$route = mb_strtolower($route);
 		$route = Diacritics::remove($route);
-		$route = strtolower($route);
 		$route = str_replace(array_column($this->escapeChars, "dir"), array_column($this->escapeChars, "url"), $route);
 		return $route;
 	}

@@ -10,6 +10,10 @@ sort:
   order: desc
   type: alpha
   recursive: false
+  childrens:
+    order: desc
+    type: lastModif
+    recursive: false
   custom:
 
 title: Nicolas Peugnet

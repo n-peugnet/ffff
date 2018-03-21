@@ -14,6 +14,15 @@ class Dir extends File
 		return $this->listDirs;
 	}
 
+	public function dirsPath_recursive()
+	{
+		$paths = [$this->path];
+		foreach ($this->listDirs as $dir) {
+			$paths = array_merge($paths, $dir->dirsPath_recursive());
+		}
+		return $paths;
+	}
+
 	public function findParentPath()
 	{
 		return substr(parent::findParentPath(), 0, -1);
@@ -87,7 +96,7 @@ class Dir extends File
 					{
 						$this->addDir($path . DIRECTORY_SEPARATOR, $element);
 						if ($recursive)
-							$this->listDirs[$element]->list($recursive = true, $dirOnly = false);
+							$this->listDirs[$element]->list($recursive, $dirOnly);
 					} elseif (!$dirOnly) {
 						$this->addFile($path, $element);
 					}

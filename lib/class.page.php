@@ -4,13 +4,15 @@ class Page extends Dir
 	protected $router;
 	protected $layout;
 	protected $params;
+	protected $paramFile;
 
 	/**
 	 * @param FFRouter $router
 	 * @param string $layout
 	 */
-	public function init(&$router, $layout = "layout.php")
+	public function init(&$router, $layout = "layout.php", $paramFile = "params.yaml")
 	{
+		$this->paramFile = $paramFile;
 		$this->loadParams();
 		$this->router = $router;
 		$this->layout = $layout;
@@ -63,7 +65,7 @@ class Page extends Dir
 					$ext = $file->ext();
 					switch ($ext) {
 						case 'md':
-							$mdParser = new MarkdownExtra_Parser();
+							$mdParser = new Markdown_Parser();
 							$contenu = $mdParser->transform($contenu);
 							break;
 						case 'txt':
@@ -123,25 +125,35 @@ class Page extends Dir
 
 	public function loadParams()
 	{
-		$this->params = Spyc::YAMLLoad($this->path . 'params.yaml');
+		if (is_file($this->path . $this->paramFile))
+			$this->params = Spyc::YAMLLoad($this->path . $this->paramFile);
 	}
 
-	public function sort()
+	public function sort($sortParams = null)
 	{
-		$order = !empty($this->params['sort']['order']) ? $this->params['sort']['order'] == 'asc' ? SORT_ASC : SORT_DESC : SORT_ASC;
-		$type = !empty($this->params['sort']['type']) ? $this->params['sort']['type'] : 'alpha';
-		$recursive = isset($this->params['sort']['recursive']) ? $this->params['sort']['recursive'] : false;
+		$order = SORT_ASC;
+		$type = 'alpha';
+		$recursive = false;
+		if (!empty($this->params['sort']))
+			$sortParams = $this->params['sort'];
+		if (!empty($sortParams)) {
+			$order = !empty($sortParams['order']) ? $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC : SORT_ASC;
+			$type = !empty($sortParams['type']) ? $sortParams['type'] : 'alpha';
+			$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false;
+		}
 		switch ($type) {
 			case 'alpha':
 				$this->sortAlpha($order, $recursive);
 				break;
 			case 'lastModif':
-				$this->sortLastModif();
+				$this->sortLastModif($order, $recursive);
 				break;
 		}
 		foreach ($this->listDirs as $subDir) {
 			if (!empty($subDir->params['sort']))
 				$subDir->sort();
+			elseif (!empty($this->params['sort']['childrens']))
+				$subDir->sort($this->params['sort']['childrens']);
 		}
 	}
 
