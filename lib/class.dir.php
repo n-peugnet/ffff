@@ -85,18 +85,18 @@ class Dir extends File
 		return $this;
 	}
 
-	function list($level = 0, $dirOnly = false)
+	function list($level = 0, $dirOnly = false, $ignore = [])
 	{
 		if ($dir = opendir($this->path)) {
 			while (($element = readdir($dir)) !== false) //pour tous les elements de ce dossier...
 			{
-				if ($element != '.' && $element != '..') {
+				if ($element != '.' && $element != '..' && array_search($element, $ignore) === false) {
 					$path = $this->path . $element;
 					if (is_dir($this->path . $element)) //si c'est un dossier...
 					{
 						$this->addDir($path . DIRECTORY_SEPARATOR, $element);
 						if ($level == -1 || $this->level < $level)
-							$this->listDirs[$element]->list($level, $dirOnly);
+							$this->listDirs[$element]->list($level, $dirOnly, $ignore);
 					} elseif (!$dirOnly) {
 						$this->addFile($path, $element);
 					}

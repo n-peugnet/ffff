@@ -42,38 +42,33 @@ class Page extends Dir
 
 	public function renderDirs($level = 1)
 	{
-		$ignore = $this->getIgnoredDirs();
 		$str = "<pre>";
 		foreach ($this->listDirs as $id => $dir) {
-			if (array_search($dir->getName(), $ignore) === false)
-				$str .= $dir->toString($this->router->genUrl($dir->getPath()), $level);
+			$str .= $dir->toString($this->router->genUrl($dir->getPath()), $level);
 		}
 		return $str . "</pre>";
 	}
 
 	public function renderFiles()
 	{
-		$ignore = $this->getIgnoredFiles();
 		$str = "";
 		foreach ($this->listFiles as $index => $file) {
-			if (array_search($file->getName(), $ignore) === false) {
-				$type = $file->type();
-				if ($type == 'image') {
-					$str .= '<img class="CadrePhoto" src="' . $this->router->genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
-				} elseif ($type == 'text') {
-					$contenu = file_get_contents($file->getPath());
-					$ext = $file->ext();
-					switch ($ext) {
-						case 'md':
-							$mdParser = new Markdown_Parser();
-							$contenu = $mdParser->transform($contenu);
-							break;
-						case 'txt':
-							$contenu = "<p>" . $contenu . "</p>";
-							break;
-					}
-					$str .= $contenu;
+			$type = $file->type();
+			if ($type == 'image') {
+				$str .= '<img class="CadrePhoto" src="' . $this->router->genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
+			} elseif ($type == 'text') {
+				$contenu = file_get_contents($file->getPath());
+				$ext = $file->ext();
+				switch ($ext) {
+					case 'md':
+						$mdParser = new Markdown_Parser();
+						$contenu = $mdParser->transform($contenu);
+						break;
+					case 'txt':
+						$contenu = "<p>" . $contenu . "</p>";
+						break;
 				}
+				$str .= $contenu;
 			}
 		}
 		return $str;
@@ -200,7 +195,7 @@ class Page extends Dir
 		return $this->getIgnored("file");
 	}
 
-	public function getIgnored($type)
+	public function getIgnored($type = 'all')
 	{
 		$ignore = [];
 		if (!empty($this->params['ignore'])) {
@@ -208,7 +203,7 @@ class Page extends Dir
 				$isDir = substr($name, -1) == '/';
 				if ($isDir)
 					$name = substr($name, 0, -1);
-				if (($type == "dir" && $isDir) || ($type == "file" && !$isDir))
+				if ($type == 'all' || ($type == "dir" && $isDir) || ($type == "file" && !$isDir))
 					array_push($ignore, $name);
 			}
 		}
