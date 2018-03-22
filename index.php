@@ -14,7 +14,7 @@ $router = new FFRouter("public", $basePath);
 if ($path = $router->matchRoute()) {
 	$page = new Page($path);
 	$page->init($router);
-	$page->list(true, false);
+	$page->list(1, false);
 	$page->sort();
 	$page->show();
 }
