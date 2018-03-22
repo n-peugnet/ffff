@@ -8,14 +8,6 @@ class FFRouter
 	{
 		$this->publicPath = $publicPath;
 		$this->basePath = $basePath;
-		// if (is_file($cacheLoc))
-		// 	$this->routes = unserialize(file_get_contents($cacheLoc));
-		// $dir = new Dir($publicPath . DIRECTORY_SEPARATOR);
-		// $dir->list(-1, true);
-		// if (!$this->checkRoutes($dir)) {
-		// 	$this->mapRoutes($dir);
-		// 	file_put_contents($cacheLoc, serialize($this->routes));
-		// }
 	}
 
 
@@ -51,16 +43,20 @@ class FFRouter
 
 	public function genUrl($path)
 	{
-		if (is_dir($path)) {
+		// if the path leads to a directory
+		if (substr($path, -1) == DIRECTORY_SEPARATOR) {
 			// removes the basePath
-			$path = substr($path, strlen($this->publicPath));
-		} elseif (is_file($path)) {
-			$path = '/' . $path;
+			$path = $this->pubRelativePath($path);
 		}
 		$path = str_replace(DIRECTORY_SEPARATOR, '/', $path); // replace '\' with '/' if on windows
 		$path = rawurlencode(utf8_encode($path)); // replace special characters such as accentued chars
 		$path = str_replace("%2F", '/', $path); // replace '/' html notation with the normal '/' char
-		return $this->basePath . $path;
+		return $this->basePath . '/' . $path;
+	}
+
+	public function pubRelativePath($path)
+	{
+		return substr($path, strlen($this->publicPath) + 1);
 	}
 
 	protected function uri()

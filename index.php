@@ -1,23 +1,15 @@
 
 <?php
-function __autoload($className)
+function autoload($className)
 {
 	require_once('lib/class.' . $className . '.php');
 }
+spl_autoload_register("autoload");
 
-foreach (glob("inc/*.php") as $fileName) {
-	include_once $fileName;
-}
-
-$basePath = $_SERVER['BASE_PATH']; // comes from the .htaccess
-$router = new FFRouter("public", $basePath);
-if ($path = $router->matchRoute()) {
-	$page = new Page($path);
-	$page->init($router);
-	$page->list(1, false);
-	$page->sort();
-	$page->show();
-}
+$publicPath = 'public';
+$urlBase = $_SERVER['BASE_PATH']; // comes from the .htaccess
+$app = new App($publicPath, $urlBase);
+$app->init();
 
 
 

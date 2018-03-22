@@ -13,9 +13,9 @@ class Page extends Dir
 	public function init(&$router, $layout = "layout.php", $paramFile = "params.yaml")
 	{
 		$this->paramFile = $paramFile;
-		$this->loadParams();
 		$this->router = $router;
 		$this->layout = $layout;
+		$this->loadParams();
 		if (empty($this->name))
 			$this->autoSetName();
 		if (empty($this->parent))
@@ -125,8 +125,26 @@ class Page extends Dir
 
 	public function loadParams()
 	{
-		if (is_file($this->path . $this->paramFile))
-			$this->params = Spyc::YAMLLoad($this->path . $this->paramFile);
+		$paramFile = $this->path . $this->paramFile;
+		$paramCache = $this->tmpPath() . $this->paramFile . '.cache';
+		if (is_file($paramFile)) {
+			if (is_file($paramCache) && (filemtime($paramFile) <= filemtime($paramCache)))
+				$this->params = unserialize(file_get_contents($paramCache));
+			else {
+				$this->params = Spyc::YAMLLoad($paramFile);
+				$this->cacheParams();
+			}
+		}
+	}
+
+	public function cacheParams()
+	{
+		$tmpPath = $this->tmpPath();
+		if (!is_dir($tmpPath)) {
+			// dir doesn't exist, make it
+			mkdir($tmpPath, 0777, true);
+		}
+		file_put_contents($tmpPath . $this->paramFile . '.cache', serialize($this->params));
 	}
 
 	public function sort($sortParams = null)
@@ -167,6 +185,11 @@ class Page extends Dir
 		return $this->router->genUrl($this->path);
 	}
 
+	public function tmpPath()
+	{
+		return 'tmp' . DIRECTORY_SEPARATOR . $this->path;
+	}
+
 	public function getIgnoredDirs()
 	{
 		return $this->getIgnored("dir");
@@ -195,7 +218,7 @@ class Page extends Dir
 	public function addDir($path, $name)
 	{
 		parent::addDir($path, $name);
-		$this->listDirs[$name]->init($this->router);
+		$this->listDirs[$name]->init($this->router, $this->layout, $this->paramFile);
 	}
 
 	public function autoSetName()

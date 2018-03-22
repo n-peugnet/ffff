@@ -1,6 +1,6 @@
 # project Relative
 tmp/*
-!tmp/README.md
+!tmp/.gitkeep
 public/*/*
 !public/assets/*
 
