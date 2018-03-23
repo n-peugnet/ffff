@@ -16,8 +16,7 @@ class Page extends Dir
 		$this->router = $router;
 		$this->layout = $layout;
 		$this->loadParams();
-		if (empty($this->name))
-			$this->autoSetName();
+		$this->autoSetName();
 		if (empty($this->parent))
 			$this->autoSetParent();
 	}
@@ -34,19 +33,35 @@ class Page extends Dir
 
 	public function render()
 	{
+		$level = !empty($this->params['render']) ? count($this->params['render']) : 1;
+		$type = !empty($this->params['render']) ? $this->params['render'] : ['list'];
 		$content = "";
 		$content .= $this->renderFiles();
-		$content .= $this->renderDirs(2);
+		$content .= $this->renderDirs($level, $type);
 		return $content;
 	}
 
-	public function renderDirs($level = 1)
+	public function renderDirs($levelLimit, $types)
 	{
-		$str = "<pre>";
+		$str = "<ul class=\"dirs\">";
 		foreach ($this->listDirs as $id => $dir) {
-			$str .= $dir->toString($this->router->genUrl($dir->getPath()), $level);
+			$url = $dir->getRoute();
+			switch ($types[$this->level]) {
+				case 'list':
+					$str .= "<li><p><a href=\"$url\" class=\"date\">$dir->name</a></p></li>";
+					break;
+
+				case 'covers':
+					$longName = $this->router->pubRelativePath($dir->path);
+					$cover = $this->router->genUrl($dir->getCover()->getPath());
+					$name = $dir->getName();
+					$str .= "<li class=\"couverture level$dir->level\" id=\"projet_$longName\"><a href=\"$url\"><div>$name</div><img src=\"$cover\" alt=\"test\" /></a>";
+					break;
+			}
+			if ($dir->level < $levelLimit)
+				$str .= $dir->renderDirs($levelLimit, $types);
 		}
-		return $str . "</pre>";
+		return $str . "</ul>";
 	}
 
 	public function renderFiles()
@@ -82,16 +97,13 @@ class Page extends Dir
 		return $content;
 	}
 
-	public function dumpDirs()
+	public function dumpDirs($level = 1)
 	{
-		$size = count($this->listDirs);
-		$str = "<pre><i>protected</i> 'listDirs' <font color='#888a85'>=&gt;</font>
-  <b>array</b> <i>(size=$size)</i>\n";
+		$str = "<pre>";
 		foreach ($this->listDirs as $id => $dir) {
-			$str .= $dir->toString($this->router->genUrl($dir->getPath()));
+			$str .= $dir->toString($dir->getRoute(), $level);
 		}
-		$str .= "</pre>";
-		return $str;
+		return $str . "</pre>";
 	}
 
 	public function dumpFiles()
@@ -116,6 +128,17 @@ class Page extends Dir
 			$str = $p->genBreadcrumb() . $str;
 		}
 		return $str;
+	}
+
+	public function getCover()
+	{
+		if (!empty($this->params['cover']) && !empty($this->listFiles[$this->params['cover']]))
+			return $this->listFiles[$this->params['cover']];
+		foreach ($this->listFiles as $file) {
+			if ($file->type() == 'image')
+				return $file;
+		}
+		return false;
 	}
 
 	public function loadParams()
@@ -218,10 +241,10 @@ class Page extends Dir
 
 	public function autoSetName()
 	{
-		if (empty($this->params['title']))
-			parent::autoSetName();
-		else
+		if (!empty($this->params['title']))
 			$this->name = $this->params['title'];
+		elseif (empty($this->name))
+			parent::autoSetName();
 		return $this;
 	}
 

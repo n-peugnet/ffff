@@ -22,7 +22,7 @@ class App
 			// show the page
 			$page = new Page($path);
 			$page->init($this->router);
-			$page->list(1, false, $page->getIgnored());
+			$page->list(2, false, $page->getIgnored());
 			$page->sort();
 			$page->show();
 		} else {

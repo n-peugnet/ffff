@@ -10,10 +10,14 @@ sort:
   order: desc
   type: alpha
   recursive: false
-  childrens:
-    order: desc
-    type: lastModif
-    recursive: false
+  # childrens:
+  #   order: desc
+  #   type: lastModif
+  #   recursive: false
   custom:
+
+render:
+  - list
+  - covers
 
 title: Nicolas Peugnet

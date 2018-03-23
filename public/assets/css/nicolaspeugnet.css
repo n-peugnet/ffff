@@ -146,16 +146,23 @@ section {
 	color: rgb(77, 77, 77);
 	text-decoration:none; 
 	
-}	
+}
 
+ul.dirs {
+	padding:0;
+	margin: 0;
+	list-style-type: none;
+}
 .couverture {
 	display: inline-block;
+	vertical-align: top;
 	position: relative;
 	width: 222px; 
 	height: 222px;
 	z-index: 0;
 	overflow: hidden;
-	background-color: rgb(0, 0, 0); 
+	background-color: rgb(0, 0, 0);
+	margin: 3px 3px 0 0;
 }
 
 .couverture a {
