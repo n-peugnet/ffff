@@ -34,34 +34,46 @@ class Page extends Dir
 	public function render()
 	{
 		$level = !empty($this->params['render']) ? count($this->params['render']) : 1;
-		$type = !empty($this->params['render']) ? $this->params['render'] : ['list'];
 		$content = "";
 		$content .= $this->renderFiles();
-		$content .= $this->renderDirs($level, $type);
+		$content .= $this->renderDirs($level);
 		return $content;
 	}
 
-	public function renderDirs($levelLimit, $types)
+	public function renderDirs($levelLimit)
 	{
+		if ($this->parent != null)
+			$type = $this->parent->getChildrenrender($this->level);
+		if (!empty($this->params['render'][0]))
+			$type = $this->params['render'][0];
 		$str = "<ul class=\"dirs\">";
 		foreach ($this->listDirs as $id => $dir) {
 			$url = $dir->getRoute();
-			switch ($types[$this->level]) {
+			switch ($type) {
 				case 'list':
 					$str .= "<li><p><a href=\"$url\" class=\"date\">$dir->name</a></p></li>";
 					break;
 
 				case 'covers':
 					$longName = $this->router->pubRelativePath($dir->path);
-					$cover = $this->router->genUrl($dir->getCover()->getPath());
+					$cover = $dir->getCover();
+					$cover = $cover ? $this->router->genUrl($cover->getPath()) : 'rien';
 					$name = $dir->getName();
-					$str .= "<li class=\"couverture level$dir->level\" id=\"projet_$longName\"><a href=\"$url\"><div>$name</div><img src=\"$cover\" alt=\"test\" /></a>";
+					$str .= "<li class=\"couverture level$dir->level\" id=\"projet-$longName\"><a href=\"$url\"><div>$name</div><img src=\"$cover\" alt=\"cover-$name\" /></a>";
 					break;
 			}
 			if ($dir->level < $levelLimit)
-				$str .= $dir->renderDirs($levelLimit, $types);
+				$str .= $dir->renderDirs($levelLimit);
 		}
 		return $str . "</ul>";
+	}
+
+	public function getChildrenRender($childLevel)
+	{
+		$sortLevel = $childLevel - $this->level;
+		if (!empty($this->params['render'][$sortLevel]))
+			return $this->params['render'][$sortLevel];
+		return false;
 	}
 
 	public function renderFiles()
@@ -167,11 +179,11 @@ class Page extends Dir
 
 	public function sort()
 	{
-		if ($this->parent != null)
-			$sortParams = $this->parent->getChildrenSort($this->level);
 		$order = SORT_ASC;
 		$type = 'alpha';
 		$recursive = false;
+		if ($this->parent != null)
+			$sortParams = $this->parent->getChildrenSort($this->level);
 		if (!empty($this->params['sort'][0]))
 			$sortParams = $this->params['sort'][0];
 		if (!empty($sortParams)) {
