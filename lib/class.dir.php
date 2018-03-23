@@ -126,7 +126,7 @@ class Dir extends File
 	public function sortLastModif($order = SORT_ASC, $recursive = true)
 	{
 		uasort($this->listDirs, function ($f1, $f2) use ($order) {
-			$cmp = File::compareLastModif($f1, $f2);
+			$cmp = File::cmpLastModif($f1, $f2);
 			return $order == SORT_ASC ? $cmp : !$cmp;
 		});
 		if ($recursive) {

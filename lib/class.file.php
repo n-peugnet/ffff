@@ -34,9 +34,12 @@ class File
 		return $this->path;
 	}
 
-	public function getParent()
+	public function getParent($level = 1)
 	{
-		return $this->parent;
+		if (!empty($this->parent) && $level > 1)
+			return $this->parent->getParent($level - 1);
+		else
+			return false;
 	}
 
 	protected function findParentPath()
@@ -105,9 +108,14 @@ class File
 	 * @param File $f1
 	 * @param File $f2
 	 */
-	public static function compareLastModif($f1, $f2)
+	public static function cmpLastModif($f1, $f2)
 	{
 		return $f1->lastModif() > $f2->lastModif();
+	}
+
+	public function diffLevel($file)
+	{
+		return $file->level - $this->level;
 	}
 }
 

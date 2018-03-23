@@ -3,6 +3,7 @@ class Page extends Dir
 {
 	protected $router;
 	protected $layout;
+	protected $title;
 	protected $params;
 	protected $paramFile;
 
@@ -16,7 +17,7 @@ class Page extends Dir
 		$this->router = $router;
 		$this->layout = $layout;
 		$this->loadParams();
-		$this->autoSetName();
+		$this->autoSetTitle();
 		if (empty($this->parent))
 			$this->autoSetParent();
 	}
@@ -24,7 +25,7 @@ class Page extends Dir
 	public function show()
 	{
 		$basePath = $this->router->getBasePath();
-		$title = $this->name;
+		$title = $this->title;
 		$breadcrumb = $this->genBreadcrumb();
 		$siteName = "test";
 		$content = $this->render();
@@ -40,40 +41,36 @@ class Page extends Dir
 		return $content;
 	}
 
-	public function renderDirs($levelLimit)
+	public function renderDirs($levelLimit, $defaultType = 'list')
 	{
-		if ($this->parent != null)
-			$type = $this->parent->getChildrenrender($this->level);
+		$type = $defaultType;
+		if ($this->parent != null) {
+			$parentChildType = $this->parent->getChildrenParam('render', $this);
+			if ($parentChildType)
+				$type = $parentChildType;
+		}
 		if (!empty($this->params['render'][0]))
 			$type = $this->params['render'][0];
 		$str = "<ul class=\"dirs\">";
 		foreach ($this->listDirs as $id => $dir) {
 			$url = $dir->getRoute();
+			$title = $dir->getTitle();
 			switch ($type) {
 				case 'list':
-					$str .= "<li><p><a href=\"$url\" class=\"date\">$dir->name</a></p></li>";
+					$str .= "<li><p><a href=\"$url\" class=\"date\">$title</a></p></li>";
 					break;
 
 				case 'covers':
-					$longName = $this->router->pubRelativePath($dir->path);
+					$longTitle = $this->router->pubRelativePath($dir->path);
 					$cover = $dir->getCover();
 					$cover = $cover ? $this->router->genUrl($cover->getPath()) : 'rien';
-					$name = $dir->getName();
-					$str .= "<li class=\"couverture level$dir->level\" id=\"projet-$longName\"><a href=\"$url\"><div>$name</div><img src=\"$cover\" alt=\"cover-$name\" /></a>";
+					$str .= "<li class=\"couverture level$dir->level\" id=\"projet-$longTitle\"><a href=\"$url\"><div>$title</div><img src=\"$cover\" alt=\"cover-$title\" /></a>";
 					break;
 			}
 			if ($dir->level < $levelLimit)
-				$str .= $dir->renderDirs($levelLimit);
+				$str .= $dir->renderDirs($levelLimit, $defaultType);
 		}
 		return $str . "</ul>";
-	}
-
-	public function getChildrenRender($childLevel)
-	{
-		$sortLevel = $childLevel - $this->level;
-		if (!empty($this->params['render'][$sortLevel]))
-			return $this->params['render'][$sortLevel];
-		return false;
 	}
 
 	public function renderFiles()
@@ -136,10 +133,16 @@ class Page extends Dir
 		$str = "";
 		if (!empty($p)) {
 			$url = $p->getRoute();
-			$str = "<a href=\"$url\">$p->name</a> › ";
+			$title = $p->getTitle();
+			$str = "<a href=\"$url\">$title</a> › ";
 			$str = $p->genBreadcrumb() . $str;
 		}
 		return $str;
+	}
+
+	public function getTitle()
+	{
+		return $this->title;
 	}
 
 	public function getCover()
@@ -183,7 +186,7 @@ class Page extends Dir
 		$type = 'alpha';
 		$recursive = false;
 		if ($this->parent != null)
-			$sortParams = $this->parent->getChildrenSort($this->level);
+			$sortParams = $this->parent->getChildrenParam('sort', $this);
 		if (!empty($this->params['sort'][0]))
 			$sortParams = $this->params['sort'][0];
 		if (!empty($sortParams)) {
@@ -207,11 +210,17 @@ class Page extends Dir
 		}
 	}
 
-	public function getChildrenSort($childLevel)
+	public function getChildrenParam($param, $child)
 	{
-		$sortLevel = $childLevel - $this->level;
-		if (!empty($this->params['sort'][$sortLevel]))
-			return $this->params['sort'][$sortLevel];
+		$levelDiff = $this->diffLevel($child);
+		if ($levelDiff == 1)
+			$directChild = $child;
+		else
+			$directChild = $child->getParent($levelDiff - 1);
+		if (!empty($this->params[$param][$levelDiff]) && array_search($directChild->getName(), $this->getIgnored()) === false)
+			return $this->params[$param][$levelDiff];
+		elseif (!empty($this->parent))
+			return $this->parent->getChildrenParam($param, $child);
 		return false;
 	}
 
@@ -230,29 +239,9 @@ class Page extends Dir
 		return 'tmp' . DIRECTORY_SEPARATOR . $this->path;
 	}
 
-	public function getIgnoredDirs()
+	public function getIgnored()
 	{
-		return $this->getIgnored("dir");
-	}
-
-	public function getIgnoredFiles()
-	{
-		return $this->getIgnored("file");
-	}
-
-	public function getIgnored($type = 'all')
-	{
-		$ignore = [];
-		if (!empty($this->params['ignore'])) {
-			foreach ($this->params['ignore'] as $name) {
-				$isDir = substr($name, -1) == '/';
-				if ($isDir)
-					$name = substr($name, 0, -1);
-				if ($type == 'all' || ($type == "dir" && $isDir) || ($type == "file" && !$isDir))
-					array_push($ignore, $name);
-			}
-		}
-		return $ignore;
+		return !empty($this->params['ignore']) ? $this->params['ignore'] : [];
 	}
 
 	public function addDir($path, $name)
@@ -261,12 +250,15 @@ class Page extends Dir
 		$this->listDirs[$name]->init($this->router, $this->layout, $this->paramFile);
 	}
 
-	public function autoSetName()
+	public function autoSetTitle()
 	{
+		if (empty($this->name))
+			$this->autoSetName();
 		if (!empty($this->params['title']))
-			$this->name = $this->params['title'];
-		elseif (empty($this->name))
-			parent::autoSetName();
+			$this->title = $this->params['title'];
+		else {
+			$this->title = $this->name;
+		}
 		return $this;
 	}
 
