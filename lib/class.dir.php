@@ -32,7 +32,7 @@ class Dir extends File
 	{
 		$parentPath = $this->findParentPath();
 		if (empty($parentPath)) return false;
-		$this->parent = new static($parentPath);
+		$this->parent = new static($parentPath, "", $this->level - 1);
 		return $this;
 	}
 

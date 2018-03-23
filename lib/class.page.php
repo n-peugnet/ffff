@@ -165,13 +165,15 @@ class Page extends Dir
 		file_put_contents($tmpPath . $this->paramFile . '.cache', serialize($this->params));
 	}
 
-	public function sort($sortParams = null)
+	public function sort()
 	{
+		if ($this->parent != null)
+			$sortParams = $this->parent->getChildrenSort($this->level);
 		$order = SORT_ASC;
 		$type = 'alpha';
 		$recursive = false;
-		if (!empty($this->params['sort']))
-			$sortParams = $this->params['sort'];
+		if (!empty($this->params['sort'][0]))
+			$sortParams = $this->params['sort'][0];
 		if (!empty($sortParams)) {
 			$order = !empty($sortParams['order']) ? $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC : SORT_ASC;
 			$type = !empty($sortParams['type']) ? $sortParams['type'] : 'alpha';
@@ -188,9 +190,17 @@ class Page extends Dir
 		foreach ($this->listDirs as $subDir) {
 			if (!empty($subDir->params['sort']))
 				$subDir->sort();
-			elseif (!empty($this->params['sort']['childrens']))
-				$subDir->sort($this->params['sort']['childrens']);
+			elseif (!empty($this->params['sort'][$this->level + 1]))
+				$subDir->sort($this->params['sort'][$this->level + 1]);
 		}
+	}
+
+	public function getChildrenSort($childLevel)
+	{
+		$sortLevel = $childLevel - $this->level;
+		if (!empty($this->params['sort'][$sortLevel]))
+			return $this->params['sort'][$sortLevel];
+		return false;
 	}
 
 	public function relativeUrl($path)

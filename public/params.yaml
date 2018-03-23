@@ -7,13 +7,10 @@ ignore:
   - README.md
 
 sort:
-  order: desc
-  type: alpha
-  recursive: false
-  # childrens:
-  #   order: desc
-  #   type: lastModif
-  #   recursive: false
+  - type: alpha
+    order: desc
+  - type: lastModif
+    order: desc
   custom:
 
 render:
