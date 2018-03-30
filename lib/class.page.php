@@ -24,7 +24,6 @@ class Page extends Dir
 
 	public function show()
 	{
-		$basePath = $this->router->getBasePath();
 		$title = $this->title;
 		$breadcrumb = $this->genBreadcrumb();
 		$siteName = "test";
@@ -231,9 +230,24 @@ class Page extends Dir
 		return false;
 	}
 
-	public function relativeUrl($path)
+	public function url($path)
 	{
-		return $this->router->genUrl($this->path . '/' . $path);
+		switch (FFRouter::analizeUrl($path)) {
+			case FFRouter::RELATIVE:
+				return $this->router->genUrl($this->path . $path);
+				break;
+			case FFRouter::ABSOLUTE:
+				return $this->router->genUrl(substr($path, 1));
+				break;
+			case FFRouter::DISTANT:
+				return $path;
+				break;
+		}
+	}
+
+	public function assetUrl($path)
+	{
+		return $this->router->staticFilesBasePath() . 'assets/' . $path;
 	}
 
 	public function getRoute(Type $var = null)
