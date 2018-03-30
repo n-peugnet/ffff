@@ -57,7 +57,7 @@ class Page extends Dir
 			$title = $dir->getTitle();
 			switch ($type) {
 				case 'list':
-					$str .= "<li><p><a href=\"$url\" class=\"date\">$title</a></p></li>";
+					$str .= "<li><p><a class=\"nav-links\" href=\"$url\" class=\"date\">$title</a></p></li>";
 					break;
 
 				case 'covers':
@@ -134,7 +134,7 @@ class Page extends Dir
 		if (!empty($p)) {
 			$url = $p->getRoute();
 			$title = $p->getTitle();
-			$str = "<a href=\"$url\">$title</a> › ";
+			$str = "<a class=\"nav-links\" href=\"$url\">$title</a> › ";
 			$str = $p->genBreadcrumb() . $str;
 		}
 		return $str;
@@ -153,7 +153,7 @@ class Page extends Dir
 			if ($file->type() == 'image')
 				return $file;
 		}
-		return false;
+		return new File('public/assets/img/default-cover.png', 'default-cover');
 	}
 
 	public function loadParams()

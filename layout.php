@@ -18,14 +18,19 @@
 	<meta name="Revisit-After" content="15 days"/>
 	<meta name="Robots" content="All"/>
 	<title><?= $title ?> - <?= $siteName ?></title>
-	<meta name="Title" content="$title"/>
+	<meta name="Title" content="<?= $title ?>"/>
 	<meta name="Keywords" content=""/>
 	<meta name="Description" content=""/>
 </head>
 <body>
 	<section id="accueil">
 		<div class="titre">
-			<h1><?= $breadcrumb . $title ?></h1><h2 class="nav"><a href="<?= $basePath ?>/a-propos/">à propos</a> | <a href="<?= $basePath ?>/contact/">Contact</a> | <a href="<?= $basePath ?>/a-propos/cv/">CV</a></h2>
+			<h1><?= $breadcrumb . $title ?></h1>
+			<h2 class="nav">
+				<a class="nav-links" href="<?= $basePath ?>/a-propos/">à propos</a> |
+				<a class="nav-links" href="<?= $basePath ?>/contact/">Contact</a> |
+				<a class="nav-links" href="<?= $basePath ?>/a-propos/cv/">CV</a>
+			</h2>
 		</div>
 			<?= $content ?>
 	</section>

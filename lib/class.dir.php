@@ -85,7 +85,7 @@ class Dir extends File
 		return $this;
 	}
 
-	function list($level = 0, $dirOnly = false, $ignore = [])
+	function list_recursive($level = 0, $dirOnly = false, $ignore = [])
 	{
 		if ($dir = opendir($this->path)) {
 			while (($element = readdir($dir)) !== false) //pour tous les elements de ce dossier...
@@ -96,7 +96,7 @@ class Dir extends File
 					{
 						$this->addDir($path . DIRECTORY_SEPARATOR, $element);
 						if ($level == -1 || $this->level < $level)
-							$this->listDirs[$element]->list($level, $dirOnly, $ignore);
+							$this->listDirs[$element]->list_recursive($level, $dirOnly, $ignore);
 					} elseif (!$dirOnly) {
 						$this->addFile($path, $element);
 					}

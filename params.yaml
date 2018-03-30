@@ -1,0 +1,15 @@
+site:
+  name: Nicolas Peugnet
+  description:
+
+defaults:
+  sort:
+    type: alpha
+    order: asc
+  render: list
+
+# you don't really need to edit these settings
+system:
+  dirs:
+    public: public
+    temp: tmp
