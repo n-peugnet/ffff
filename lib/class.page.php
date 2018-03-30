@@ -84,7 +84,7 @@ class Page extends Dir
 				$ext = $file->ext();
 				switch ($ext) {
 					case 'md':
-						$mdParser = new Markdown_Parser();
+						$mdParser = new MarkdownFF_Parser($this);
 						$contenu = $mdParser->transform($contenu);
 						break;
 					case 'txt':
@@ -230,9 +230,10 @@ class Page extends Dir
 		return false;
 	}
 
-	public function url($path)
+	public function url($path, $type = false)
 	{
-		switch (FFRouter::analizeUrl($path)) {
+		$type = $type ? $type : FFRouter::analizeUrl($path);
+		switch ($type) {
 			case FFRouter::RELATIVE:
 				return $this->router->genUrl($this->path . $path);
 				break;
