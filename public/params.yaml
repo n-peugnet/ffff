@@ -5,15 +5,15 @@ ignore:
   - a-propos
   - contact
   - README.md
+  - stage-2
 
 sort:
   - type: alpha
     order: desc
-  - type: alpha
-    order: asc
   custom:
 
 render:
+  - list
   - list
   - covers
 

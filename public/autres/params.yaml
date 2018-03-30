@@ -1,0 +1,9 @@
+render:
+  - list
+  - covers
+sort:
+  - type: alpha
+    order: desc
+  - type: lastModif
+    order: desc
+  custom:
