@@ -1,0 +1,5 @@
+styles:
+  - styles/cv.css
+
+ignore:
+  - styles

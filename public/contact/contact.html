@@ -1,0 +1,24 @@
+<h2>Par E-mail</h2>
+<p>
+	Vous pouvez m'envoyer un mail
+	<del>grâce au formulaire ci-dessous ou</del> à partir de
+	<a href="mailto:nicolas.pgnt@gmail.com?subject=Contact via n.peugnet.free.fr">votre application de messagerie</a>.
+</p>
+<form action="envoi.php" method="post">
+	<div class="labels">
+		<label for="nom">Nom</label>
+		<br/>
+		<label for="email">Adresse email</label>
+		<br/>
+		<label for="message">Message</label>
+	</div>
+	<div class="champs">
+		<input id="nom" name="nom" type="text" value="" disabled/>
+		<br/>
+		<input id="email" name="email" type="text" value="" disabled/>
+		<br/>
+		<textarea id="message" name="message" disabled></textarea>
+		<br/>
+		<button type="submit" disabled>Envoyer</button>
+	</div>
+</form>

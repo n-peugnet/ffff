@@ -9,8 +9,8 @@ ignore:
 sort:
   - type: alpha
     order: desc
-  - type: lastModif
-    order: desc
+  - type: alpha
+    order: asc
   custom:
 
 render:

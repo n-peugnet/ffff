@@ -2,11 +2,6 @@
 tmp/*
 !tmp/README.md
 
-public/*/*
-!public/assets/*
-!public/404/*
-!public/403/*
-
 inc/*
 !inc/README.md
 
