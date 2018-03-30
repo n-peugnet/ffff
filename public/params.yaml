@@ -14,7 +14,6 @@ sort:
 
 render:
   - list
-  - list
   - covers
 
 title: Nicolas Peugnet

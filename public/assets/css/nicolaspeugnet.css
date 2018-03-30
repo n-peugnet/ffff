@@ -146,9 +146,9 @@ ul.dirs {
 	margin: 0;
 	list-style-type: none;
 }
-ul.dirs ul {
+/* ul.dirs ul {
 	padding-left: 10px;
-}
+} */
 
 .couverture {
 	display: inline-block;
