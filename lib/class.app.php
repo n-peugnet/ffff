@@ -35,7 +35,7 @@ class App
 			// show the page
 			$page = new Page($path);
 			$page->init($this->router);
-			$page->list_recursive(2, false, $page->getIgnored());
+			$page->list_recursive($page->getRenderLevel(), false, $page->getIgnored());
 			$page->sort();
 			$page->show();
 		} else {

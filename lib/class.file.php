@@ -36,10 +36,13 @@ class File
 
 	public function getParent($level = 1)
 	{
-		if (!empty($this->parent) && $level > 1)
-			return $this->parent->getParent($level - 1);
-		else
-			return false;
+		if (!empty($this->parent)) {
+			if ($level > 1)
+				return $this->parent->getParent($level - 1);
+			else
+				return $this->parent;
+		}
+		return false;
 	}
 
 	protected function findParentPath()

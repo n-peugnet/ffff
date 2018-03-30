@@ -156,6 +156,13 @@ class Page extends Dir
 		return new File('public/assets/img/default-cover.png', 'default-cover');
 	}
 
+	public function getRenderLevel()
+	{
+		if (!empty($this->params['render']))
+			return count($this->params['render']);
+		return 2;
+	}
+
 	public function loadParams()
 	{
 		$paramFile = $this->path . $this->paramFile;
@@ -255,10 +262,11 @@ class Page extends Dir
 		if (empty($this->name))
 			$this->autoSetName();
 		if (!empty($this->params['title']))
-			$this->title = $this->params['title'];
+			$title = $this->params['title'];
 		else {
-			$this->title = $this->name;
+			$title = $this->name;
 		}
+		$this->title = ucwords($title);
 		return $this;
 	}
 
