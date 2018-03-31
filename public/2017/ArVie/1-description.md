@@ -14,6 +14,4 @@ PHPMyAdmin puis du backend grâce au Framework Joomla.
 
 Le développement collaboratif est assuré par les 11 élèves de 2ème année
 de BTS SIO spécialité SLAM.
-Pour cela, un <a href="https://github.com/deromeem/ArVie" target="_blank" >repository GitHub</a> est utilisé. 
-
-<a href="https://drive.google.com/drive/folders/1T2w2W1koJtfFr0z6FD8TZRok8a7rSY7L?usp=sharing" target="_blank" >Dossier ArVie</a>
+Pour cela, un [repository GitHub](https://github.com/deromeem/ArVie) est utilisé.

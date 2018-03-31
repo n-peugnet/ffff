@@ -3,7 +3,7 @@
 }
 
 /* Typos et couleurs communes */
-h1, h1 a, h2, h3, h4, h5, h6, a, p, li, input, textarea, label {
+h1, h1 a, h2, h3, h4, h5, h6, a, p, li, input, textarea, label, td, tr {
 	font-family: Source Code Pro, consolas, Monospace, sans-serif;
 	color:rgb(77, 77, 77);
 }
