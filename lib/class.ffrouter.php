@@ -2,9 +2,9 @@
 class FFRouter
 {
 	const SLASH = '/';
-	const DISTANT = 'distant';
-	const ABSOLUTE = 'absolute';
-	const RELATIVE = 'relative';
+	const DISTANT = 0;
+	const ABSOLUTE = 1;
+	const RELATIVE = 2;
 
 	protected $publicPath = "";
 	protected $basePath = "";
@@ -61,8 +61,8 @@ class FFRouter
 		if (($strpos = strpos($uri, '?')) !== false) {
 			$uri = substr($uri, 0, $strpos);
 		}
-		$path = str_replace(self::SLASH, DIRECTORY_SEPARATOR, $uri); // replace '\' with '/' if on windows
-		$path = $this->publicPath . $path;
+		$path = str_replace(self::SLASH, DIRECTORY_SEPARATOR, $uri); // replace '/' with '\' if on windows
+		$path = utf8_decode($this->publicPath . $path);
 		$return = is_dir($path) ? $path : false;
 		return $return;
 	}
@@ -89,7 +89,7 @@ class FFRouter
 
 	protected function uri()
 	{
-		return isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : self::SLASH;
+		return isset($_SERVER['REQUEST_URI']) ? urldecode($_SERVER['REQUEST_URI']) : self::SLASH;
 	}
 }
 

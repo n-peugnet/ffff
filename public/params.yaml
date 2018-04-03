@@ -11,10 +11,16 @@ sort:
     order: desc
   - type: lastModif
     order: desc
-  custom:
 
 render:
   - list
   - covers
+
+custom:
+  render:
+    test: covers
+  sort:
+    - *
+    - 2015
 
 title: Nicolas Peugnet

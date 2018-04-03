@@ -52,9 +52,11 @@ class Page extends Dir
 			$type = $this->params['render'][0];
 		$str = "<ul class=\"dirs\">";
 		foreach ($this->listDirs as $id => $dir) {
+			if (!$typeDir = $this->getCustomParam('render', $dir->getName()))
+				$typeDir = $type;
 			$url = $dir->getRoute();
 			$title = $dir->getTitle();
-			switch ($type) {
+			switch ($typeDir) {
 				case 'list':
 					$str .= "<li><p><a class=\"nav-links\" href=\"$url\" class=\"date\">$title</a></p></li>";
 					break;
@@ -188,18 +190,14 @@ class Page extends Dir
 
 	public function sort()
 	{
-		$order = SORT_ASC;
-		$type = 'alpha';
-		$recursive = false;
-		if ($this->parent != null)
-			$sortParams = $this->parent->getChildrenParam('sort', $this);
 		if (!empty($this->params['sort'][0]))
 			$sortParams = $this->params['sort'][0];
-		if (!empty($sortParams)) {
-			$order = !empty($sortParams['order']) ? $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC : SORT_ASC;
-			$type = !empty($sortParams['type']) ? $sortParams['type'] : 'alpha';
-			$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false;
-		}
+		elseif ($this->parent != null)
+			$sortParams = $this->parent->getChildrenParam('sort', $this);
+
+		$order = !empty($sortParams['order']) ? $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC : SORT_ASC;
+		$type = !empty($sortParams['type']) ? $sortParams['type'] : 'alpha';
+		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false;
 		switch ($type) {
 			case 'alpha':
 				$this->sortAlpha($order, $recursive);
@@ -227,6 +225,13 @@ class Page extends Dir
 			return $this->params[$param][$levelDiff];
 		elseif (!empty($this->parent))
 			return $this->parent->getChildrenParam($param, $child);
+		return false;
+	}
+
+	public function getCustomParam($param, $key)
+	{
+		if (!empty($this->params['custom'][$param][$key]))
+			return $this->params['custom'][$param][$key];
 		return false;
 	}
 
