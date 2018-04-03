@@ -52,7 +52,7 @@ class Page extends Dir
 			$type = $this->params['render'][0];
 		$str = "<ul class=\"dirs\">";
 		foreach ($this->listDirs as $id => $dir) {
-			if (!$typeDir = $this->getCustomParam('render', $dir->getName()))
+			if (!$typeDir = $this->getCustomParamKey('render', $dir->getName()))
 				$typeDir = $type;
 			$url = $dir->getRoute();
 			$title = $dir->getTitle();
@@ -212,6 +212,29 @@ class Page extends Dir
 			elseif (!empty($this->params['sort'][$this->level + 1]))
 				$subDir->sort($this->params['sort'][$this->level + 1]);
 		}
+		$this->sortCustom();
+	}
+
+	public function sortCustom()
+	{
+		if ($sort = $this->getCustomParam('sort')) {
+			$mode = 'unshift';
+			$unshift = [];
+			$push = [];
+			foreach ($sort as $name) {
+				$name = utf8_decode($name);
+				if ($name == '*')
+					$mode = 'push';
+				elseif (!empty($this->listDirs[$name])) {
+					if ($mode == 'unshift')
+						$unshift[$name] = $this->listDirs[$name];
+					else
+						$push[$name] = $this->listDirs[$name];
+					unset($this->listDirs[$name]);
+				}
+			}
+			$this->listDirs = array_merge($unshift, $this->listDirs, $push);
+		}
 	}
 
 	public function getChildrenParam($param, $child)
@@ -228,10 +251,19 @@ class Page extends Dir
 		return false;
 	}
 
-	public function getCustomParam($param, $key)
+	public function getCustomParam($param)
 	{
-		if (!empty($this->params['custom'][$param][$key]))
-			return $this->params['custom'][$param][$key];
+		if (!empty($this->params['custom'][$param]))
+			return $this->params['custom'][$param];
+		return false;
+	}
+
+	public function getCustomParamKey($param, $key)
+	{
+		if ($param = $this->getCustomParam($param)) {
+			if (!empty($param[$key]))
+				return $param[$key];
+		}
 		return false;
 	}
 
