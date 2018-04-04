@@ -3,7 +3,7 @@
 #### A1.1.1 Analyse du cahier des charges d'un service à produire
 
 Analyse des documents fournis (cahier des charges et spécifications) et
-élaboration d'une présentation de synthèse.
+élaboration d'une [présentation de synthèse](https://drive.google.com/open?id=0B1T9tkseoI0qZ2l2c083UE10RFU).
 
 #### A4.1.1 Proposition d'une solution applicative
 
@@ -19,8 +19,7 @@ Amélioration de la page d'accueil et affichage du type utilisateur.
 
 #### A4.1.3 Conception ou adaptation d'une base de données
 
--   Ajout dans la base de données des colonnes `estComptable` et `grainSel`
-    dans la table visiteur.
+-   Ajout dans la base de données des colonnes `estComptable` dans la table visiteur.
 -   Modification de la taille du champ mot de passe.
 -   Cryptage du mot de passe des utilisateurs déjà existants.
 
@@ -38,5 +37,5 @@ l'application
 
 #### A5.2.1 Exploitation des référentiels, normes et standards adoptés par le prestataire
 
-Création d'un tableau de nommage des fichiers MVC de l'application par analyse
-du code fourni.
+Création d'un [tableau de nommage des fichiers MVC](https://drive.google.com/file/d/0B1T9tkseoI0qaFBkdVRuQVVVUUk/view?usp=sharing)
+de l'application par analyse du code fourni.
