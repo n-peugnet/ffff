@@ -1,3 +1,6 @@
 title: à propos
 render:
   - covers
+
+ignore:
+  - Veille
