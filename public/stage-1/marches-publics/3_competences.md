@@ -56,15 +56,19 @@ j'ai entièrement concu et réalisé la base de donnée, en voici le [modèle de
 
 #### A4.1.9 Rédaction d'une documentation technique
 
-L'ensemble des caractéristiques techniques de l'application ont été compiléd dans une [documentation technique](https://drive.google.com/open?id=0B1T9tkseoI0qUUM0Zk9IYXc3bzg) au format Word
+L'ensemble des caractéristiques techniques de l'application ont été compilées dans une [documentation technique](https://drive.google.com/open?id=0B1T9tkseoI0qUUM0Zk9IYXc3bzg) au format Word
 
 #### A4.2.1 Analyse et correction d'un dysfonctionnement, d'un problème de qualité de sevice
 
 #### A4.2.2 Adaptation d'une solution applicative aux évolutions de ses composants
 
-AJAX https
+Basculement sur l'API sécurisée de Geonames pour l'autocomplétion suite
+à la mise à jour de Google Chrome empêchant les requêtes AJAX en HTTP
+sur depuis un site en HTTPS.
 
 #### A5.1.1 Mise en place d'une gestion de configuration
 
-git + fichier de connfig
+Utilisation de git pour la gestion de version et mise en place d'un
+fichier de configuration PHP à la racine du site pour adapter la
+configuration a l'environnement.
 
