@@ -2,6 +2,9 @@
 
 #### A1.4.1 Participation à un projet
 
+Tenu d'un carnet de route contenant la liste des tâches à faire ordonnées par
+priorité avec leur date de réalisation.
+
 #### A4.1.1 Proposition d'une solution applicative
 
 Selectize

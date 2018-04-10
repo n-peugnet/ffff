@@ -42,3 +42,7 @@ Test des fonctionnalités du back-office à l'aide d'[une fiche de test](https:/
 
 Apprentissage du fonctionnement d'un framework MVC en général et de Joomla
 en particulier
+
+#### A5.1.1 Mise en place d'une gestion de configuration
+
+Création d'un repository git et utilisation de [GitHub](https://github.com/deromeem/ArVie362) comme remote commune.
