@@ -38,11 +38,11 @@ Une application Android en Java a également été commencée.
 
 Test des fonctionnalités du back-office à l'aide d'[une fiche de test](https://drive.google.com/file/d/1lUU387OWlBV6abTVKLwZhX_GmKWaUo8F/view?usp=sharing).
 
+#### A5.1.1 Mise en place d'une gestion de configuration
+
+Création d'un repository git et utilisation de [GitHub](https://github.com/deromeem/ArVie362) comme remote commune.
+
 #### A5.2.4 Étude d'une technologie, d'un composant, d'un outil ou d'une méthode
 
 Apprentissage du fonctionnement d'un framework MVC en général et de Joomla
 en particulier
-
-#### A5.1.1 Mise en place d'une gestion de configuration
-
-Création d'un repository git et utilisation de [GitHub](https://github.com/deromeem/ArVie362) comme remote commune.

@@ -12,8 +12,6 @@ PM2
 
 passage de l'ajax au nodejs + SocketIO
 
-#### A2.3.2 Proposition d'amélioration d'un service
-
 #### A4.1.2 Conception ou adaptation de l'interface utilisateur d'une solution applicative
 
 #### A4.1.3 Conception ou adaptation d'une base de données
