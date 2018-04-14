@@ -9,12 +9,18 @@ ignore:
 sort:
   - type: alpha
     order: desc
-  - type: alpha
-    order: asc
-  custom:
+  - type: lastModif
+    order: desc
 
 render:
   - list
   - covers
+
+custom:
+  render:
+    test: covers
+  sort:
+    - *
+    - 2014
 
 title: Nicolas Peugnet
