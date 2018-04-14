@@ -9,7 +9,7 @@ ignore:
 sort:
   - type: alpha
     order: desc
-  - type: lastModif
+  - type: date
     order: desc
 
 render:

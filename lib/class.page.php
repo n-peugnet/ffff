@@ -1,14 +1,12 @@
 <?php
 class Page extends Dir
 {
-	protected $router;
 	protected $layout;
 	protected $title;
 	protected $params;
 	protected $paramFile;
 
 	/**
-	 * @param FFRouter $router
 	 * @param string $layout
 	 */
 	public function init($layout = "layout.php", $paramFile = "params.yaml")
@@ -163,6 +161,21 @@ class Page extends Dir
 		return 2;
 	}
 
+	public function getDate()
+	{
+		$formats = ['d/m/Y H:i:s', 'd/m/Y H:i', 'd/m/Y'];
+		$date = false;
+		if (!empty($this->params['date'])) {
+			$numFormat = 0;
+			while (!$date) {
+				$date = DateTimeImmutable::createFromFormat($formats[$numFormat], $this->params['date']);
+				$numFormat++;
+			}
+			return $date;
+		}
+		return $this->lastModif();
+	}
+
 	public function loadParams()
 	{
 		$paramFile = $this->path . $this->paramFile;
@@ -204,6 +217,9 @@ class Page extends Dir
 			case 'lastModif':
 				$this->sortLastModif($order, $recursive);
 				break;
+			case 'date':
+				$this->sortDate($order, $recursive);
+				break;
 		}
 		foreach ($this->listDirs as $subDir) {
 			if (!empty($subDir->params['sort']))
@@ -212,6 +228,19 @@ class Page extends Dir
 				$subDir->sort($this->params['sort'][$this->level + 1]);
 		}
 		$this->sortCustom();
+	}
+
+	public function sortDate($order = SORT_DESC, $recursive = true)
+	{
+		uasort($this->listDirs, function ($p1, $p2) use ($order) {
+			$cmp = self::cmpDate($p1, $p2);
+			return $order == SORT_ASC ? $cmp : !$cmp;
+		});
+		if ($recursive) {
+			foreach ($this->listDirs as $subDir)
+				$subDir->sortDate($order, $recursive);
+		}
+		return $this;
 	}
 
 	public function sortCustom()
@@ -234,6 +263,15 @@ class Page extends Dir
 			}
 			$this->listDirs = array_merge($unshift, $this->listDirs, $push);
 		}
+	}
+
+	/**
+	 * @param self $p1
+	 * @param self $p2
+	 */
+	public static function cmpDate($p1, $p2)
+	{
+		return $p1->getDate() > $p2->getDate();
 	}
 
 	public function getChildrenParam($param, $child)
