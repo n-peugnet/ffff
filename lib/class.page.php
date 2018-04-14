@@ -11,10 +11,9 @@ class Page extends Dir
 	 * @param FFRouter $router
 	 * @param string $layout
 	 */
-	public function init(&$router, $layout = "layout.php", $paramFile = "params.yaml")
+	public function init($layout = "layout.php", $paramFile = "params.yaml")
 	{
 		$this->paramFile = $paramFile;
-		$this->router = $router;
 		$this->layout = $layout;
 		$this->loadParams();
 		$this->autoSetTitle();
@@ -62,9 +61,9 @@ class Page extends Dir
 					break;
 
 				case 'covers':
-					$longTitle = $this->router->pubRelativePath($dir->path);
+					$longTitle = FFRouter::pubRelativePath($dir->path);
 					$cover = $dir->getCover();
-					$cover = $cover ? $this->router->genUrl($cover->getPath()) : 'rien';
+					$cover = $cover ? FFRouter::genUrl($cover->getPath()) : 'rien';
 					$str .= "<li class=\"couverture level$dir->level\" id=\"projet-$longTitle\"><a href=\"$url\"><div>$title</div><img src=\"$cover\" alt=\"cover-$title\" /></a>";
 					break;
 			}
@@ -80,7 +79,7 @@ class Page extends Dir
 		foreach ($this->listFiles as $index => $file) {
 			$type = $file->type();
 			if ($type == 'image') {
-				$str .= '<img class="CadrePhoto" src="' . $this->router->genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
+				$str .= '<img class="CadrePhoto" src="' . FFRouter::genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
 			} elseif ($type == 'text') {
 				$contenu = file_get_contents($file->getPath());
 				$ext = $file->ext();
@@ -122,7 +121,7 @@ class Page extends Dir
 		$str = "<pre><i>protected</i> 'listFiles' <font color='#888a85'>=&gt;</font>
   <b>array</b> <i>(size=$size)</i>\n";
 		foreach ($this->listFiles as $index => $file) {
-			$str .= $file->toString($this->router->genUrl($file->getPath()));
+			$str .= $file->toString(FFRouter::genUrl($file->getPath()));
 		}
 		$str .= "</pre>";
 		return $str;
@@ -272,10 +271,10 @@ class Page extends Dir
 		$type = $type ? $type : FFRouter::analizeUrl($path);
 		switch ($type) {
 			case FFRouter::RELATIVE:
-				return $this->router->genUrl($this->path . $path);
+				return FFRouter::genUrl($this->path . $path);
 				break;
 			case FFRouter::ABSOLUTE:
-				return $this->router->genUrl(substr($path, 1));
+				return FFRouter::genUrl(substr($path, 1));
 				break;
 			case FFRouter::DISTANT:
 				return $path;
@@ -285,12 +284,12 @@ class Page extends Dir
 
 	public function assetUrl($path)
 	{
-		return $this->router->staticFilesBasePath() . 'assets/' . $path;
+		return FFRouter::staticFilesBasePath() . 'assets/' . $path;
 	}
 
 	public function getRoute(Type $var = null)
 	{
-		return $this->router->genUrl($this->path);
+		return FFRouter::genUrl($this->path);
 	}
 
 	public function tmpPath()
@@ -306,7 +305,7 @@ class Page extends Dir
 	public function addDir($path, $name)
 	{
 		parent::addDir($path, $name);
-		$this->listDirs[$name]->init($this->router, $this->layout, $this->paramFile);
+		$this->listDirs[$name]->init($this->layout, $this->paramFile);
 	}
 
 	public function autoSetTitle()
@@ -326,7 +325,7 @@ class Page extends Dir
 	{
 		parent::autoSetParent();
 		if (empty($this->parent)) return false;
-		$this->parent->init($this->router);
+		$this->parent->init();
 		return $this;
 	}
 
