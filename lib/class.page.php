@@ -11,10 +11,9 @@ class Page extends Dir
 	 * @param FFRouter $router
 	 * @param string $layout
 	 */
-	public function init(&$router, $layout = "layout.php", $paramFile = "params.yaml")
+	public function init($layout = "layout.php", $paramFile = "params.yaml")
 	{
 		$this->paramFile = $paramFile;
-		$this->router = $router;
 		$this->layout = $layout;
 		$this->loadParams();
 		$this->autoSetTitle();
@@ -52,17 +51,19 @@ class Page extends Dir
 			$type = $this->params['render'][0];
 		$str = "<ul class=\"dirs\">";
 		foreach ($this->listDirs as $id => $dir) {
+			if (!$typeDir = $this->getCustomParamKey('render', $dir->getName()))
+				$typeDir = $type;
 			$url = $dir->getRoute();
 			$title = $dir->getTitle();
-			switch ($type) {
+			switch ($typeDir) {
 				case 'list':
 					$str .= "<li><p><a class=\"nav-links\" href=\"$url\" class=\"date\">$title</a></p></li>";
 					break;
 
 				case 'covers':
-					$longTitle = $this->router->pubRelativePath($dir->path);
+					$longTitle = FFRouter::pubRelativePath($dir->path);
 					$cover = $dir->getCover();
-					$cover = $cover ? $this->router->genUrl($cover->getPath()) : 'rien';
+					$cover = $cover ? FFRouter::genUrl($cover->getPath()) : 'rien';
 					$str .= "<li class=\"couverture level$dir->level\" id=\"projet-$longTitle\"><a href=\"$url\"><div>$title</div><img src=\"$cover\" alt=\"cover-$title\" /></a>";
 					break;
 			}
@@ -78,7 +79,7 @@ class Page extends Dir
 		foreach ($this->listFiles as $index => $file) {
 			$type = $file->type();
 			if ($type == 'image') {
-				$str .= '<img class="CadrePhoto" src="' . $this->router->genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
+				$str .= '<img class="CadrePhoto" src="' . FFRouter::genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
 			} elseif ($type == 'text') {
 				$contenu = file_get_contents($file->getPath());
 				$ext = $file->ext();
@@ -120,7 +121,7 @@ class Page extends Dir
 		$str = "<pre><i>protected</i> 'listFiles' <font color='#888a85'>=&gt;</font>
   <b>array</b> <i>(size=$size)</i>\n";
 		foreach ($this->listFiles as $index => $file) {
-			$str .= $file->toString($this->router->genUrl($file->getPath()));
+			$str .= $file->toString(FFRouter::genUrl($file->getPath()));
 		}
 		$str .= "</pre>";
 		return $str;
@@ -188,18 +189,14 @@ class Page extends Dir
 
 	public function sort()
 	{
-		$order = SORT_ASC;
-		$type = 'alpha';
-		$recursive = false;
-		if ($this->parent != null)
-			$sortParams = $this->parent->getChildrenParam('sort', $this);
 		if (!empty($this->params['sort'][0]))
 			$sortParams = $this->params['sort'][0];
-		if (!empty($sortParams)) {
-			$order = !empty($sortParams['order']) ? $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC : SORT_ASC;
-			$type = !empty($sortParams['type']) ? $sortParams['type'] : 'alpha';
-			$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false;
-		}
+		elseif ($this->parent != null)
+			$sortParams = $this->parent->getChildrenParam('sort', $this);
+
+		$order = !empty($sortParams['order']) ? $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC : SORT_ASC;
+		$type = !empty($sortParams['type']) ? $sortParams['type'] : 'alpha';
+		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false;
 		switch ($type) {
 			case 'alpha':
 				$this->sortAlpha($order, $recursive);
@@ -213,6 +210,29 @@ class Page extends Dir
 				$subDir->sort();
 			elseif (!empty($this->params['sort'][$this->level + 1]))
 				$subDir->sort($this->params['sort'][$this->level + 1]);
+		}
+		$this->sortCustom();
+	}
+
+	public function sortCustom()
+	{
+		if ($sort = $this->getCustomParam('sort')) {
+			$mode = 'unshift';
+			$unshift = [];
+			$push = [];
+			foreach ($sort as $name) {
+				$name = utf8_decode($name);
+				if ($name == '*')
+					$mode = 'push';
+				elseif (!empty($this->listDirs[$name])) {
+					if ($mode == 'unshift')
+						$unshift[$name] = $this->listDirs[$name];
+					else
+						$push[$name] = $this->listDirs[$name];
+					unset($this->listDirs[$name]);
+				}
+			}
+			$this->listDirs = array_merge($unshift, $this->listDirs, $push);
 		}
 	}
 
@@ -230,15 +250,31 @@ class Page extends Dir
 		return false;
 	}
 
+	public function getCustomParam($param)
+	{
+		if (!empty($this->params['custom'][$param]))
+			return $this->params['custom'][$param];
+		return false;
+	}
+
+	public function getCustomParamKey($param, $key)
+	{
+		if ($param = $this->getCustomParam($param)) {
+			if (!empty($param[$key]))
+				return $param[$key];
+		}
+		return false;
+	}
+
 	public function url($path, $type = false)
 	{
 		$type = $type ? $type : FFRouter::analizeUrl($path);
 		switch ($type) {
 			case FFRouter::RELATIVE:
-				return $this->router->genUrl($this->path . $path);
+				return FFRouter::genUrl($this->path . $path);
 				break;
 			case FFRouter::ABSOLUTE:
-				return $this->router->genUrl(substr($path, 1));
+				return FFRouter::genUrl(substr($path, 1));
 				break;
 			case FFRouter::DISTANT:
 				return $path;
@@ -248,12 +284,12 @@ class Page extends Dir
 
 	public function assetUrl($path)
 	{
-		return $this->router->staticFilesBasePath() . 'assets/' . $path;
+		return FFRouter::staticFilesBasePath() . 'assets/' . $path;
 	}
 
 	public function getRoute(Type $var = null)
 	{
-		return $this->router->genUrl($this->path);
+		return FFRouter::genUrl($this->path);
 	}
 
 	public function tmpPath()
@@ -269,7 +305,7 @@ class Page extends Dir
 	public function addDir($path, $name)
 	{
 		parent::addDir($path, $name);
-		$this->listDirs[$name]->init($this->router, $this->layout, $this->paramFile);
+		$this->listDirs[$name]->init($this->layout, $this->paramFile);
 	}
 
 	public function autoSetTitle()
@@ -289,7 +325,7 @@ class Page extends Dir
 	{
 		parent::autoSetParent();
 		if (empty($this->parent)) return false;
-		$this->parent->init($this->router);
+		$this->parent->init();
 		return $this;
 	}
 

@@ -17,4 +17,11 @@ render:
   - list
   - covers
 
+custom:
+  render:
+    test: covers
+  sort:
+    - *
+    - 2014
+
 title: Nicolas Peugnet

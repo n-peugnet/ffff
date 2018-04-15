@@ -2,24 +2,24 @@
 class FFRouter
 {
 	const SLASH = '/';
-	const DISTANT = 'distant';
-	const ABSOLUTE = 'absolute';
-	const RELATIVE = 'relative';
+	const DISTANT = 0;
+	const ABSOLUTE = 1;
+	const RELATIVE = 2;
 
-	protected $publicPath = "";
-	protected $basePath = "";
+	protected static $publicPath = "";
+	protected static $basePath = "";
 
-	public function __construct($publicPath = "public", $basePath = "")
+	public static function init($publicPath = "public", $basePath = "")
 	{
-		$this->publicPath = $publicPath;
-		$this->basePath = $basePath;
+		self::$publicPath = $publicPath;
+		self::$basePath = $basePath;
 	}
 
 	/**
 	 * find the type of a given url
 	 * @param string $url
 	 */
-	static function analizeUrl($url)
+	public static function analizeUrl($url)
 	{
 		$url = str_replace('\\', self::SLASH, $url);
 		$slashNb = substr_count($url, self::SLASH);
@@ -37,59 +37,59 @@ class FFRouter
 		}
 	}
 
-	public function staticFilesBasePath()
+	public static function staticFilesBasePath()
 	{
-		return $this->basePath . self::SLASH . $this->publicPath . self::SLASH;
+		return self::$basePath . self::SLASH . self::$publicPath . self::SLASH;
 	}
 
-	public function getBasePath()
+	public static function getBasePath()
 	{
-		return $this->basePath;
+		return self::$basePath;
 	}
 
-	public function setBasePath($str)
+	public static function setBasePath($str)
 	{
-		return $this->basePath = $str;
+		return self::$basePath = $str;
 	}
 
-	public function matchRoute()
+	public static function matchRoute()
 	{
 		// removes the basePath
-		$uri = substr($this->uri(), strlen($this->basePath));
+		$uri = substr(self::uri(), strlen(self::$basePath));
 
 		// strip url parameters
 		if (($strpos = strpos($uri, '?')) !== false) {
 			$uri = substr($uri, 0, $strpos);
 		}
-		$path = str_replace(self::SLASH, DIRECTORY_SEPARATOR, $uri); // replace '\' with '/' if on windows
-		$path = $this->publicPath . $path;
+		$path = str_replace(self::SLASH, DIRECTORY_SEPARATOR, $uri); // replace '/' with '\' if on windows
+		$path = utf8_decode(self::$publicPath . $path);
 		$return = is_dir($path) ? $path : false;
 		return $return;
 	}
 
-	public function genUrl($path)
+	public static function genUrl($path)
 	{
 		$path = str_replace('\\', self::SLASH, $path); // replace '\' with '/' if on windows
 		// if the path leads to a directory
-		if (substr($path, -1) == self::SLASH) {
+		if (is_dir($path)) {
 			// removes the basePath
-			$path = $this->pubRelativePath($path);
+			$path = self::pubRelativePath($path);
 		}
 		$path = rawurlencode(utf8_encode($path)); // replace special characters such as accentued chars
 		$path = str_replace("%2F", self::SLASH, $path); // replace '/' html notation with the normal '/' char
-		return $this->basePath . self::SLASH . $path;
+		return self::$basePath . self::SLASH . $path;
 	}
 
-	public function pubRelativePath($path)
+	public static function pubRelativePath($path)
 	{
-		if (substr($path, 0, strlen($this->publicPath)) == $this->publicPath)
-			return substr($path, strlen($this->publicPath) + 1);
+		if (substr($path, 0, strlen(self::$publicPath)) == self::$publicPath)
+			return substr($path, strlen(self::$publicPath) + 1);
 		return $path;
 	}
 
-	protected function uri()
+	protected static function uri()
 	{
-		return isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : self::SLASH;
+		return isset($_SERVER['REQUEST_URI']) ? urldecode($_SERVER['REQUEST_URI']) : self::SLASH;
 	}
 }
 
