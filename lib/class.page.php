@@ -6,6 +6,11 @@ class Page extends Dir
 	protected $params;
 	protected $paramFile;
 
+	const RENDER = 'render';
+	const SORT = 'sort';
+	const UNSHIFT = 0;
+	const PUSH = 1;
+
 	/**
 	 * @param string $layout
 	 */
@@ -30,7 +35,7 @@ class Page extends Dir
 
 	public function render()
 	{
-		$level = !empty($this->params['render']) ? count($this->params['render']) : 1;
+		$level = !empty($this->params[self::RENDER]) ? count($this->params[self::RENDER]) : 1;
 		$content = "";
 		$content .= $this->renderFiles();
 		$content .= $this->renderDirs($level);
@@ -41,15 +46,15 @@ class Page extends Dir
 	{
 		$type = $defaultType;
 		if ($this->parent != null) {
-			$parentChildType = $this->parent->getChildrenParam('render', $this);
+			$parentChildType = $this->parent->getChildrenParam(self::RENDER, $this);
 			if ($parentChildType)
 				$type = $parentChildType;
 		}
-		if (!empty($this->params['render'][0]))
-			$type = $this->params['render'][0];
+		if (!empty($this->params[self::RENDER][0]))
+			$type = $this->params[self::RENDER][0];
 		$str = "<ul class=\"dirs\">";
-		foreach ($this->listDirs as $id => $dir) {
-			if (!$typeDir = $this->getCustomParamKey('render', $dir->getName()))
+		foreach ($this->getListDirs() as $id => $dir) {
+			if (!$typeDir = $this->getCustomParamKey(self::RENDER, $dir->getName()))
 				$typeDir = $type;
 			$url = $dir->getRoute();
 			$title = $dir->getTitle();
@@ -74,7 +79,7 @@ class Page extends Dir
 	public function renderFiles()
 	{
 		$str = "";
-		foreach ($this->listFiles as $index => $file) {
+		foreach ($this->getListFiles() as $index => $file) {
 			$type = $file->type();
 			if ($type == 'image') {
 				$str .= '<img class="CadrePhoto" src="' . FFRouter::genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
@@ -93,35 +98,6 @@ class Page extends Dir
 				$str .= $contenu;
 			}
 		}
-		return $str;
-	}
-
-	public function dump()
-	{
-		$content = "";
-		$content .= $this->dumpDirs();
-		$content .= $this->dumpFiles();
-		return $content;
-	}
-
-	public function dumpDirs($level = 1)
-	{
-		$str = "<pre>";
-		foreach ($this->listDirs as $id => $dir) {
-			$str .= $dir->toString($dir->getRoute(), $level);
-		}
-		return $str . "</pre>";
-	}
-
-	public function dumpFiles()
-	{
-		$size = count($this->listFiles);
-		$str = "<pre><i>protected</i> 'listFiles' <font color='#888a85'>=&gt;</font>
-  <b>array</b> <i>(size=$size)</i>\n";
-		foreach ($this->listFiles as $index => $file) {
-			$str .= $file->toString(FFRouter::genUrl($file->getPath()));
-		}
-		$str .= "</pre>";
 		return $str;
 	}
 
@@ -145,9 +121,9 @@ class Page extends Dir
 
 	public function getCover()
 	{
-		if (!empty($this->params['cover']) && !empty($this->listFiles[$this->params['cover']]))
-			return $this->listFiles[$this->params['cover']];
-		foreach ($this->listFiles as $file) {
+		if (!empty($this->params['cover']) && !empty($this->files[$this->params['cover']]))
+			return $this->files[$this->params['cover']];
+		foreach ($this->files as $file) {
 			if ($file->type() == 'image')
 				return $file;
 		}
@@ -156,8 +132,8 @@ class Page extends Dir
 
 	public function getRenderLevel()
 	{
-		if (!empty($this->params['render']))
-			return count($this->params['render']);
+		if (!empty($this->params[self::RENDER]))
+			return count($this->params[self::RENDER]);
 		return 2;
 	}
 
@@ -202,10 +178,10 @@ class Page extends Dir
 
 	public function sort()
 	{
-		if (!empty($this->params['sort'][0]))
-			$sortParams = $this->params['sort'][0];
+		if (!empty($this->params[self::SORT][0]))
+			$sortParams = $this->params[self::SORT][0];
 		elseif ($this->parent != null)
-			$sortParams = $this->parent->getChildrenParam('sort', $this);
+			$sortParams = $this->parent->getChildrenParam(self::SORT, $this);
 
 		$order = !empty($sortParams['order']) ? $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC : SORT_ASC;
 		$type = !empty($sortParams['type']) ? $sortParams['type'] : 'alpha';
@@ -221,23 +197,23 @@ class Page extends Dir
 				$this->sortDate($order, $recursive);
 				break;
 		}
-		foreach ($this->listDirs as $subDir) {
-			if (!empty($subDir->params['sort']))
+		foreach ($this->getListDirs() as $subDir) {
+			if (!empty($subDir->params[self::SORT]))
 				$subDir->sort();
-			elseif (!empty($this->params['sort'][$this->level + 1]))
-				$subDir->sort($this->params['sort'][$this->level + 1]);
+			elseif (!empty($this->params[self::SORT][$this->level + 1]))
+				$subDir->sort($this->params[self::SORT][$this->level + 1]);
 		}
 		$this->sortCustom();
 	}
 
 	public function sortDate($order = SORT_DESC, $recursive = true)
 	{
-		uasort($this->listDirs, function ($p1, $p2) use ($order) {
+		uasort($this->files, function ($p1, $p2) use ($order) {
 			$cmp = self::cmpDate($p1, $p2);
 			return $order == SORT_ASC ? $cmp : !$cmp;
 		});
 		if ($recursive) {
-			foreach ($this->listDirs as $subDir)
+			foreach ($this->getListDirs() as $subDir)
 				$subDir->sortDate($order, $recursive);
 		}
 		return $this;
@@ -245,23 +221,23 @@ class Page extends Dir
 
 	public function sortCustom()
 	{
-		if ($sort = $this->getCustomParam('sort')) {
-			$mode = 'unshift';
+		if ($sort = $this->getCustomParam(self::SORT)) {
+			$mode = self::UNSHIFT;
 			$unshift = [];
 			$push = [];
 			foreach ($sort as $name) {
 				$name = utf8_decode($name);
 				if ($name == '*')
-					$mode = 'push';
-				elseif (!empty($this->listDirs[$name])) {
-					if ($mode == 'unshift')
-						$unshift[$name] = $this->listDirs[$name];
+					$mode = self::PUSH;
+				elseif (!empty($this->files[$name])) {
+					if ($mode == self::UNSHIFT)
+						$unshift[$name] = $this->files[$name];
 					else
-						$push[$name] = $this->listDirs[$name];
-					unset($this->listDirs[$name]);
+						$push[$name] = $this->files[$name];
+					unset($this->files[$name]);
 				}
 			}
-			$this->listDirs = array_merge($unshift, $this->listDirs, $push);
+			$this->files = array_merge($unshift, $this->files, $push);
 		}
 	}
 
@@ -343,7 +319,7 @@ class Page extends Dir
 	public function addDir($path, $name)
 	{
 		parent::addDir($path, $name);
-		$this->listDirs[$name]->init($this->layout, $this->paramFile);
+		$this->files[$name]->init($this->layout, $this->paramFile);
 	}
 
 	public function autoSetTitle()

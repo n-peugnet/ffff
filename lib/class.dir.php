@@ -1,26 +1,26 @@
 <?php
 class Dir extends File
 {
-	protected $listDirs = [];
-	protected $listFiles = [];
+	protected $files = [];
 
 	public function getListFiles()
 	{
-		return $this->listFiles;
+		$listFiles = [];
+		foreach ($this->files as $key => $value) {
+			if (get_class($value) == get_parent_class())
+				$listFiles[$key] = $value;
+		}
+		return $listFiles;
 	}
 
 	public function getListDirs()
 	{
-		return $this->listDirs;
-	}
-
-	public function dirsPath_recursive()
-	{
-		$paths = [$this->path];
-		foreach ($this->listDirs as $dir) {
-			$paths = array_merge($paths, $dir->dirsPath_recursive());
+		$listDirs = [];
+		foreach ($this->files as $key => $value) {
+			if (get_class($value) == get_class($this))
+				$listDirs[$key] = $value;
 		}
-		return $paths;
+		return $listDirs;
 	}
 
 	public function findParentPath()
@@ -50,7 +50,7 @@ class Dir extends File
 
 	public function isEmpty()
 	{
-		return $this->nbDirs() + $this->nbFiles() == 0;
+		return count($this->files) == 0;
 	}
 
 	public function hasChild()
@@ -63,25 +63,30 @@ class Dir extends File
 		return $this->nbFiles() > 0;
 	}
 
+	public function type()
+	{
+		return 'dir';
+	}
+
 	public function nbDirs()
 	{
-		return count($this->listDirs);
+		return count($this->getListDirs());
 	}
 
 	public function nbFiles()
 	{
-		return count($this->listFiles);
+		return count($this->getListFiles());
 	}
 
 	public function addDir($path, $name)
 	{
-		$this->listDirs[$name] = new static($path, $name, $this->level + 1, $this);
+		$this->files[$name] = new static($path, $name, $this->level + 1, $this);
 		return $this;
 	}
 
 	public function addFile($path, $name)
 	{
-		$this->listFiles[$name] = new File($path, $name, $this->level + 1, $this);
+		$this->files[$name] = new File($path, $name, $this->level + 1, $this);
 		return $this;
 	}
 
@@ -96,7 +101,7 @@ class Dir extends File
 					{
 						$this->addDir($path . DIRECTORY_SEPARATOR, $element);
 						if ($level == -1 || $this->level < $level)
-							$this->listDirs[$element]->list_recursive($level, $dirOnly, $ignore);
+							$this->files[$element]->list_recursive($level, $dirOnly, $ignore);
 					} elseif (!$dirOnly) {
 						$this->addFile($path, $element);
 					}
@@ -110,14 +115,12 @@ class Dir extends File
 	public function sortAlpha($order = SORT_ASC, $recursive = true)
 	{
 		if ($order == SORT_ASC) {
-			ksort($this->listFiles, SORT_NATURAL | SORT_FLAG_CASE);
-			ksort($this->listDirs, SORT_NATURAL | SORT_FLAG_CASE);
+			ksort($this->files, SORT_NATURAL | SORT_FLAG_CASE);
 		} elseif ($order == SORT_DESC) {
-			krsort($this->listFiles, SORT_NATURAL | SORT_FLAG_CASE);
-			krsort($this->listDirs, SORT_NATURAL | SORT_FLAG_CASE);
+			krsort($this->files, SORT_NATURAL | SORT_FLAG_CASE);
 		}
 		if ($recursive) {
-			foreach ($this->listDirs as $subDir)
+			foreach ($this->getListDirs() as $subDir)
 				$subDir->sortAlpha($order, $recursive);
 		}
 		return $this;
@@ -125,12 +128,12 @@ class Dir extends File
 
 	public function sortLastModif($order = SORT_ASC, $recursive = true)
 	{
-		uasort($this->listDirs, function ($f1, $f2) use ($order) {
+		uasort($this->files, function ($f1, $f2) use ($order) {
 			$cmp = self::cmpLastModif($f1, $f2);
 			return $order == SORT_ASC ? $cmp : !$cmp;
 		});
 		if ($recursive) {
-			foreach ($this->listDirs as $subDir)
+			foreach ($this->getListDirs() as $subDir)
 				$subDir->sortLastModif($order, $recursive);
 		}
 		return $this;
