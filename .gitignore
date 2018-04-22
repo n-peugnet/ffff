@@ -10,6 +10,11 @@ public/*/*
 inc/*
 !inc/README.md
 
+tpl/*
+!tpl/views/li.list.php
+!tpl/views/li.cover.php
+!tpl/layouts/default.php
+
 # Personnal files
 .vscode
 old

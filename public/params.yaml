@@ -14,11 +14,11 @@ sort:
 
 render:
   - list
-  - covers
+  - cover
 
 custom:
   render:
-    test: covers
+    test: cover
   sort:
     - *
     - 2014

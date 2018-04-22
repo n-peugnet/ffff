@@ -14,10 +14,10 @@ class Page extends Dir
 	/**
 	 * @param string $layout
 	 */
-	public function init($layout = "layout.php", $paramFile = "params.yaml")
+	public function init($layout = "default.php", $paramFile = "params.yaml")
 	{
 		$this->paramFile = $paramFile;
-		$this->layout = $layout;
+		$this->layout = "tpl/layouts/$layout";
 		$this->loadParams();
 		$this->autoSetTitle();
 		if (empty($this->parent))
@@ -42,47 +42,43 @@ class Page extends Dir
 		return $content;
 	}
 
-	public function renderDirs($levelLimit, $defaultType = 'list')
+	public function renderDirs($levelLimit, $renderTypeDefault = 'list')
 	{
-		$type = $defaultType;
-		if ($this->parent != null) {
+		$renderType = $renderTypeDefault;
+		if (!empty($this->params[self::RENDER][0]))
+			$renderType = $this->params[self::RENDER][0];
+		elseif ($this->parent != null) {
 			$parentChildType = $this->parent->getChildrenParam(self::RENDER, $this);
 			if ($parentChildType)
-				$type = $parentChildType;
+				$renderType = $parentChildType;
 		}
-		if (!empty($this->params[self::RENDER][0]))
-			$type = $this->params[self::RENDER][0];
-		$str = "<ul class=\"dirs\">";
-		foreach ($this->getListDirs() as $id => $dir) {
-			if (!$typeDir = $this->getCustomParamKey(self::RENDER, $dir->getName()))
-				$typeDir = $type;
-			$url = $dir->getRoute();
-			$title = $dir->getTitle();
-			switch ($typeDir) {
-				case 'list':
-					$str .= "<li><p><a class=\"nav-links\" href=\"$url\" class=\"date\">$title</a></p></li>";
-					break;
+		$buffer = "<ul class=\"pages\">";
+		foreach ($this->getListDirs() as $id => $page) {
+			if (!$renderTypePage = $this->getCustomParamKey(self::RENDER, $page->getName()))
+				$renderTypePage = $renderType;
+			$url = $page->getRoute();
+			$title = $page->getTitle();
+			$longTitle = FFRouter::pubRelativePath($page->path);
+			$cover = $page->getCover();
+			$cover = $cover ? FFRouter::genUrl($cover->getPath()) : 'rien';
 
-				case 'covers':
-					$longTitle = FFRouter::pubRelativePath($dir->path);
-					$cover = $dir->getCover();
-					$cover = $cover ? FFRouter::genUrl($cover->getPath()) : 'rien';
-					$str .= "<li class=\"couverture level$dir->level\" id=\"projet-$longTitle\"><a href=\"$url\"><div>$title</div><img src=\"$cover\" alt=\"cover-$title\" /></a>";
-					break;
-			}
-			if ($dir->level < $levelLimit)
-				$str .= $dir->renderDirs($levelLimit, $defaultType);
+			ob_start();
+			include "tpl/views/li.$renderTypePage.php";
+			$buffer .= ob_get_clean();
+
+			if ($page->level < $levelLimit)
+				$buffer .= $page->renderDirs($levelLimit, $renderTypeDefault);
 		}
-		return $str . "</ul>";
+		return $buffer . "</ul>";
 	}
 
 	public function renderFiles()
 	{
-		$str = "";
+		$buffer = "";
 		foreach ($this->getListFiles() as $index => $file) {
 			$type = $file->type();
 			if ($type == 'image') {
-				$str .= '<img class="CadrePhoto" src="' . FFRouter::genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
+				$buffer .= '<img class="CadrePhoto" src="' . FFRouter::genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
 			} elseif ($type == 'text') {
 				$contenu = file_get_contents($file->getPath());
 				$ext = $file->ext();
@@ -95,23 +91,23 @@ class Page extends Dir
 						$contenu = "<p>" . $contenu . "</p>";
 						break;
 				}
-				$str .= $contenu;
+				$buffer .= $contenu;
 			}
 		}
-		return $str;
+		return $buffer;
 	}
 
 	public function genBreadcrumb()
 	{
 		$p = $this->parent;
-		$str = "";
+		$buffer = "";
 		if (!empty($p)) {
 			$url = $p->getRoute();
 			$title = $p->getTitle();
-			$str = "<a class=\"nav-links\" href=\"$url\">$title</a> › ";
-			$str = $p->genBreadcrumb() . $str;
+			$buffer = "<a class=\"nav-links\" href=\"$url\">$title</a> › ";
+			$buffer = $p->genBreadcrumb() . $buffer;
 		}
-		return $str;
+		return $buffer;
 	}
 
 	public function getTitle()
