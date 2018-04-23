@@ -1,20 +1,23 @@
 <?php
 class Page extends Dir
 {
-	protected $router;
 	protected $layout;
 	protected $title;
 	protected $params;
 	protected $paramFile;
 
+	const RENDER = 'render';
+	const SORT = 'sort';
+	const UNSHIFT = 0;
+	const PUSH = 1;
+
 	/**
-	 * @param FFRouter $router
 	 * @param string $layout
 	 */
-	public function init($layout = "layout.php", $paramFile = "params.yaml")
+	public function init($layout = "default.php", $paramFile = "params.yaml")
 	{
 		$this->paramFile = $paramFile;
-		$this->layout = $layout;
+		$this->layout = "tpl/layouts/$layout";
 		$this->loadParams();
 		$this->autoSetTitle();
 		if (empty($this->parent))
@@ -23,6 +26,7 @@ class Page extends Dir
 
 	public function show()
 	{
+		$head = $this->genHead();
 		$title = $this->title;
 		$breadcrumb = $this->genBreadcrumb();
 		$siteName = "test";
@@ -32,54 +36,50 @@ class Page extends Dir
 
 	public function render()
 	{
-		$level = !empty($this->params['render']) ? count($this->params['render']) : 1;
+		$level = !empty($this->params[self::RENDER]) ? count($this->params[self::RENDER]) : 1;
 		$content = "";
 		$content .= $this->renderFiles();
 		$content .= $this->renderDirs($level);
 		return $content;
 	}
 
-	public function renderDirs($levelLimit, $defaultType = 'list')
+	public function renderDirs($levelLimit, $renderTypeDefault = 'list')
 	{
-		$type = $defaultType;
-		if ($this->parent != null) {
-			$parentChildType = $this->parent->getChildrenParam('render', $this);
+		$renderType = $renderTypeDefault;
+		if (!empty($this->params[self::RENDER][0]))
+			$renderType = $this->params[self::RENDER][0];
+		elseif ($this->parent != null) {
+			$parentChildType = $this->parent->getChildrenParam(self::RENDER, $this);
 			if ($parentChildType)
-				$type = $parentChildType;
+				$renderType = $parentChildType;
 		}
-		if (!empty($this->params['render'][0]))
-			$type = $this->params['render'][0];
-		$str = "<ul class=\"dirs\">";
-		foreach ($this->listDirs as $id => $dir) {
-			if (!$typeDir = $this->getCustomParamKey('render', $dir->getName()))
-				$typeDir = $type;
-			$url = $dir->getRoute();
-			$title = $dir->getTitle();
-			switch ($typeDir) {
-				case 'list':
-					$str .= "<li><p><a class=\"nav-links\" href=\"$url\" class=\"date\">$title</a></p></li>";
-					break;
+		$buffer = "<ul class=\"pages\">";
+		foreach ($this->getListDirs() as $id => $page) {
+			if (!$renderTypePage = $this->getCustomParamKey(self::RENDER, $page->getName()))
+				$renderTypePage = $renderType;
+			$url = $page->getRoute();
+			$title = $page->getTitle();
+			$longTitle = FFRouter::pubRelativePath($page->path);
+			$cover = $page->getCover();
+			$cover = $cover ? FFRouter::genUrl($cover->getPath()) : 'rien';
 
-				case 'covers':
-					$longTitle = FFRouter::pubRelativePath($dir->path);
-					$cover = $dir->getCover();
-					$cover = $cover ? FFRouter::genUrl($cover->getPath()) : 'rien';
-					$str .= "<li class=\"couverture level$dir->level\" id=\"projet-$longTitle\"><a href=\"$url\"><div>$title</div><img src=\"$cover\" alt=\"cover-$title\" /></a>";
-					break;
-			}
-			if ($dir->level < $levelLimit)
-				$str .= $dir->renderDirs($levelLimit, $defaultType);
+			ob_start();
+			include "tpl/views/li.$renderTypePage.php";
+			$buffer .= ob_get_clean();
+
+			if ($page->level < $levelLimit)
+				$buffer .= $page->renderDirs($levelLimit, $renderTypeDefault);
 		}
-		return $str . "</ul>";
+		return $buffer . "</ul>";
 	}
 
 	public function renderFiles()
 	{
-		$str = "";
-		foreach ($this->listFiles as $index => $file) {
+		$buffer = "";
+		foreach ($this->getListFiles() as $index => $file) {
 			$type = $file->type();
 			if ($type == 'image') {
-				$str .= '<img class="CadrePhoto" src="' . FFRouter::genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
+				$buffer .= '<img class="CadrePhoto" src="' . FFRouter::genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
 			} elseif ($type == 'text') {
 				$contenu = file_get_contents($file->getPath());
 				$ext = $file->ext();
@@ -92,52 +92,56 @@ class Page extends Dir
 						$contenu = "<p>" . $contenu . "</p>";
 						break;
 				}
-				$str .= $contenu;
+				$buffer .= $contenu;
 			}
 		}
-		return $str;
+		return $buffer;
 	}
 
-	public function dump()
+	public function genHead()
 	{
-		$content = "";
-		$content .= $this->dumpDirs();
-		$content .= $this->dumpFiles();
-		return $content;
-	}
-
-	public function dumpDirs($level = 1)
-	{
-		$str = "<pre>";
-		foreach ($this->listDirs as $id => $dir) {
-			$str .= $dir->toString($dir->getRoute(), $level);
+		$buffer = "\n";
+		// ------------------------ include default .js files ----------------------------
+		if (empty($this->params['remove default']['scripts'])) {
+			foreach (glob("inc/js/*.js") as $fileName) {
+				$buffer .= "\t<script src=\"" . FFRouter::genUrl($fileName) . "\" async ></script>\n";
+			}
 		}
-		return $str . "</pre>";
-	}
-
-	public function dumpFiles()
-	{
-		$size = count($this->listFiles);
-		$str = "<pre><i>protected</i> 'listFiles' <font color='#888a85'>=&gt;</font>
-  <b>array</b> <i>(size=$size)</i>\n";
-		foreach ($this->listFiles as $index => $file) {
-			$str .= $file->toString(FFRouter::genUrl($file->getPath()));
+		// ----------------------- include default stylesheets ---------------------------
+		if (empty($this->params['remove default']['styles'])) {
+			foreach (glob("inc/css/*.css") as $fileName) {
+				$buffer .= "\t<link rel=\"stylesheet\" href=\"" . FFRouter::genUrl($fileName) . "\" />\n";
+			}
 		}
-		$str .= "</pre>";
-		return $str;
+		// ----------------------- include specific stylesheets --------------------------
+		if (!empty($this->params['styles'])) {
+			foreach ($this->params['styles'] as $style) {
+				$buffer .= "\t<link rel=\"stylesheet\" href=\"" . $this->url($style) . "\" />\n";
+			}
+		}
+		// ------------------------- include default favicon -----------------------------
+		if (empty($this->params['remove default']['favicon'])) {
+			foreach (glob("inc/img/favicon.{ico,png}", GLOB_BRACE) as $fileName) {
+				$ext = substr($fileName, strrpos($fileName, '.') + 1);
+				$mime = 'image/' . ($ext == 'ico' ? 'x-icon' : $ext);
+				$buffer .= "\t<link rel=\"icon\" type=\"$mime\" href=\"" . FFRouter::genUrl($fileName) . "\" />\n";
+				break;
+			}
+		}
+		return $buffer;
 	}
 
 	public function genBreadcrumb()
 	{
 		$p = $this->parent;
-		$str = "";
+		$buffer = "";
 		if (!empty($p)) {
 			$url = $p->getRoute();
 			$title = $p->getTitle();
-			$str = "<a class=\"nav-links\" href=\"$url\">$title</a> › ";
-			$str = $p->genBreadcrumb() . $str;
+			$buffer = "<a class=\"nav-links\" href=\"$url\">$title</a> › ";
+			$buffer = $p->genBreadcrumb() . $buffer;
 		}
-		return $str;
+		return $buffer;
 	}
 
 	public function getTitle()
@@ -147,20 +151,35 @@ class Page extends Dir
 
 	public function getCover()
 	{
-		if (!empty($this->params['cover']) && !empty($this->listFiles[$this->params['cover']]))
-			return $this->listFiles[$this->params['cover']];
-		foreach ($this->listFiles as $file) {
+		if (!empty($this->params['cover']) && !empty($this->files[$this->params['cover']]))
+			return $this->files[$this->params['cover']];
+		foreach ($this->files as $file) {
 			if ($file->type() == 'image')
 				return $file;
 		}
-		return new File('public/assets/img/default-cover.png', 'default-cover');
+		return new File('inc/img/default-cover.png', 'default-cover');
 	}
 
 	public function getRenderLevel()
 	{
-		if (!empty($this->params['render']))
-			return count($this->params['render']);
+		if (!empty($this->params[self::RENDER]))
+			return count($this->params[self::RENDER]);
 		return 2;
+	}
+
+	public function getDate()
+	{
+		$formats = ['d/m/Y H:i:s', 'd/m/Y H:i', 'd/m/Y'];
+		$date = false;
+		if (!empty($this->params['date'])) {
+			$numFormat = 0;
+			while (!$date) {
+				$date = DateTimeImmutable::createFromFormat($formats[$numFormat], $this->params['date']);
+				$numFormat++;
+			}
+			return $date;
+		}
+		return $this->lastModif();
 	}
 
 	public function loadParams()
@@ -189,10 +208,10 @@ class Page extends Dir
 
 	public function sort()
 	{
-		if (!empty($this->params['sort'][0]))
-			$sortParams = $this->params['sort'][0];
+		if (!empty($this->params[self::SORT][0]))
+			$sortParams = $this->params[self::SORT][0];
 		elseif ($this->parent != null)
-			$sortParams = $this->parent->getChildrenParam('sort', $this);
+			$sortParams = $this->parent->getChildrenParam(self::SORT, $this);
 
 		$order = !empty($sortParams['order']) ? $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC : SORT_ASC;
 		$type = !empty($sortParams['type']) ? $sortParams['type'] : 'alpha';
@@ -204,36 +223,61 @@ class Page extends Dir
 			case 'lastModif':
 				$this->sortLastModif($order, $recursive);
 				break;
+			case 'date':
+				$this->sortDate($order, $recursive);
+				break;
 		}
-		foreach ($this->listDirs as $subDir) {
-			if (!empty($subDir->params['sort']))
+		foreach ($this->getListDirs() as $subDir) {
+			if (!empty($subDir->params[self::SORT]))
 				$subDir->sort();
-			elseif (!empty($this->params['sort'][$this->level + 1]))
-				$subDir->sort($this->params['sort'][$this->level + 1]);
+			elseif (!empty($this->params[self::SORT][$this->level + 1]))
+				$subDir->sort($this->params[self::SORT][$this->level + 1]);
 		}
 		$this->sortCustom();
 	}
 
+	public function sortDate($order = SORT_DESC, $recursive = true)
+	{
+		uasort($this->files, function ($p1, $p2) use ($order) {
+			$cmp = self::cmpDate($p1, $p2);
+			return $order == SORT_ASC ? $cmp : !$cmp;
+		});
+		if ($recursive) {
+			foreach ($this->getListDirs() as $subDir)
+				$subDir->sortDate($order, $recursive);
+		}
+		return $this;
+	}
+
 	public function sortCustom()
 	{
-		if ($sort = $this->getCustomParam('sort')) {
-			$mode = 'unshift';
+		if ($sort = $this->getCustomParam(self::SORT)) {
+			$mode = self::UNSHIFT;
 			$unshift = [];
 			$push = [];
 			foreach ($sort as $name) {
 				$name = utf8_decode($name);
 				if ($name == '*')
-					$mode = 'push';
-				elseif (!empty($this->listDirs[$name])) {
-					if ($mode == 'unshift')
-						$unshift[$name] = $this->listDirs[$name];
+					$mode = self::PUSH;
+				elseif (!empty($this->files[$name])) {
+					if ($mode == self::UNSHIFT)
+						$unshift[$name] = $this->files[$name];
 					else
-						$push[$name] = $this->listDirs[$name];
-					unset($this->listDirs[$name]);
+						$push[$name] = $this->files[$name];
+					unset($this->files[$name]);
 				}
 			}
-			$this->listDirs = array_merge($unshift, $this->listDirs, $push);
+			$this->files = array_merge($unshift, $this->files, $push);
 		}
+	}
+
+	/**
+	 * @param self $p1
+	 * @param self $p2
+	 */
+	public static function cmpDate($p1, $p2)
+	{
+		return $p1->getDate() > $p2->getDate();
 	}
 
 	public function getChildrenParam($param, $child)
@@ -305,7 +349,7 @@ class Page extends Dir
 	public function addDir($path, $name)
 	{
 		parent::addDir($path, $name);
-		$this->listDirs[$name]->init($this->layout, $this->paramFile);
+		$this->files[$name]->init($this->layout, $this->paramFile);
 	}
 
 	public function autoSetTitle()

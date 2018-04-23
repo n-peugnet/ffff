@@ -1,7 +1,6 @@
 ignore:
   - 403
   - 404
-  - assets
   - a-propos
   - contact
   - README.md
@@ -9,17 +8,17 @@ ignore:
 sort:
   - type: alpha
     order: desc
-  - type: lastModif
+  - type: date
     order: desc
   custom:
 
 render:
   - list
-  - covers
+  - cover
 
 custom:
   render:
-    test: covers
+    test: cover
   sort:
     - *
     - 2014
