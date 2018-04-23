@@ -1,7 +1,6 @@
 ignore:
   - 403
   - 404
-  - assets
   - a-propos
   - contact
   - README.md

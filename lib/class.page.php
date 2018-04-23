@@ -26,6 +26,7 @@ class Page extends Dir
 
 	public function show()
 	{
+		$head = $this->genHead();
 		$title = $this->title;
 		$breadcrumb = $this->genBreadcrumb();
 		$siteName = "test";
@@ -97,6 +98,39 @@ class Page extends Dir
 		return $buffer;
 	}
 
+	public function genHead()
+	{
+		$buffer = "\n";
+		// ------------------------ include default .js files ----------------------------
+		if (empty($this->params['remove default']['scripts'])) {
+			foreach (glob("inc/js/*.js") as $fileName) {
+				$buffer .= "\t<script src=\"" . FFRouter::genUrl($fileName) . "\" async ></script>\n";
+			}
+		}
+		// ----------------------- include default stylesheets ---------------------------
+		if (empty($this->params['remove default']['styles'])) {
+			foreach (glob("inc/css/*.css") as $fileName) {
+				$buffer .= "\t<link rel=\"stylesheet\" href=\"" . FFRouter::genUrl($fileName) . "\" />\n";
+			}
+		}
+		// ----------------------- include specific stylesheets --------------------------
+		if (!empty($this->params['styles'])) {
+			foreach ($this->params['styles'] as $style) {
+				$buffer .= "\t<link rel=\"stylesheet\" href=\"" . $this->url($style) . "\" />\n";
+			}
+		}
+		// ------------------------- include default favicon -----------------------------
+		if (empty($this->params['remove default']['favicon'])) {
+			foreach (glob("inc/img/favicon.{ico,png}", GLOB_BRACE) as $fileName) {
+				$ext = substr($fileName, strrpos($fileName, '.') + 1);
+				$mime = 'image/' . ($ext == 'ico' ? 'x-icon' : $ext);
+				$buffer .= "\t<link rel=\"icon\" type=\"$mime\" href=\"" . FFRouter::genUrl($fileName) . "\" />\n";
+				break;
+			}
+		}
+		return $buffer;
+	}
+
 	public function genBreadcrumb()
 	{
 		$p = $this->parent;
@@ -123,7 +157,7 @@ class Page extends Dir
 			if ($file->type() == 'image')
 				return $file;
 		}
-		return new File('public/assets/img/default-cover.png', 'default-cover');
+		return new File('inc/img/default-cover.png', 'default-cover');
 	}
 
 	public function getRenderLevel()

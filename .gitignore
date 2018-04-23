@@ -7,8 +7,8 @@ public/*/*
 !public/404/*
 !public/403/*
 
-inc/*
-!inc/README.md
+inc/*/*
+!inc/*/README.md
 
 tpl/*
 !tpl/views/li.list.php

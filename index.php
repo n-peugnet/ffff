@@ -9,7 +9,7 @@ function autoload($className)
 }
 spl_autoload_register("autoload");
 
-foreach (glob("inc/*.php") as $fileName) {
+foreach (glob("inc/php/*.php") as $fileName) {
 	include_once $fileName;
 }
 
