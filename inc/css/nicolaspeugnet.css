@@ -3,7 +3,7 @@
 }
 
 /* Typos et couleurs communes */
-h1, h1 a, h2, h3, h4, h5, h6, a, p, li, input, textarea, label, td, tr {
+h1, h1 a, h2, h3, h4, h5, h6, a, p, li, input, textarea, label {
 	font-family: Source Code Pro, consolas, Monospace, sans-serif;
 	color:rgb(77, 77, 77);
 }
@@ -141,7 +141,7 @@ section {
 	width: 900px;
 }
 
-ul.dirs {
+ul.pages {
 	padding:0;
 	margin: 0;
 	list-style-type: none;

@@ -45,7 +45,7 @@ ignore:                # files or folders you want to ignore
 
 render:                # rendering method for subpages
   - list               # method for subpages of level 1
-  - covers             # method for subpages of level 2
+  - cover              # method for subpages of level 2
 
 sort:                  # sort method for subpages
   - type: alpha        # sort type for subpages of level 1

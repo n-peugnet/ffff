@@ -2,9 +2,6 @@
 tmp/*
 !tmp/README.md
 
-inc/*
-!inc/README.md
-
 # Personnal files
 .vscode
 old

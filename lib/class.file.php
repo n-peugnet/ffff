@@ -108,8 +108,8 @@ class File
 	}
 
 	/**
-	 * @param File $f1
-	 * @param File $f2
+	 * @param self $f1
+	 * @param self $f2
 	 */
 	public static function cmpLastModif($f1, $f2)
 	{
