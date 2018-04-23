@@ -119,14 +119,21 @@ class Page extends Dir
 				$buffer .= "\t<link rel=\"stylesheet\" href=\"" . $this->url($style) . "\" />\n";
 			}
 		}
-		// ------------------------- include default favicon -----------------------------
-		if (empty($this->params['remove default']['favicon'])) {
-			foreach (glob("inc/img/favicon.{ico,png}", GLOB_BRACE) as $fileName) {
-				$ext = substr($fileName, strrpos($fileName, '.') + 1);
-				$mime = 'image/' . ($ext == 'ico' ? 'x-icon' : $ext);
-				$buffer .= "\t<link rel=\"icon\" type=\"$mime\" href=\"" . FFRouter::genUrl($fileName) . "\" />\n";
-				break;
+		// ----------------------------- include favicon ---------------------------------
+		if (empty($this->params['favicon'])) {
+			$faviconFiles = glob("inc/img/favicon.{ico,png}", GLOB_BRACE);
+			if (isset($faviconFiles[0])) {
+				$favicon = $faviconFiles[0];
+				$faviconUrl = FFRouter::genUrl($favicon);
 			}
+		} else {
+			$favicon = $this->params['favicon'];
+			$faviconUrl = $this->url($favicon);
+		}
+		if (isset($favicon)) {
+			$ext = substr($favicon, strrpos($favicon, '.') + 1);
+			$mime = 'image/' . ($ext == 'ico' ? 'x-icon' : $ext);
+			$buffer .= "\t<link rel=\"icon\" type=\"$mime\" href=\"$faviconUrl\" />\n";
 		}
 		return $buffer;
 	}
