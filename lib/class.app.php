@@ -5,28 +5,24 @@ class App
 	protected $urlBase = "";
 	protected $router;
 	protected $params;
-	protected $paramFile;
-	protected $tmpPath;
 
 	public function __construct($publicPath, $urlBase)
 	{
 		$this->publicPath = $publicPath;
 		$this->urlBase = $urlBase;
-		$this->params = [
+		$this->params = new Params([
 			'site' => [
 				'name' => 'test',
 				'description' => 'a longer test'
 			],
 			'public dir' => 'public'
-		];
-		$this->paramFile = 'params.yaml';
-		$this->tmpPath = 'tmp' . DIRECTORY_SEPARATOR;
+		]);
 		FFRouter::init($publicPath, $urlBase);
 	}
 
 	public function init()
 	{
-		$this->loadParams();
+		$this->params->load();
 		if ($path = FFRouter::matchRoute()) {
 			// adds trailing slash
 			if (substr($path, -1) != DIRECTORY_SEPARATOR) {
@@ -53,28 +49,6 @@ class App
 		$page->init();
 		$page->list_recursive(0);
 		$page->show();
-	}
-
-	public function loadParams()
-	{
-		$paramCache = $this->tmpPath . $this->paramFile . '.cache';
-		if (is_file($this->paramFile)) {
-			if (is_file($paramCache) && (filemtime($this->paramFile) <= filemtime($paramCache)))
-				$this->params = unserialize(file_get_contents($paramCache));
-			else {
-				$this->params = Spyc::YAMLLoad($this->paramFile);
-				$this->cacheParams();
-			}
-		}
-	}
-
-	public function cacheParams()
-	{
-		if (!is_dir($this->tmpPath)) {
-			// dir doesn't exist, make it
-			mkdir($this->tmpPath, 0777, true);
-		}
-		file_put_contents($this->tmpPath . $this->paramFile . '.cache', serialize($this->params));
 	}
 
 	public function redirectTo($url)

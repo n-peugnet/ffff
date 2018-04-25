@@ -18,7 +18,8 @@ class Page extends Dir
 	{
 		$this->paramFile = $paramFile;
 		$this->layout = "tpl/layouts/$layout";
-		$this->loadParams();
+		$this->params = new Params();
+		$this->params->load($this->path);
 		$this->autoSetTitle();
 		if (empty($this->parent))
 			$this->autoSetParent();
@@ -55,7 +56,7 @@ class Page extends Dir
 		}
 		$buffer = "<ul class=\"pages\">";
 		foreach ($this->getListDirs() as $id => $page) {
-			if (!$renderTypePage = $this->getCustomParamKey(self::RENDER, $page->getName()))
+			if (!$renderTypePage = $this->params->getCustomKey(self::RENDER, $page->getName()))
 				$renderTypePage = $renderType;
 			$url = $page->getRoute();
 			$title = $page->getTitle();
@@ -189,30 +190,6 @@ class Page extends Dir
 		return $this->lastModif();
 	}
 
-	public function loadParams()
-	{
-		$paramFile = $this->path . $this->paramFile;
-		$paramCache = $this->tmpPath() . $this->paramFile . '.cache';
-		if (is_file($paramFile)) {
-			if (is_file($paramCache) && (filemtime($paramFile) <= filemtime($paramCache)))
-				$this->params = unserialize(file_get_contents($paramCache));
-			else {
-				$this->params = Spyc::YAMLLoad($paramFile);
-				$this->cacheParams();
-			}
-		}
-	}
-
-	public function cacheParams()
-	{
-		$tmpPath = $this->tmpPath();
-		if (!is_dir($tmpPath)) {
-			// dir doesn't exist, make it
-			mkdir($tmpPath, 0777, true);
-		}
-		file_put_contents($tmpPath . $this->paramFile . '.cache', serialize($this->params));
-	}
-
 	public function sort()
 	{
 		if (!empty($this->params[self::SORT][0]))
@@ -237,8 +214,8 @@ class Page extends Dir
 		foreach ($this->getListDirs() as $subDir) {
 			if (!empty($subDir->params[self::SORT]))
 				$subDir->sort();
-			elseif (!empty($this->params[self::SORT][$this->level + 1]))
-				$subDir->sort($this->params[self::SORT][$this->level + 1]);
+			elseif (!empty($this->params[self::SORT][1]))
+				$subDir->sort($this->params[self::SORT][1]);
 		}
 		$this->sortCustom();
 	}
@@ -258,7 +235,7 @@ class Page extends Dir
 
 	public function sortCustom()
 	{
-		if ($sort = $this->getCustomParam(self::SORT)) {
+		if ($sort = $this->params->getCustom(self::SORT)) {
 			$mode = self::UNSHIFT;
 			$unshift = [];
 			$push = [];
@@ -301,22 +278,6 @@ class Page extends Dir
 		return false;
 	}
 
-	public function getCustomParam($param)
-	{
-		if (!empty($this->params['custom'][$param]))
-			return $this->params['custom'][$param];
-		return false;
-	}
-
-	public function getCustomParamKey($param, $key)
-	{
-		if ($param = $this->getCustomParam($param)) {
-			if (!empty($param[$key]))
-				return $param[$key];
-		}
-		return false;
-	}
-
 	public function url($path, $type = false)
 	{
 		$type = $type ? $type : FFRouter::analizeUrl($path);
@@ -333,19 +294,9 @@ class Page extends Dir
 		}
 	}
 
-	public function assetUrl($path)
-	{
-		return FFRouter::staticFilesBasePath() . 'assets/' . $path;
-	}
-
 	public function getRoute(Type $var = null)
 	{
 		return FFRouter::genUrl($this->path);
-	}
-
-	public function tmpPath()
-	{
-		return 'tmp' . DIRECTORY_SEPARATOR . $this->path;
 	}
 
 	public function getIgnored()
