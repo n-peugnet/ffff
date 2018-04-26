@@ -15,7 +15,7 @@ La mise à jour de la version de production est assurée par git.
 #### A1.4.1 Participation à un projet
 
 J'ai réalisé une [liste des fonctionnalités à implémenter](https://docs.google.com/document/d/1b-F_Fh2jqYwZxvAMv9QheL0OfiN5-tlXOlkzrPJLRkA/edit?usp=sharing)
-en fonction de leur importance
+classées en fonction de leur importance.
 
 #### A2.1.1 Accompagnement des utilisateurs dans la prise en main d'un service
 
@@ -25,13 +25,15 @@ Elle est actuellement correctement utilisée.
 
 #### A2.2.1 Suivi et résolution d'incidents
 
-Un problème interne à l'appliocation empêchait le bon fonctionnement de l'envoi
+Un problème interne à l'application empêchait le bon fonctionnement de l'envoi
 automatique de mails.
 
 J'ai résolu cet incident en modifiant le contenu du fichier de configuration au
 niveau des paramètres de la connexion SMTP.
 
 #### A2.3.1 Identification, qualification et évaluation d'un problème
+
+Identification de plusieurs dysfonctionnements et rédation d'[une note pour les recenser](https://docs.google.com/document/d/1dympg85hx4NkXRyv4ShbNIhSBuAcM7laI6ntRsY5Xmc/edit?usp=sharing)
 
 #### A4.1.1 Proposition d'une solution applicative
 
@@ -44,7 +46,8 @@ Sans framework car je n'en connaissais pas encore.
 
 #### A4.1.2 Conception ou adaptation de l'interface utilisateur d'une solution applicative
 
-L'interface, inspirée de la première application Wordpress a été rapidement maquettée
+L'interface, inspirée de la première application Wordpress a été
+rapidement maquettée à l'aide de croquis papiers.
 
 #### A4.1.3 Conception ou adaptation d'une base de données
 
@@ -52,7 +55,13 @@ j'ai entièrement concu et réalisé la base de donnée, en voici le [modèle de
 
 #### A4.1.4 Définition des caractéristiques d'une solution applicative
 
+[Listage de l'ensemble des fonctionnalités](https://docs.google.com/document/d/1b-F_Fh2jqYwZxvAMv9QheL0OfiN5-tlXOlkzrPJLRkA/edit?usp=sharing) à implémenter dans la solution
+
 #### A4.1.7 Développement, utilisation ou adaptation de composants logiciels
+
+Intégration et utilisation de 6 composants externes : 6 en JavaScript et
+1 en PHP dans le but de recréer une sorte de micro framework.
+Voir chapitre VI de la [documentation technique](https://drive.google.com/open?id=0B1T9tkseoI0qUUM0Zk9IYXc3bzg)
 
 #### A4.1.9 Rédaction d'une documentation technique
 
@@ -60,11 +69,14 @@ L'ensemble des caractéristiques techniques de l'application ont été compilée
 
 #### A4.2.1 Analyse et correction d'un dysfonctionnement, d'un problème de qualité de sevice
 
+Les deux dysfonctionnements analysés ont été corrigés dans l'environnement de développement :
+![capture correction dysfonctionnement](correction.png)
+
 #### A4.2.2 Adaptation d'une solution applicative aux évolutions de ses composants
 
 Basculement sur l'API sécurisée de Geonames pour l'autocomplétion suite
 à la mise à jour de Google Chrome empêchant les requêtes AJAX en HTTP
-sur depuis un site en HTTPS.
+depuis un site en HTTPS. (voir ci-dessus)
 
 #### A5.1.1 Mise en place d'une gestion de configuration
 
