@@ -2,3 +2,5 @@ title: Stage 1 - Coopaname
 sort:
   - type: alpha
     order: asc
+ignore:
+  - live-youtube

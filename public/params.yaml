@@ -4,6 +4,7 @@ ignore:
   - a-propos
   - contact
   - README.md
+  - live-youtube
 
 sort:
   - type: alpha
