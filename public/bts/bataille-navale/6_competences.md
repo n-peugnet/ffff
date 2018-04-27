@@ -11,6 +11,6 @@ via les flèches du clavier et quelques autres touches, dont la touche `entrée`
 
 #### A4.1.7 Développement, utilisation ou adaptation de composants logiciels
 
-Développement de [l'applicatione en C#](https://drive.google.com/drive/folders/0B1T9tkseoI0qMTAtTHQ0VXJkWUU?usp=sharing)
+Développement de [l'application en C#](https://drive.google.com/drive/folders/0B1T9tkseoI0qMTAtTHQ0VXJkWUU?usp=sharing)
 dans un premier temps en style procédural.  
 La migration vers un modèle POO sera peut-être faite un jour.
