@@ -4,7 +4,7 @@ class App
 	protected $publicPath = "";
 	protected $urlBase = "";
 	protected $router;
-	protected $params;
+	protected static $params;
 
 	const PARAM_FILE = 'params.yaml';
 
@@ -12,13 +12,22 @@ class App
 	{
 		$this->publicPath = $publicPath;
 		$this->urlBase = $urlBase;
-		$this->params = new Params([
+		self::init();
+		FFRouter::init($publicPath, $urlBase);
+	}
+
+	public static function init()
+	{
+		$defaults = [
 			'site' => [
 				'name' => 'test',
 				'description' => 'a longer test'
 			],
 			'defaults' => [
-				'sort' => [],
+				'sort' => [
+					'type' => 'alpha',
+					'order' => 'asc'
+				],
 				'render' => 'title',
 				'layout' => 'default',
 				'favicon' => 'favicon'
@@ -29,14 +38,24 @@ class App
 					'temp' => 'tmp'
 				]
 			]
-		]);
-		FFRouter::init($publicPath, $urlBase);
+		];
+		self::$params = new Params($defaults);
+		self::$params->load(self::PARAM_FILE);
 	}
 
-	public function init()
+	public static function siteName()
 	{
-		$this->params->load(self::PARAM_FILE);
-		Page::setDefaults($this->params['defaults']);
+		return self::$params['site']['name'];
+	}
+
+	public static function siteDescription()
+	{
+		return self::$params['site']['description'];
+	}
+
+	public function run()
+	{
+		Page::setDefaults(self::$params['defaults']);
 		if ($path = FFRouter::matchRoute()) {
 			// adds trailing slash
 			if (substr($path, -1) != DIRECTORY_SEPARATOR) {

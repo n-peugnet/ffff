@@ -14,6 +14,6 @@ foreach (glob("inc/php/*.php") as $fileName) {
 }
 
 $app = new App($publicPath, $urlBase);
-$app->init();
+$app->run();
 
 ?>

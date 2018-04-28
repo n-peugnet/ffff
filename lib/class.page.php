@@ -6,9 +6,11 @@ class Page extends Dir
 	protected $params;
 
 	public static $default_layout;
+	public static $default_sort;
+	public static $default_render;
 
-	const RENDER = 'render';
 	const SORT = 'sort';
+	const RENDER = 'render';
 	const UNSHIFT = 0;
 	const PUSH = 1;
 	const HERITABLE_PARAMS = [self::RENDER, self::SORT];
@@ -26,10 +28,12 @@ class Page extends Dir
 	public function init()
 	{
 		$this->params = new Params();
-		$this->autoSetTitle();
+		if (empty($this->name))
+			$this->autoSetName();
 		if (empty($this->parent))
 			$this->autoSetParent();
 		$this->loadParams();
+		$this->autoSetTitle();
 		$layout = !empty($this->params['layout']) ? $this->params['layout'] : self::$default_layout;
 		$this->layout = "tpl/layouts/$layout.php";
 	}
@@ -51,7 +55,7 @@ class Page extends Dir
 		$head = $this->genHead();
 		$title = $this->title;
 		$breadcrumb = $this->genBreadcrumb();
-		$siteName = "test";
+		$siteName = App::siteName();
 		$content = $this->render();
 		include $this->layout;
 	}
@@ -65,9 +69,9 @@ class Page extends Dir
 		return $content;
 	}
 
-	public function renderDirs($levelLimit, $renderTypeDefault = 'title')
+	public function renderDirs($levelLimit, $renderTypeDefault = null)
 	{
-		$renderType = $renderTypeDefault;
+		$renderType = is_null($renderTypeDefault) ? self::$default_render : $renderTypeDefault;
 		if (!empty($this->params[self::RENDER][0]))
 			$renderType = $this->params[self::RENDER][0];
 		$buffer = "<ul class=\"pages\">";
@@ -210,8 +214,9 @@ class Page extends Dir
 	{
 		if (!empty($this->params[self::SORT][0]))
 			$sortParams = $this->params[self::SORT][0];
-		$order = !empty($sortParams['order']) ? $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC : SORT_ASC;
-		$type = !empty($sortParams['type']) ? $sortParams['type'] : 'alpha';
+		$order = !empty($sortParams['order']) ? $sortParams['order'] : self::$default_sort['order'];
+		$order = $order == 'asc' ? SORT_ASC : SORT_DESC;
+		$type = !empty($sortParams['type']) ? $sortParams['type'] : self::$default_sort['type'];
 		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false;
 		switch ($type) {
 			case 'alpha':
@@ -325,8 +330,6 @@ class Page extends Dir
 
 	public function autoSetTitle()
 	{
-		if (empty($this->name))
-			$this->autoSetName();
 		if (!empty($this->params['title']))
 			$title = $this->params['title'];
 		else {
