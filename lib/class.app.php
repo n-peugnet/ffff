@@ -6,6 +6,9 @@ class App
 	protected $router;
 	protected $params;
 
+	const PARAM_FILE = 'params.yaml';
+	const DEFAULT_LAYOUT = 'default';
+
 	public function __construct($publicPath, $urlBase)
 	{
 		$this->publicPath = $publicPath;
@@ -22,7 +25,7 @@ class App
 
 	public function init()
 	{
-		$this->params->load();
+		$this->params->load(self::PARAM_FILE);
 		if ($path = FFRouter::matchRoute()) {
 			// adds trailing slash
 			if (substr($path, -1) != DIRECTORY_SEPARATOR) {

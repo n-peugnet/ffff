@@ -13,7 +13,8 @@ inc/*/*
 !inc/*/README.md
 
 tpl/*
-!tpl/views/li.list.php
+tpl/*/*
+!tpl/views/li.title.php
 !tpl/views/li.cover.php
 !tpl/layouts/default.php
 

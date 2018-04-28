@@ -1,68 +1,14 @@
 <?php
-class Params implements SeekableIterator, ArrayAccess, Countable
+class Params implements ArrayAccess
 {
 	private $position = 0;
 	private $values = [];
 
+	const EXT = '.cache';
+
 	public function __construct($values = [])
 	{
-		$this->values = self::merge_recursive($this->values, $values);
-	}
-
-	/* MÉTHODES DE L'INTERFACE SeekableIterator */
-	public function current()
-	{
-		return $this->values[$this->position];
-	}
-	public function key()
-	{
-		return $this->position;
-	}
-	public function next()
-	{
-		$this->position++;
-	}
-	public function rewind()
-	{
-		$this->position = 0;
-	}
-	public function seek($position)
-	{
-		$anciennePosition = $this->position;
-		$this->position = $position;
-
-		if (!$this->valid()) {
-			trigger_error('La position spécifiée n\'est pas valide', E_USER_WARNING);
-			$this->position = $anciennePosition;
-		}
-	}
-	public function valid()
-	{
-		return isset($this->values[$this->position]);
-	}
-
-	/* MÉTHODES DE L'INTERFACE ArrayAccess */
-	public function offsetExists($key)
-	{
-		return isset($this->values[$key]);
-	}
-	public function offsetGet($key)
-	{
-		return isset($this->values[$key]) ? $this->values[$key] : false;
-	}
-	public function offsetSet($key, $value)
-	{
-		$this->values[$key] = $value;
-	}
-	public function offsetUnset($key)
-	{
-		unset($this->values[$key]);
-	}
-	
-	/* MÉTHODES DE L'INTERFACE Countable */
-	public function count()
-	{
-		return count($this->values);
+		$this->values = $values;
 	}
 
 	public function __isset($key)
@@ -88,16 +34,23 @@ class Params implements SeekableIterator, ArrayAccess, Countable
 		return $a1;
 	}
 
-	public function load($path = '', $paramFile = 'params.yaml', $tmpPath = 'tmp' . DIRECTORY_SEPARATOR)
+	/**
+	 * Loads a configuration from cache if it is up to date, or else, from the parameter file and then cache it.
+	 * @param string $path Path to the directory of the param file.
+	 * @param string $paramFile Name of the param file. (default : params.yaml)
+	 * @param string $tmpDir Name of the temporary directory. (default : tmp)
+	 */
+	public function load($paramFile, $path = '', $tmpDir = 'tmp')
 	{
+		$cachePath = $tmpDir . DIRECTORY_SEPARATOR . $path;
 		$paramFilePath = $path . $paramFile;
-		$paramCachePath = $tmpPath . $path . $paramFile . '.cache';
+		$paramCachePath = $cachePath . $paramFile . self::EXT;
 		if (is_file($paramFilePath)) {
 			if (is_file($paramCachePath) && (filemtime($paramFilePath) <= filemtime($paramCachePath)))
-				self::__construct(unserialize(file_get_contents($paramCachePath)));
+				$this->override(unserialize(file_get_contents($paramCachePath)));
 			else {
-				self::__construct(Spyc::YAMLLoad($paramFilePath));
-				$this->cache($paramFile, $tmpPath . $path);
+				$this->override(Spyc::YAMLLoad($paramFilePath));
+				$this->cache($paramFile, $cachePath);
 			}
 		}
 	}
@@ -108,7 +61,29 @@ class Params implements SeekableIterator, ArrayAccess, Countable
 			// dir doesn't exist, make it
 			mkdir($cachePath, 0777, true);
 		}
-		file_put_contents($cachePath . $paramFile . '.cache', serialize($this->values));
+		file_put_contents($cachePath . $paramFile . self::EXT, serialize($this->values));
+	}
+
+	/**
+	 * Merge the current configuration with the one given in parameter by overriding.
+	 */
+	public function override($params)
+	{
+		$this->values = self::merge_recursive($this->values, $params);
+	}
+
+	public function get($param, $level = -1)
+	{
+		if (!empty($this->values[$param])) {
+			if ($level >= 0) {
+				if (!empty($this->values[$param][$level])) {
+					return $this->values[$param][$level];
+				}
+				return false;
+			}
+			return $this->values[$param];
+		}
+		return false;
 	}
 
 	public function getCustom($param)
@@ -125,6 +100,28 @@ class Params implements SeekableIterator, ArrayAccess, Countable
 				return $param[$key];
 		}
 		return false;
+	}
+
+	///////////////////////////////////////////////////////
+	//                    INTEFACES                      //
+	///////////////////////////////////////////////////////
+
+	// ArrayAccess functions
+	public function offsetExists($key)
+	{
+		return isset($this->values[$key]);
+	}
+	public function offsetGet($key)
+	{
+		return isset($this->values[$key]) ? $this->values[$key] : false;
+	}
+	public function offsetSet($key, $value)
+	{
+		$this->values[$key] = $value;
+	}
+	public function offsetUnset($key)
+	{
+		unset($this->values[$key]);
 	}
 }
 ?>

@@ -4,25 +4,36 @@ class Page extends Dir
 	protected $layout;
 	protected $title;
 	protected $params;
-	protected $paramFile;
 
 	const RENDER = 'render';
 	const SORT = 'sort';
 	const UNSHIFT = 0;
 	const PUSH = 1;
+	const HERITABLE_PARAMS = [self::RENDER, self::SORT];
 
 	/**
 	 * @param string $layout
 	 */
-	public function init($layout = "default.php", $paramFile = "params.yaml")
+	public function init($layout = "default.php")
 	{
-		$this->paramFile = $paramFile;
 		$this->layout = "tpl/layouts/$layout";
 		$this->params = new Params();
-		$this->params->load($this->path);
 		$this->autoSetTitle();
 		if (empty($this->parent))
 			$this->autoSetParent();
+		$this->loadParams();
+	}
+
+	public function loadParams()
+	{
+		$params = [];
+		if ($this->parent != null) {
+			foreach (self::HERITABLE_PARAMS as $param) {
+				$params[$param] = [$this->parent->getChildrenParam($param, $this)];
+			}
+		}
+		$this->params->override($params);
+		$this->params->load(App::PARAM_FILE, $this->path);
 	}
 
 	public function show()
@@ -44,16 +55,11 @@ class Page extends Dir
 		return $content;
 	}
 
-	public function renderDirs($levelLimit, $renderTypeDefault = 'list')
+	public function renderDirs($levelLimit, $renderTypeDefault = 'title')
 	{
 		$renderType = $renderTypeDefault;
 		if (!empty($this->params[self::RENDER][0]))
 			$renderType = $this->params[self::RENDER][0];
-		elseif ($this->parent != null) {
-			$parentChildType = $this->parent->getChildrenParam(self::RENDER, $this);
-			if ($parentChildType)
-				$renderType = $parentChildType;
-		}
 		$buffer = "<ul class=\"pages\">";
 		foreach ($this->getListDirs() as $id => $page) {
 			if (!$renderTypePage = $this->params->getCustomKey(self::RENDER, $page->getName()))
@@ -194,9 +200,6 @@ class Page extends Dir
 	{
 		if (!empty($this->params[self::SORT][0]))
 			$sortParams = $this->params[self::SORT][0];
-		elseif ($this->parent != null)
-			$sortParams = $this->parent->getChildrenParam(self::SORT, $this);
-
 		$order = !empty($sortParams['order']) ? $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC : SORT_ASC;
 		$type = !empty($sortParams['type']) ? $sortParams['type'] : 'alpha';
 		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false;
@@ -307,7 +310,7 @@ class Page extends Dir
 	public function addDir($path, $name)
 	{
 		parent::addDir($path, $name);
-		$this->files[$name]->init($this->layout, $this->paramFile);
+		$this->files[$name]->init($this->layout);
 	}
 
 	public function autoSetTitle()

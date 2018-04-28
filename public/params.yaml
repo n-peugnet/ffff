@@ -12,7 +12,7 @@ sort:
     order: desc
 
 render:
-  - list
+  - title
   - cover
 
 custom:

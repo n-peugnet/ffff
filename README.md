@@ -44,7 +44,7 @@ ignore:                # files or folders you want to ignore
   - un-dossier
 
 render:                # rendering method for subpages
-  - list               # method for subpages of level 1
+  - title              # method for subpages of level 1
   - cover              # method for subpages of level 2
 
 sort:                  # sort method for subpages
