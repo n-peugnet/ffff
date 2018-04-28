@@ -5,23 +5,33 @@ class Page extends Dir
 	protected $title;
 	protected $params;
 
+	public static $default_layout;
+
 	const RENDER = 'render';
 	const SORT = 'sort';
 	const UNSHIFT = 0;
 	const PUSH = 1;
 	const HERITABLE_PARAMS = [self::RENDER, self::SORT];
 
-	/**
-	 * @param string $layout
-	 */
-	public function init($layout = "default.php")
+	public static function setDefaults($defaults)
 	{
-		$this->layout = "tpl/layouts/$layout";
+		foreach ($defaults as $key => $value) {
+			$default = "default_$key";
+			if (property_exists('Page', $default)) {
+				static::$$default = $value;
+			}
+		}
+	}
+
+	public function init()
+	{
 		$this->params = new Params();
 		$this->autoSetTitle();
 		if (empty($this->parent))
 			$this->autoSetParent();
 		$this->loadParams();
+		$layout = !empty($this->params['layout']) ? $this->params['layout'] : self::$default_layout;
+		$this->layout = "tpl/layouts/$layout.php";
 	}
 
 	public function loadParams()
@@ -310,7 +320,7 @@ class Page extends Dir
 	public function addDir($path, $name)
 	{
 		parent::addDir($path, $name);
-		$this->files[$name]->init($this->layout);
+		$this->files[$name]->init();
 	}
 
 	public function autoSetTitle()

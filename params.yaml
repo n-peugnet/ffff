@@ -7,6 +7,7 @@ defaults:
     type: alpha
     order: asc
   render: title
+  layout: default
 
 # you don't really need to edit these settings
 system:

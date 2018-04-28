@@ -7,7 +7,6 @@ class App
 	protected $params;
 
 	const PARAM_FILE = 'params.yaml';
-	const DEFAULT_LAYOUT = 'default';
 
 	public function __construct($publicPath, $urlBase)
 	{
@@ -18,7 +17,18 @@ class App
 				'name' => 'test',
 				'description' => 'a longer test'
 			],
-			'public dir' => 'public'
+			'defaults' => [
+				'sort' => [],
+				'render' => 'title',
+				'layout' => 'default',
+				'favicon' => 'favicon'
+			],
+			'system' => [
+				'dir' => [
+					'public' => 'public',
+					'temp' => 'tmp'
+				]
+			]
 		]);
 		FFRouter::init($publicPath, $urlBase);
 	}
@@ -26,6 +36,7 @@ class App
 	public function init()
 	{
 		$this->params->load(self::PARAM_FILE);
+		Page::setDefaults($this->params['defaults']);
 		if ($path = FFRouter::matchRoute()) {
 			// adds trailing slash
 			if (substr($path, -1) != DIRECTORY_SEPARATOR) {
