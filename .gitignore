@@ -4,9 +4,10 @@ tmp/*
 
 public/*
 public/*/*
-!public/assets/*
 !public/404/*
 !public/403/*
+!public/README.md
+!public/sample.config.yaml
 
 inc/*
 inc/*/*
@@ -17,6 +18,8 @@ tpl/*/*
 !tpl/views/li.title.php
 !tpl/views/li.cover.php
 !tpl/layouts/default.php
+
+params.yaml
 
 # Personnal files
 .vscode
