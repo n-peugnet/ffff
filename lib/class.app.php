@@ -30,7 +30,8 @@ class App
 				],
 				'render' => 'title',
 				'layout' => 'default',
-				'favicon' => 'favicon'
+				'favicon' => 'favicon',
+				'date formats' => ['Y-m-d H:i:s']
 			],
 			'system' => [
 				'dir' => [
@@ -55,7 +56,6 @@ class App
 
 	public function run()
 	{
-		Page::setDefaults(self::$params['defaults']);
 		if ($path = FFRouter::matchRoute()) {
 			// adds trailing slash
 			if (substr($path, -1) != DIRECTORY_SEPARATOR) {
@@ -66,6 +66,7 @@ class App
 				include_once $fileName;
 			}
 			// show the page
+			Page::setDefaults(self::$params['defaults']);
 			$page = new Page($path);
 			$page->init();
 			$page->list_recursive($page->getRenderLevel(), false, $page->getIgnored());

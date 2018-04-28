@@ -8,6 +8,10 @@ defaults:
     order: asc
   render: title
   layout: default
+  date formats:
+    - d/m/Y H:i:s
+    - d/m/Y H:i
+    - d/m/Y
 
 # you don't really need to edit these settings
 system:

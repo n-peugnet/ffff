@@ -5,9 +5,7 @@ class Page extends Dir
 	protected $title;
 	protected $params;
 
-	public static $default_layout;
-	public static $default_sort;
-	public static $default_render;
+	protected static $defaults;
 
 	const SORT = 'sort';
 	const RENDER = 'render';
@@ -17,12 +15,7 @@ class Page extends Dir
 
 	public static function setDefaults($defaults)
 	{
-		foreach ($defaults as $key => $value) {
-			$default = "default_$key";
-			if (property_exists('Page', $default)) {
-				static::$$default = $value;
-			}
-		}
+		self::$defaults = $defaults;
 	}
 
 	public function init()
@@ -34,7 +27,7 @@ class Page extends Dir
 			$this->autoSetParent();
 		$this->loadParams();
 		$this->autoSetTitle();
-		$layout = !empty($this->params['layout']) ? $this->params['layout'] : self::$default_layout;
+		$layout = !empty($this->params['layout']) ? $this->params['layout'] : self::$defaults['layout'];
 		$this->layout = "tpl/layouts/$layout.php";
 	}
 
@@ -69,11 +62,12 @@ class Page extends Dir
 		return $content;
 	}
 
-	public function renderDirs($levelLimit, $renderTypeDefault = null)
+	public function renderDirs($levelLimit)
 	{
-		$renderType = is_null($renderTypeDefault) ? self::$default_render : $renderTypeDefault;
 		if (!empty($this->params[self::RENDER][0]))
 			$renderType = $this->params[self::RENDER][0];
+		else
+			$renderType = self::$defaults['render'];
 		$buffer = "<ul class=\"pages\">";
 		foreach ($this->getListDirs() as $id => $page) {
 			if (!$renderTypePage = $this->params->getCustomKey(self::RENDER, $page->getName()))
@@ -89,7 +83,7 @@ class Page extends Dir
 			$buffer .= ob_get_clean();
 
 			if ($page->level < $levelLimit)
-				$buffer .= $page->renderDirs($levelLimit, $renderTypeDefault);
+				$buffer .= $page->renderDirs($levelLimit);
 		}
 		return $buffer . "</ul>";
 	}
@@ -197,7 +191,7 @@ class Page extends Dir
 
 	public function getDate()
 	{
-		$formats = ['d/m/Y H:i:s', 'd/m/Y H:i', 'd/m/Y'];
+		$formats = self::$defaults['date formats'];
 		$date = false;
 		if (!empty($this->params['date'])) {
 			$numFormat = 0;
@@ -214,10 +208,10 @@ class Page extends Dir
 	{
 		if (!empty($this->params[self::SORT][0]))
 			$sortParams = $this->params[self::SORT][0];
-		$order = !empty($sortParams['order']) ? $sortParams['order'] : self::$default_sort['order'];
+		$type = !empty($sortParams['type']) ? $sortParams['type'] : self::$defaults['sort']['type'];
+		$order = !empty($sortParams['order']) ? $sortParams['order'] : self::$defaults['sort']['order'];
 		$order = $order == 'asc' ? SORT_ASC : SORT_DESC;
-		$type = !empty($sortParams['type']) ? $sortParams['type'] : self::$default_sort['type'];
-		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false;
+		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false; // not really used yet
 		switch ($type) {
 			case 'alpha':
 				$this->sortAlpha($order, $recursive);

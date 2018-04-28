@@ -29,7 +29,11 @@ class Params implements ArrayAccess
 					$value = self::merge_recursive($a1[$key], $a2[$key]);
 				}
 			}
-			$a1[$key] = $value;
+			if (is_int($key)) {
+				if (!in_array($value, $a1))
+					array_push($a1, $value);
+			} else
+				$a1[$key] = $value;
 		}
 		return $a1;
 	}
