@@ -1,6 +1,6 @@
 site:
   name: Nicolas Peugnet
-  description:
+  description: A quick description of the website
 
 defaults:
   sort:

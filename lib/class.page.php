@@ -117,13 +117,19 @@ class Page extends Dir
 	{
 		$buffer = "\n";
 		// ------------------------ include default .js files ----------------------------
-		if (empty($this->params['remove default']['scripts'])) {
+		if (empty($this->params['bypass']['scripts'])) {
 			foreach (glob("inc/js/*.js") as $fileName) {
 				$buffer .= "\t<script src=\"" . FFRouter::genUrl($fileName) . "\" async ></script>\n";
 			}
 		}
+		// ----------------------- include specific stylesheets --------------------------
+		if (!empty($this->params['scripts'])) {
+			foreach ($this->params['scripts'] as $script) {
+				$buffer .= "\t<script src=\"" . $this->url($script) . "\" async ></script>\n";
+			}
+		}
 		// ----------------------- include default stylesheets ---------------------------
-		if (empty($this->params['remove default']['styles'])) {
+		if (empty($this->params['bypass']['styles'])) {
 			foreach (glob("inc/css/*.css") as $fileName) {
 				$buffer .= "\t<link rel=\"stylesheet\" href=\"" . FFRouter::genUrl($fileName) . "\" />\n";
 			}
