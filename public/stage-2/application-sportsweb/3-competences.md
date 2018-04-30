@@ -6,10 +6,6 @@ Tenue d'un carnet de route contenant la liste des tâches à faire ordonnées pa
 priorité avec leur date de réalisation.
 <!-- scan needed -->
 
-#### A4.1.1 Proposition d'une solution applicative
-
-Proposition de fusion de 2 fonctionnalités en 1, impliquant l'ajout de requêtes AJAX
-
 #### A4.1.2 Conception ou adaptation de l'interface utilisateur d'une solution applicative 
 
 [Conception de l'interface](https://drive.google.com/file/d/1OrqARJ34OrO9ZEeH8DfEn5ZpxthuXTlpTw/view?usp=sharing)
