@@ -4,29 +4,58 @@ class App
 	protected $publicPath = "";
 	protected $urlBase = "";
 	protected $router;
-	protected $params;
-	protected $paramFile;
-	protected $tmpPath;
+	protected static $params;
+
+	const PARAM_FILE = 'params.yaml';
 
 	public function __construct($publicPath, $urlBase)
 	{
 		$this->publicPath = $publicPath;
 		$this->urlBase = $urlBase;
-		$this->params = [
+		self::init();
+		FFRouter::init($publicPath, $urlBase);
+	}
+
+	public static function init()
+	{
+		$defaults = [
 			'site' => [
 				'name' => 'test',
 				'description' => 'a longer test'
 			],
-			'public dir' => 'public'
+			'defaults' => [
+				'sort' => [
+					'type' => 'alpha',
+					'order' => 'asc'
+				],
+				'render' => 'title',
+				'layout' => 'default',
+				'favicon' => 'favicon',
+				'date formats' => ['Y-m-d H:i:s']
+			],
+			'system' => [
+				'dir' => [
+					'public' => 'public',
+					'temp' => 'tmp'
+				]
+			]
 		];
-		$this->paramFile = 'params.yaml';
-		$this->tmpPath = 'tmp' . DIRECTORY_SEPARATOR;
-		FFRouter::init($publicPath, $urlBase);
+		self::$params = new Params($defaults);
+		self::$params->load(self::PARAM_FILE);
 	}
 
-	public function init()
+	public static function siteName()
 	{
-		$this->loadParams();
+		return self::$params['site']['name'];
+	}
+
+	public static function siteDescription()
+	{
+		return self::$params['site']['description'];
+	}
+
+	public function run()
+	{
 		if ($path = FFRouter::matchRoute()) {
 			// adds trailing slash
 			if (substr($path, -1) != DIRECTORY_SEPARATOR) {
@@ -37,6 +66,7 @@ class App
 				include_once $fileName;
 			}
 			// show the page
+			Page::setDefaults(self::$params['defaults']);
 			$page = new Page($path);
 			$page->init();
 			$page->list_recursive($page->getRenderLevel(), false, $page->getIgnored());
@@ -53,28 +83,6 @@ class App
 		$page->init();
 		$page->list_recursive(0);
 		$page->show();
-	}
-
-	public function loadParams()
-	{
-		$paramCache = $this->tmpPath . $this->paramFile . '.cache';
-		if (is_file($this->paramFile)) {
-			if (is_file($paramCache) && (filemtime($this->paramFile) <= filemtime($paramCache)))
-				$this->params = unserialize(file_get_contents($paramCache));
-			else {
-				$this->params = Spyc::YAMLLoad($this->paramFile);
-				$this->cacheParams();
-			}
-		}
-	}
-
-	public function cacheParams()
-	{
-		if (!is_dir($this->tmpPath)) {
-			// dir doesn't exist, make it
-			mkdir($this->tmpPath, 0777, true);
-		}
-		file_put_contents($this->tmpPath . $this->paramFile . '.cache', serialize($this->params));
 	}
 
 	public function redirectTo($url)
