@@ -44,11 +44,13 @@ class MarkdownFF_Parser extends Markdown_Parser
 		$alt_text = $this->encodeAttribute($alt_text);
 		$url = $this->encodeAttribute($url);
 		$url = $this->page->url($url);
-		$result = "<img src=\"$url\" alt=\"$alt_text\"";
+		$result = "<img class=\"CadrePhoto md\" src=\"$url\" alt=\"$alt_text\"";
 		if (isset($title)) {
 			$title = $this->encodeAttribute($title);
-			$result .= " title=\"$title\""; # $title already quoted
+		} else {
+			$title = $alt_text;
 		}
+		$result .= " title=\"$title\""; # $title already quoted
 		$result .= $this->empty_element_suffix;
 
 		return $this->hashPart($result);

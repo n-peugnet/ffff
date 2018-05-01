@@ -4,24 +4,43 @@ class Page extends Dir
 	protected $layout;
 	protected $title;
 	protected $params;
-	protected $paramFile;
 
-	const RENDER = 'render';
+	protected static $defaults;
+
 	const SORT = 'sort';
+	const RENDER = 'render';
 	const UNSHIFT = 0;
 	const PUSH = 1;
+	const HERITABLE_PARAMS = [self::RENDER, self::SORT];
 
-	/**
-	 * @param string $layout
-	 */
-	public function init($layout = "default.php", $paramFile = "params.yaml")
+	public static function setDefaults($defaults)
 	{
-		$this->paramFile = $paramFile;
-		$this->layout = "tpl/layouts/$layout";
-		$this->loadParams();
-		$this->autoSetTitle();
+		self::$defaults = $defaults;
+	}
+
+	public function init()
+	{
+		$this->params = new Params();
+		if (empty($this->name))
+			$this->autoSetName();
 		if (empty($this->parent))
 			$this->autoSetParent();
+		$this->loadParams();
+		$this->autoSetTitle();
+		$layout = !empty($this->params['layout']) ? $this->params['layout'] : self::$defaults['layout'];
+		$this->layout = "tpl/layouts/$layout.php";
+	}
+
+	public function loadParams()
+	{
+		$params = [];
+		if ($this->parent != null) {
+			foreach (self::HERITABLE_PARAMS as $param) {
+				$params[$param] = [$this->parent->getChildrenParam($param, $this)];
+			}
+		}
+		$this->params->override($params);
+		$this->params->load(App::PARAM_FILE, $this->path);
 	}
 
 	public function show()
@@ -29,7 +48,7 @@ class Page extends Dir
 		$head = $this->genHead();
 		$title = $this->title;
 		$breadcrumb = $this->genBreadcrumb();
-		$siteName = "test";
+		$siteName = App::siteName();
 		$content = $this->render();
 		include $this->layout;
 	}
@@ -43,19 +62,15 @@ class Page extends Dir
 		return $content;
 	}
 
-	public function renderDirs($levelLimit, $renderTypeDefault = 'list')
+	public function renderDirs($levelLimit)
 	{
-		$renderType = $renderTypeDefault;
 		if (!empty($this->params[self::RENDER][0]))
 			$renderType = $this->params[self::RENDER][0];
-		elseif ($this->parent != null) {
-			$parentChildType = $this->parent->getChildrenParam(self::RENDER, $this);
-			if ($parentChildType)
-				$renderType = $parentChildType;
-		}
+		else
+			$renderType = self::$defaults['render'];
 		$buffer = "<ul class=\"pages\">";
 		foreach ($this->getListDirs() as $id => $page) {
-			if (!$renderTypePage = $this->getCustomParamKey(self::RENDER, $page->getName()))
+			if (!$renderTypePage = $this->params->getCustomKey(self::RENDER, $page->getName()))
 				$renderTypePage = $renderType;
 			$url = $page->getRoute();
 			$title = $page->getTitle();
@@ -68,7 +83,7 @@ class Page extends Dir
 			$buffer .= ob_get_clean();
 
 			if ($page->level < $levelLimit)
-				$buffer .= $page->renderDirs($levelLimit, $renderTypeDefault);
+				$buffer .= $page->renderDirs($levelLimit);
 		}
 		return $buffer . "</ul>";
 	}
@@ -102,13 +117,19 @@ class Page extends Dir
 	{
 		$buffer = "\n";
 		// ------------------------ include default .js files ----------------------------
-		if (empty($this->params['remove default']['scripts'])) {
+		if (empty($this->params['bypass']['scripts'])) {
 			foreach (glob("inc/js/*.js") as $fileName) {
 				$buffer .= "\t<script src=\"" . FFRouter::genUrl($fileName) . "\" async ></script>\n";
 			}
 		}
+		// ----------------------- include specific stylesheets --------------------------
+		if (!empty($this->params['scripts'])) {
+			foreach ($this->params['scripts'] as $script) {
+				$buffer .= "\t<script src=\"" . $this->url($script) . "\" async ></script>\n";
+			}
+		}
 		// ----------------------- include default stylesheets ---------------------------
-		if (empty($this->params['remove default']['styles'])) {
+		if (empty($this->params['bypass']['styles'])) {
 			foreach (glob("inc/css/*.css") as $fileName) {
 				$buffer .= "\t<link rel=\"stylesheet\" href=\"" . FFRouter::genUrl($fileName) . "\" />\n";
 			}
@@ -119,14 +140,21 @@ class Page extends Dir
 				$buffer .= "\t<link rel=\"stylesheet\" href=\"" . $this->url($style) . "\" />\n";
 			}
 		}
-		// ------------------------- include default favicon -----------------------------
-		if (empty($this->params['remove default']['favicon'])) {
-			foreach (glob("inc/img/favicon.{ico,png}", GLOB_BRACE) as $fileName) {
-				$ext = substr($fileName, strrpos($fileName, '.') + 1);
-				$mime = 'image/' . ($ext == 'ico' ? 'x-icon' : $ext);
-				$buffer .= "\t<link rel=\"icon\" type=\"$mime\" href=\"" . FFRouter::genUrl($fileName) . "\" />\n";
-				break;
+		// ----------------------------- include favicon ---------------------------------
+		if (empty($this->params['favicon'])) {
+			$faviconFiles = glob("inc/img/favicon.{ico,png}", GLOB_BRACE);
+			if (isset($faviconFiles[0])) {
+				$favicon = $faviconFiles[0];
+				$faviconUrl = FFRouter::genUrl($favicon);
 			}
+		} else {
+			$favicon = $this->params['favicon'];
+			$faviconUrl = $this->url($favicon);
+		}
+		if (isset($favicon)) {
+			$ext = substr($favicon, strrpos($favicon, '.') + 1);
+			$mime = 'image/' . ($ext == 'ico' ? 'x-icon' : $ext);
+			$buffer .= "\t<link rel=\"icon\" type=\"$mime\" href=\"$faviconUrl\" />\n";
 		}
 		return $buffer;
 	}
@@ -169,7 +197,7 @@ class Page extends Dir
 
 	public function getDate()
 	{
-		$formats = ['d/m/Y H:i:s', 'd/m/Y H:i', 'd/m/Y'];
+		$formats = self::$defaults['date formats'];
 		$date = false;
 		if (!empty($this->params['date'])) {
 			$numFormat = 0;
@@ -182,40 +210,14 @@ class Page extends Dir
 		return $this->lastModif();
 	}
 
-	public function loadParams()
-	{
-		$paramFile = $this->path . $this->paramFile;
-		$paramCache = $this->tmpPath() . $this->paramFile . '.cache';
-		if (is_file($paramFile)) {
-			if (is_file($paramCache) && (filemtime($paramFile) <= filemtime($paramCache)))
-				$this->params = unserialize(file_get_contents($paramCache));
-			else {
-				$this->params = Spyc::YAMLLoad($paramFile);
-				$this->cacheParams();
-			}
-		}
-	}
-
-	public function cacheParams()
-	{
-		$tmpPath = $this->tmpPath();
-		if (!is_dir($tmpPath)) {
-			// dir doesn't exist, make it
-			mkdir($tmpPath, 0777, true);
-		}
-		file_put_contents($tmpPath . $this->paramFile . '.cache', serialize($this->params));
-	}
-
 	public function sort()
 	{
 		if (!empty($this->params[self::SORT][0]))
 			$sortParams = $this->params[self::SORT][0];
-		elseif ($this->parent != null)
-			$sortParams = $this->parent->getChildrenParam(self::SORT, $this);
-
-		$order = !empty($sortParams['order']) ? $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC : SORT_ASC;
-		$type = !empty($sortParams['type']) ? $sortParams['type'] : 'alpha';
-		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false;
+		$type = !empty($sortParams['type']) ? $sortParams['type'] : self::$defaults['sort']['type'];
+		$order = !empty($sortParams['order']) ? $sortParams['order'] : self::$defaults['sort']['order'];
+		$order = $order == 'asc' ? SORT_ASC : SORT_DESC;
+		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false; // not really used yet
 		switch ($type) {
 			case 'alpha':
 				$this->sortAlpha($order, $recursive);
@@ -230,8 +232,8 @@ class Page extends Dir
 		foreach ($this->getListDirs() as $subDir) {
 			if (!empty($subDir->params[self::SORT]))
 				$subDir->sort();
-			elseif (!empty($this->params[self::SORT][$this->level + 1]))
-				$subDir->sort($this->params[self::SORT][$this->level + 1]);
+			elseif (!empty($this->params[self::SORT][1]))
+				$subDir->sort($this->params[self::SORT][1]);
 		}
 		$this->sortCustom();
 	}
@@ -251,7 +253,7 @@ class Page extends Dir
 
 	public function sortCustom()
 	{
-		if ($sort = $this->getCustomParam(self::SORT)) {
+		if ($sort = $this->params->getCustom(self::SORT)) {
 			$mode = self::UNSHIFT;
 			$unshift = [];
 			$push = [];
@@ -277,7 +279,9 @@ class Page extends Dir
 	 */
 	public static function cmpDate($p1, $p2)
 	{
-		return $p1->getDate() > $p2->getDate();
+		$date1 = method_exists($p1, 'getDate') ? $p1->getDate() : $p1->lastModif();
+		$date2 = method_exists($p2, 'getDate') ? $p2->getDate() : $p2->lastModif();
+		return $date1 > $date2;
 	}
 
 	public function getChildrenParam($param, $child)
@@ -291,22 +295,6 @@ class Page extends Dir
 			return $this->params[$param][$levelDiff];
 		elseif (!empty($this->parent))
 			return $this->parent->getChildrenParam($param, $child);
-		return false;
-	}
-
-	public function getCustomParam($param)
-	{
-		if (!empty($this->params['custom'][$param]))
-			return $this->params['custom'][$param];
-		return false;
-	}
-
-	public function getCustomParamKey($param, $key)
-	{
-		if ($param = $this->getCustomParam($param)) {
-			if (!empty($param[$key]))
-				return $param[$key];
-		}
 		return false;
 	}
 
@@ -326,19 +314,9 @@ class Page extends Dir
 		}
 	}
 
-	public function assetUrl($path)
-	{
-		return FFRouter::staticFilesBasePath() . 'assets/' . $path;
-	}
-
 	public function getRoute(Type $var = null)
 	{
 		return FFRouter::genUrl($this->path);
-	}
-
-	public function tmpPath()
-	{
-		return 'tmp' . DIRECTORY_SEPARATOR . $this->path;
 	}
 
 	public function getIgnored()
@@ -349,13 +327,11 @@ class Page extends Dir
 	public function addDir($path, $name)
 	{
 		parent::addDir($path, $name);
-		$this->files[$name]->init($this->layout, $this->paramFile);
+		$this->files[$name]->init();
 	}
 
 	public function autoSetTitle()
 	{
-		if (empty($this->name))
-			$this->autoSetName();
 		if (!empty($this->params['title']))
 			$title = $this->params['title'];
 		else {
