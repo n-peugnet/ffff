@@ -279,7 +279,9 @@ class Page extends Dir
 	 */
 	public static function cmpDate($p1, $p2)
 	{
-		return $p1->getDate() > $p2->getDate();
+		$date1 = method_exists($p1, 'getDate') ? $p1->getDate() : $p1->lastModif();
+		$date2 = method_exists($p2, 'getDate') ? $p2->getDate() : $p2->lastModif();
+		return $date1 > $date2;
 	}
 
 	public function getChildrenParam($param, $child)
