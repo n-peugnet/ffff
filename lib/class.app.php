@@ -42,6 +42,7 @@ class App
 		];
 		self::$params = new Params($defaults);
 		self::$params->load(self::PARAM_FILE);
+		Page::setDefaults(self::$params['defaults']);
 	}
 
 	public static function siteName()
@@ -66,7 +67,6 @@ class App
 				include_once $fileName;
 			}
 			// show the page
-			Page::setDefaults(self::$params['defaults']);
 			$page = new Page($path);
 			$page->init();
 			$page->list_recursive($page->getRenderLevel(), false, $page->getIgnored());
