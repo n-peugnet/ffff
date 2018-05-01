@@ -3,7 +3,7 @@ _just another flat file cms I made for [my website](http://nicolas.club1.fr)_
 
 ## Presentation
 The `public/` directory contains the public content of the website.
-Inside of it every folder **is** a page. Thus a page's url **is** its folder's path (after `public/`)
+Inside of it **every folder _is_ a page**. Thus **a page's url _is_ its folder's path** (after `public/`)
 
 In these folders you can put your content :
 
@@ -57,6 +57,36 @@ ffff
             li.title.php
 ```
 
+#### Configuration
+
+At the root of th project you can add the general `params.yaml`
+configuration file containing these settings :
+
+```yaml
+site:
+  name: website-name
+  description: A description
+
+defaults:
+  sort:
+    type: alpha
+    order: asc
+  render: title
+  layout: default
+  date formats:
+    - d/m/Y H:i:s
+    - d/m/Y H:i
+    - d/m/Y
+
+# you don't really need to edit these settings
+system:
+  dirs:
+    public: public
+    temp: tmp
+```
+
+(you can also create it from `sample.params.yaml`)
+
 #### Personalization
 
 The `inc/` folder provides possibilities for personalization. It will
@@ -70,7 +100,7 @@ add automatically on every pages :
 
 ### Advanced
 
-In each folder you can add a configuration file : `params.yaml`.
+In each folder you can add a `params.yaml` configuration file :
 Here are the parameters you can use in this file :
 
 ```yaml
@@ -95,10 +125,10 @@ sort:                  # sort method for subpages
   - type: lastModif    # sort type for subpages of level 2
     order: desc        # ...
 
-custom:               # custom settings
-  render:             # custom rendering
-    un-fichier: cover # renders `un-fichier` as a cover
-  sort:               # custom sort : make 2014 last
+custom:                # custom settings
+  render:              # custom rendering
+    un-fichier: cover  # renders `un-fichier` as a cover
+  sort:                # custom sort : make 2014 last
     - *
     - 2014
 

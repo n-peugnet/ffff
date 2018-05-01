@@ -113,7 +113,11 @@ class File
 	 */
 	public static function cmpLastModif($f1, $f2)
 	{
-		return $f1->lastModif() > $f2->lastModif();
+		$date1 = $f1->lastModif();
+		$date2 = $f2->lastModif();
+		if ($date1 == $date2)
+			return 0;
+		return $date1 > $date2 ? 1 : -1;
 	}
 
 	public function diffLevel($file)

@@ -281,7 +281,9 @@ class Page extends Dir
 	{
 		$date1 = method_exists($p1, 'getDate') ? $p1->getDate() : $p1->lastModif();
 		$date2 = method_exists($p2, 'getDate') ? $p2->getDate() : $p2->lastModif();
-		return $date1 > $date2;
+		if ($date1 == $date2)
+			return 0;
+		return $date1 > $date2 ? 1 : -1;
 	}
 
 	public function getChildrenParam($param, $child)
