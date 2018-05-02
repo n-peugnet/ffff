@@ -41,7 +41,7 @@ class App
 			]
 		];
 		self::$params = new Params($defaults);
-		self::$params->load(self::PARAM_FILE);
+		self::$params->load(self::PARAM_FILE, '', Params::PUSH);
 		Page::setDefaults(self::$params['defaults']);
 	}
 
