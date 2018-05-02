@@ -101,7 +101,7 @@ class File
 		return 'unknown';
 	}
 
-	public function lastModif()
+	public function getDateLastModif()
 	{
 		$date = new DateTimeImmutable();
 		return $date->setTimestamp(filemtime($this->path));
@@ -113,8 +113,8 @@ class File
 	 */
 	public static function cmpLastModif($f1, $f2)
 	{
-		$date1 = $f1->lastModif();
-		$date2 = $f2->lastModif();
+		$date1 = $f1->getDateLastModif();
+		$date2 = $f2->getDateLastModif();
 		if ($date1 == $date2)
 			return 0;
 		return $date1 > $date2 ? 1 : -1;
