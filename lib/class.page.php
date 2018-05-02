@@ -207,7 +207,7 @@ class Page extends Dir
 			}
 			return $date;
 		}
-		return $this->lastModif();
+		return $this->getDateLastModif();
 	}
 
 	public function sort()
@@ -279,8 +279,8 @@ class Page extends Dir
 	 */
 	public static function cmpDate($p1, $p2)
 	{
-		$date1 = method_exists($p1, 'getDate') ? $p1->getDate() : $p1->lastModif();
-		$date2 = method_exists($p2, 'getDate') ? $p2->getDate() : $p2->lastModif();
+		$date1 = method_exists($p1, 'getDate') ? $p1->getDate() : $p1->getDateLastModif();
+		$date2 = method_exists($p2, 'getDate') ? $p2->getDate() : $p2->getDateLastModif();
 		if ($date1 == $date2)
 			return 0;
 		return $date1 > $date2 ? 1 : -1;

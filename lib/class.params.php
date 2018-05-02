@@ -5,6 +5,8 @@ class Params implements ArrayAccess
 	private $values = [];
 
 	const EXT = '.cache';
+	const PUSH = 0;
+	const OVERRIDE = 1;
 
 	public function __construct($values = [])
 	{
@@ -21,7 +23,7 @@ class Params implements ArrayAccess
 	 * @param array $a1
 	 * @param array $a2
 	 */
-	static function merge_recursive($a1, $a2)
+	static function merge_recursive($a1, $a2, $numBehavior = self::OVERRIDE)
 	{
 		foreach ($a2 as $key => $value) {
 			if (is_array($value)) {
@@ -29,7 +31,7 @@ class Params implements ArrayAccess
 					$value = self::merge_recursive($a1[$key], $a2[$key]);
 				}
 			}
-			if (is_int($key)) {
+			if (is_int($key) && $numBehavior == self::PUSH) {
 				if (!in_array($value, $a1))
 					array_push($a1, $value);
 			} else
@@ -44,16 +46,16 @@ class Params implements ArrayAccess
 	 * @param string $paramFile Name of the param file. (default : params.yaml)
 	 * @param string $tmpDir Name of the temporary directory. (default : tmp)
 	 */
-	public function load($paramFile, $path = '', $tmpDir = 'tmp')
+	public function load($paramFile, $path = '', $numBehavior = self::OVERRIDE, $tmpDir = 'tmp')
 	{
 		$cachePath = $tmpDir . DIRECTORY_SEPARATOR . $path;
 		$paramFilePath = $path . $paramFile;
 		$paramCachePath = $cachePath . $paramFile . self::EXT;
 		if (is_file($paramFilePath)) {
 			if (is_file($paramCachePath) && (filemtime($paramFilePath) <= filemtime($paramCachePath)))
-				$this->override(unserialize(file_get_contents($paramCachePath)));
+				$this->override(unserialize(file_get_contents($paramCachePath)), $numBehavior);
 			else {
-				$this->override(Spyc::YAMLLoad($paramFilePath));
+				$this->override(Spyc::YAMLLoad($paramFilePath), $numBehavior);
 				$this->cache($paramFile, $cachePath);
 			}
 		}
@@ -71,9 +73,9 @@ class Params implements ArrayAccess
 	/**
 	 * Merge the current configuration with the one given in parameter by overriding.
 	 */
-	public function override($params)
+	public function override($params, $numBehavior = self::OVERRIDE)
 	{
-		$this->values = self::merge_recursive($this->values, $params);
+		$this->values = self::merge_recursive($this->values, $params, $numBehavior);
 	}
 
 	public function get($param, $level = -1)
