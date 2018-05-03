@@ -2,9 +2,9 @@
 
 #### A1.4.1 Participation à un projet
 
-Tenue d'un carnet de route contenant la liste des tâches à faire ordonnées par
+Tenue d'un [carnet de route](https://drive.google.com/file/d/1mP1UJ2MWArIN5xEnms2OrexXMj3HEb2Y/view?usp=sharing)
+contenant la liste des tâches à faire ordonnées par
 priorité avec leur date de réalisation.
-<!-- scan needed -->
 
 #### A4.1.2 Conception ou adaptation de l'interface utilisateur d'une solution applicative 
 

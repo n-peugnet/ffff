@@ -2,17 +2,18 @@
 
 #### A1.3.4 Déploiement d'un service
 
-polygonev2.club1.fr
+Le service est actuellement déployé sur mon serveur personnel et
+accessible à l'adresse [http://polygonev2.club1.fr](http://polygonev2.club1.fr)
 
 #### A3.2.1 Installation et configuration d'éléments d'infrastructure
 
-PM2
-
-#### A3.2.2 Remplacement ou mise à jour d'éléments défectueux ou obsolètes
-
-passage de l'ajax au nodejs + SocketIO
+Installation de [PM2](http://pm2.keymetrics.io/), un gestionnaire
+d'application NodeJs, permettant, entre autre, de redémarrer automatiquement les applications en cas de bug.
 
 #### A4.1.2 Conception ou adaptation de l'interface utilisateur d'une solution applicative
+
+Conception de l'interface utilisateur à l'aide de croquis
+![croquis de l'interface utilisateur](nicolas_polygone_005.jpg)
 
 #### A4.1.3 Conception ou adaptation d'une base de données
 
