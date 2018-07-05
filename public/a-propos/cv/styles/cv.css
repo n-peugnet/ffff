@@ -12,77 +12,79 @@
 	font-family: 'helveticaLt';
 	src: url('HelveticaNeueLTCom-Lt.ttf');
 }
-body {
-	margin: 0;
-}
 
-article {
+#cv {
 	max-width: 800px;
+	margin-bottom: 50px;
 }
 
-h2 {
+#cv h2 {
 	font-size: 18px;
 	font-family: HelveticaNeueLTCom-BdExO, 'helveticaBoldObl';
 }
 
-article > h2 {
+#cv > h2 {
 	margin: 17px 0 8px 115px;
 }
 
-p, a, td, li {
+#cv p, #cv a, #cv td, #cv li {
 	font-size: 14px;
 	font-family: HelveticaNeueLTCom-Roman, 'helveticaRoman';
 }
 
-p {
+#cv p, #cv td, #cv li, #cv h2, #cv h3 {
+	color: black;
+}
+
+#cv p {
 	margin: 8px;
 }
 
-td {
+#cv td {
 	min-width: 80px;
 	padding-bottom: 8px;
 }
 
-ul {
+#cv ul {
 	margin: 0;
     padding-left: 20px;
     text-indent: -16px;
 	list-style: none;
 }
 
-ul li:before {
+#cv li:before {
     content: "-";
     padding-right: 10px;
 }
 
-.entete {
+#cv .entete {
 	margin-bottom: 45px;
 }
 
-.date, .niveau {
+#cv .date, #cv .niveau {
 	font-family: HelveticaNeueLTCom-Lt, 'helveticaLt';
 }
 
-td.date {
+#cv td.date {
 	width: 110px;
 	padding-right: 10px;
     text-align: right;
 }
 
-td.lieu, td.langage{
+#cv td.lieu, #cv td.langage{
     padding-right: 10px;
     text-align: center;
     width: 130px;
 }
 
-table.troisCol td.details {
+#cv table.troisCol td.details {
 	min-width: 170px;
 }
-table.deuxCol td.details {
+#cv table.deuxCol td.details {
 	min-width: 230px;
 }
 
-td.langage{
+#cv td.langage{
 	min-width: 100px;
 	width: 165px;
 }

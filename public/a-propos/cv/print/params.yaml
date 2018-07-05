@@ -1,0 +1,13 @@
+title: Version Imprimable
+ignore:
+  - styles
+  - print.css
+
+layout: cv
+
+bypass:
+  styles: true
+
+styles:
+  - styles/cv.css
+  - print.css
