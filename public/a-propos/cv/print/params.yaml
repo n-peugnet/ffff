@@ -2,6 +2,7 @@ title: Version Imprimable
 ignore:
   - styles
   - print.css
+  - print.js
 
 layout: cv
 
@@ -11,3 +12,6 @@ bypass:
 styles:
   - styles/cv.css
   - print.css
+
+scripts:
+  - print.js

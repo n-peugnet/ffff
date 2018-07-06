@@ -4,3 +4,7 @@
 #cv p, #cv a, #cv td, #cv li {
 	font-size: 9pt;
 }
+
+#cv .entete, #cv .entete a {
+	font-size: 11pt;
+}
