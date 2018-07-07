@@ -3,3 +3,6 @@ styles:
 
 ignore:
   - styles
+
+render:
+  - cover

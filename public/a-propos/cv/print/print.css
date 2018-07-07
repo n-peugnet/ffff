@@ -1,0 +1,10 @@
+#cv h2 {
+	font-size: 13pt;
+}
+#cv p, #cv a, #cv td, #cv li {
+	font-size: 9pt;
+}
+
+#cv .entete *, #cv h1 {
+	font-size: 11pt;
+}

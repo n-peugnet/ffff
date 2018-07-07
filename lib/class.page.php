@@ -103,6 +103,8 @@ class Page extends Dir
 						$mdParser = new MarkdownFF_Parser($this);
 						$contenu = $mdParser->transform($contenu);
 						break;
+					case 'html':
+						$contenu = $this->adaptUrls($contenu);
 					case 'txt':
 						$contenu = "<p>" . $contenu . "</p>";
 						break;
@@ -310,10 +312,19 @@ class Page extends Dir
 			case FFRouter::ABSOLUTE:
 				return FFRouter::genUrl(substr($path, 1));
 				break;
-			case FFRouter::DISTANT:
+			default:
 				return $path;
 				break;
 		}
+	}
+
+	private function adaptUrls($content)
+	{
+		$content = preg_replace_callback('/(src|href)=[\'"](.+?)[\'"]/', function ($matches) {
+			$url = $this->url($matches[2]);
+			return $matches[1] . "=\"$url\"";
+		}, $content);
+		return $content;
 	}
 
 	public function getRoute(Type $var = null)

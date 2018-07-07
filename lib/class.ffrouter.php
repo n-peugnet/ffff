@@ -5,6 +5,7 @@ class FFRouter
 	const DISTANT = 0;
 	const ABSOLUTE = 1;
 	const RELATIVE = 2;
+	const MAILTO = 3;
 
 	protected static $publicPath = "";
 	protected static $basePath = "";
@@ -32,6 +33,8 @@ class FFRouter
 			return self::DISTANT;
 		} elseif ($slashIndex === 0) {
 			return self::ABSOLUTE;
+		} elseif ($slashNb == 0 && substr($url, 0, 7) == 'mailto:') {
+			return self::MAILTO;
 		} else {
 			return self::RELATIVE;
 		}

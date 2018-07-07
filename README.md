@@ -133,7 +133,8 @@ custom:                # custom settings
     - 2014
 
 bypass:
-  - styles: true       # bypass default styles
+  styles: true         # bypass default styles
+  scripts: true        # bypass default scripts
 
 styles:                # adds stylesheets for this page
   - un-fichier.css

@@ -4,6 +4,11 @@
 }
 
 @font-face {
+	font-family: 'helveticaMd';
+	src: url('HelveticaNeueLTCom-Md.ttf');
+}
+
+@font-face {
 	font-family: 'helveticaRoman';
 	src: url('HelveticaNeueLTCom-Roman.ttf');
 }
@@ -12,77 +17,94 @@
 	font-family: 'helveticaLt';
 	src: url('HelveticaNeueLTCom-Lt.ttf');
 }
-body {
-	margin: 0;
-}
 
-article {
+#cv {
 	max-width: 800px;
+	margin-bottom: 50px;
 }
 
-h2 {
+#cv h1 {
+	font-size: 16px;
+	font-family: HelveticaNeueLTCom-Md, 'helveticaMd', sans-serif;
+	font-weight: initial;
+	text-align: center;
+	display: block;
+}
+
+#cv h2 {
 	font-size: 18px;
-	font-family: HelveticaNeueLTCom-BdExO, 'helveticaBoldObl';
-}
-
-article > h2 {
+	font-family: HelveticaNeueLTCom-BdExO, 'helveticaBoldObl', sans-serif;
 	margin: 17px 0 8px 115px;
 }
 
-p, a, td, li {
+#cv p, #cv a, #cv td, #cv li {
 	font-size: 14px;
-	font-family: HelveticaNeueLTCom-Roman, 'helveticaRoman';
+	font-family: HelveticaNeueLTCom-Roman, 'helveticaRoman', sans-serif;
 }
 
-p {
+#cv p, #cv td, #cv li, #cv h1, #cv h2, #cv h3 {
+	color: black;
+}
+
+#cv p {
 	margin: 8px;
 }
 
-td {
+#cv td {
 	min-width: 80px;
 	padding-bottom: 8px;
 }
 
-ul {
+#cv ul {
 	margin: 0;
     padding-left: 20px;
     text-indent: -16px;
 	list-style: none;
 }
 
-ul li:before {
+#cv li:before {
     content: "-";
     padding-right: 10px;
 }
 
-.entete {
+#cv .entete {
 	margin-bottom: 45px;
 }
 
-.date, .niveau {
+#cv .entete>* {
+	display: inline-block;
+}
+
+#cv .photo {
+	float: right;
+	height: 120px;
+}
+
+#cv .date, #cv .niveau, #cv .ecole {
 	font-family: HelveticaNeueLTCom-Lt, 'helveticaLt';
 }
 
-td.date {
+#cv td.date {
 	width: 110px;
+	min-width: 50px;
 	padding-right: 10px;
     text-align: right;
 }
 
-td.lieu, td.langage{
+#cv td.lieu, #cv td.langage{
     padding-right: 10px;
     text-align: center;
-    width: 130px;
+	width: 130px;
+	min-width: 60px
 }
 
-table.troisCol td.details {
-	min-width: 170px;
+#cv table.troisCol td.details {
+	min-width: 165px;
 }
-table.deuxCol td.details {
-	min-width: 230px;
+#cv table.deuxCol td.details {
+	min-width: 215px;
 }
 
-td.langage{
-	min-width: 100px;
+#cv td.langage{
 	width: 165px;
 }
