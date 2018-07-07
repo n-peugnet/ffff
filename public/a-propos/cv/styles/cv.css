@@ -4,6 +4,11 @@
 }
 
 @font-face {
+	font-family: 'helveticaMd';
+	src: url('HelveticaNeueLTCom-Md.ttf');
+}
+
+@font-face {
 	font-family: 'helveticaRoman';
 	src: url('HelveticaNeueLTCom-Roman.ttf');
 }
@@ -18,21 +23,26 @@
 	margin-bottom: 50px;
 }
 
-#cv h2 {
-	font-size: 18px;
-	font-family: HelveticaNeueLTCom-BdExO, 'helveticaBoldObl';
+#cv h1 {
+	font-size: 16px;
+	font-family: HelveticaNeueLTCom-Md, 'helveticaMd', sans-serif;
+	font-weight: initial;
+	text-align: center;
+	display: block;
 }
 
-#cv > h2 {
+#cv h2 {
+	font-size: 18px;
+	font-family: HelveticaNeueLTCom-BdExO, 'helveticaBoldObl', sans-serif;
 	margin: 17px 0 8px 115px;
 }
 
 #cv p, #cv a, #cv td, #cv li {
 	font-size: 14px;
-	font-family: HelveticaNeueLTCom-Roman, 'helveticaRoman';
+	font-family: HelveticaNeueLTCom-Roman, 'helveticaRoman', sans-serif;
 }
 
-#cv p, #cv td, #cv li, #cv h2, #cv h3 {
+#cv p, #cv td, #cv li, #cv h1, #cv h2, #cv h3 {
 	color: black;
 }
 
@@ -61,12 +71,22 @@
 	margin-bottom: 45px;
 }
 
+#cv .entete>* {
+	display: inline-block;
+}
+
+#cv .photo {
+	float: right;
+	height: 120px;
+}
+
 #cv .date, #cv .niveau, #cv .ecole {
 	font-family: HelveticaNeueLTCom-Lt, 'helveticaLt';
 }
 
 #cv td.date {
 	width: 110px;
+	min-width: 50px;
 	padding-right: 10px;
     text-align: right;
 }
@@ -74,17 +94,17 @@
 #cv td.lieu, #cv td.langage{
     padding-right: 10px;
     text-align: center;
-    width: 130px;
+	width: 130px;
+	min-width: 60px
 }
 
 #cv table.troisCol td.details {
-	min-width: 170px;
+	min-width: 165px;
 }
 #cv table.deuxCol td.details {
-	min-width: 230px;
+	min-width: 215px;
 }
 
 #cv td.langage{
-	min-width: 100px;
 	width: 165px;
 }
