@@ -25,7 +25,7 @@ class MarkdownFF_Parser extends Markdown_Parser
 			$title = $this->encodeAttribute($title);
 			$result .= " title=\"$title\"";
 		}
-		if ($type == FFRouter::DISTANT)
+		if ($type == FFRouter::EXTERNAL)
 			$result .= " target=\"_blank\"";
 
 		$link_text = $this->runSpanGamut($link_text);
