@@ -2,17 +2,17 @@
 class FFRouter
 {
 	const SLASH = '/';
-	const DISTANT = 0;
+	const EXTERNAL = 0;
 	const ABSOLUTE = 1;
 	const RELATIVE = 2;
 	const MAILTO = 3;
 
-	protected static $publicPath = "";
+	protected static $publicDir = "";
 	protected static $basePath = "";
 
-	public static function init($publicPath = "public", $basePath = "")
+	public static function init($publicDir = "public", $basePath = "")
 	{
-		self::$publicPath = $publicPath;
+		self::$publicDir = $publicDir;
 		self::$basePath = $basePath;
 	}
 
@@ -30,7 +30,7 @@ class FFRouter
 		&& strlen($url) > $slashIndex + 2   // has room for a domain
 		&& $url[$slashIndex - 1] == ':'     // has : before
 		&& $url[$slashIndex + 1] == self::SLASH) {  // has / after
-			return self::DISTANT;
+			return self::EXTERNAL;
 		} elseif ($slashIndex === 0) {
 			return self::ABSOLUTE;
 		} elseif ($slashNb == 0 && substr($url, 0, 7) == 'mailto:') {
@@ -42,7 +42,7 @@ class FFRouter
 
 	public static function staticFilesBasePath()
 	{
-		return self::$basePath . self::SLASH . self::$publicPath . self::SLASH;
+		return self::$basePath . self::SLASH . self::$publicDir . self::SLASH;
 	}
 
 	public static function getBasePath()
@@ -65,7 +65,7 @@ class FFRouter
 			$uri = substr($uri, 0, $strpos);
 		}
 		$path = str_replace(self::SLASH, DIRECTORY_SEPARATOR, $uri); // replace '/' with '\' if on windows
-		$path = utf8_decode(self::$publicPath . $path);
+		$path = utf8_decode(self::$publicDir . $path);
 		$return = is_dir($path) ? $path : false;
 		return $return;
 	}
@@ -75,7 +75,6 @@ class FFRouter
 		$path = str_replace('\\', self::SLASH, $path); // replace '\' with '/' if on windows
 		// if the path leads to a directory
 		if (is_dir($path)) {
-			// removes the basePath
 			$path = self::pubRelativePath($path);
 		}
 		$path = rawurlencode(utf8_encode($path)); // replace special characters such as accentued chars
@@ -83,10 +82,15 @@ class FFRouter
 		return self::$basePath . self::SLASH . $path;
 	}
 
+	/**
+	 * Removes the public dir from the path
+	 * @param string $path
+	 * @return string
+	 */
 	public static function pubRelativePath($path)
 	{
-		if (substr($path, 0, strlen(self::$publicPath)) == self::$publicPath)
-			return substr($path, strlen(self::$publicPath) + 1);
+		if (substr($path, 0, strlen(self::$publicDir)) == self::$publicDir)
+			return substr($path, strlen(self::$publicDir) + 1);
 		return $path;
 	}
 

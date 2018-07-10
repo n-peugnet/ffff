@@ -1,19 +1,19 @@
 <?php
 class App
 {
-	protected $publicPath = "";
+	protected $publicDir = "";
 	protected $urlBase = "";
 	protected $router;
 	protected static $params;
 
 	const PARAM_FILE = 'params.yaml';
 
-	public function __construct($publicPath, $urlBase)
+	public function __construct($publicDir, $urlBase)
 	{
-		$this->publicPath = $publicPath;
+		$this->publicDir = $publicDir;
 		$this->urlBase = $urlBase;
 		self::init();
-		FFRouter::init($publicPath, $urlBase);
+		FFRouter::init($publicDir, $urlBase);
 	}
 
 	public static function init()
@@ -79,7 +79,7 @@ class App
 
 	function showNotFound()
 	{
-		$page = new Page($this->publicPath . DIRECTORY_SEPARATOR . '404' . DIRECTORY_SEPARATOR);
+		$page = new Page($this->publicDir . DIRECTORY_SEPARATOR . '404' . DIRECTORY_SEPARATOR);
 		$page->init();
 		$page->list_recursive(0);
 		$page->show();
