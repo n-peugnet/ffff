@@ -146,6 +146,10 @@ ul.pages {
 	margin: 0;
 	list-style-type: none;
 }
+/* ul.dirs ul {
+	padding-left: 10px;
+} */
+
 .couverture {
 	display: inline-block;
 	vertical-align: top;
