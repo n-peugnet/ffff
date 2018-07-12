@@ -15,3 +15,5 @@ styles:
 
 scripts:
   - print.js
+
+external links arrow: false

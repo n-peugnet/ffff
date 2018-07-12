@@ -8,3 +8,6 @@
 #cv .entete *, #cv h1 {
 	font-size: 11pt;
 }
+#cv a {
+	color: blue;
+}
