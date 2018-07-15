@@ -8,12 +8,13 @@ class App
 
 	const PARAM_FILE = 'params.yaml';
 
-	public function __construct($publicDir, $urlBase)
+	public function __construct($urlBase)
 	{
-		$this->publicDir = $publicDir;
+		self::init();
+		$this->publicDir = self::$params['system']['dirs']['public'];
 		$this->urlBase = $urlBase;
 		self::init();
-		FFRouter::init($publicDir, $urlBase);
+		FFRouter::init($this->publicDir, $urlBase);
 	}
 
 	public static function init()
@@ -34,9 +35,8 @@ class App
 				'date formats' => ['Y-m-d H:i:s']
 			],
 			'system' => [
-				'dir' => [
-					'public' => 'public',
-					'temp' => 'tmp'
+				'dirs' => [
+					'public' => 'public'
 				]
 			]
 		];

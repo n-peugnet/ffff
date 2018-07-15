@@ -1,7 +1,9 @@
+# general settings
 site:
   name: Nicolas Peugnet
   description: A quick description of the website
 
+# advanced settings
 defaults:
   sort:
     type: alpha
@@ -17,4 +19,3 @@ defaults:
 system:
   dirs:
     public: public
-    temp: tmp

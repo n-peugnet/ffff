@@ -1,6 +1,5 @@
 
 <?php
-$publicDir = 'public';
 $urlBase = $_SERVER['BASE_PATH']; // comes from the .htaccess
 
 function autoload($className)
@@ -13,7 +12,7 @@ foreach (glob("inc/php/*.php") as $fileName) {
 	include_once $fileName;
 }
 
-$app = new App($publicDir, $urlBase);
+$app = new App($urlBase);
 $app->run();
 
 ?>

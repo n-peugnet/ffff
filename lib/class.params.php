@@ -42,8 +42,9 @@ class Params implements ArrayAccess
 
 	/**
 	 * Loads a configuration from cache if it is up to date, or else, from the parameter file and then cache it.
-	 * @param string $path Path to the directory of the param file.
 	 * @param string $paramFile Name of the param file. (default : params.yaml)
+	 * @param string $path Path to the directory of the param file.
+	 * @param int    $numBehavior Merging behavior of the loading
 	 * @param string $tmpDir Name of the temporary directory. (default : tmp)
 	 */
 	public function load($paramFile, $path = '', $numBehavior = self::OVERRIDE, $tmpDir = 'tmp')
