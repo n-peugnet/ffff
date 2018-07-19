@@ -78,16 +78,18 @@ site:
   description: A description
 
 # advanced settings
+date formats:
+  - d/m/Y H:i:s
+  - d/m/Y H:i
+  - d/m/Y
+
 defaults:
   sort:
-    type: alpha | lastModif | date
-    order: asc | desc
-  render: title
+    - type: alpha | lastModif | date
+      order: asc | desc
+  render:
+    - title
   layout: default
-  date formats:
-    - d/m/Y H:i:s
-    - d/m/Y H:i
-    - d/m/Y
 
 # you don't really need to edit these settings
 system:
@@ -184,8 +186,6 @@ For example a list item view named title will be `li.title.php`
 
 ## Authors
 
--   **Nicolas Peugnet** - *Initial work*
-    - [Github](https://github.com/n-peugnet)
-    - [Website](http://n.peugnet.free.fr)
+-   **Nicolas Peugnet** - *Initial work* - [Github](https://github.com/n-peugnet) - [Website](http://nicolas.club1.fr)
 
 See also the list of [contributors](https://github.com/n-peugnet/ffff/contributors) who participated in this project.

@@ -18,29 +18,18 @@ class Page extends Dir
 		self::$defaults = $defaults;
 	}
 
-	public function init()
+	public function init($heritedParams = [])
 	{
-		$this->params = new Params();
+		$this->params = new Params(self::$defaults);
 		if (empty($this->name))
 			$this->autoSetName();
 		if (empty($this->parent))
-			$this->autoSetParent();
-		$this->loadParams();
+			$heritedParams = $this->autoSetParent();
+		$this->params->override($heritedParams);
+		$this->params->load(App::PARAM_FILE, $this->path, Params::OVERRIDE);
 		$this->autoSetTitle();
-		$layout = !empty($this->params['layout']) ? $this->params['layout'] : self::$defaults['layout'];
+		$layout = $this->params['layout'];
 		$this->layout = "tpl/layouts/$layout.php";
-	}
-
-	public function loadParams()
-	{
-		$params = [];
-		if ($this->parent != null) {
-			foreach (self::HERITABLE_PARAMS as $param) {
-				$params[$param] = [$this->parent->getChildrenParam($param, $this)];
-			}
-		}
-		$this->params->override($params);
-		$this->params->load(App::PARAM_FILE, $this->path);
 	}
 
 	public function show()
@@ -64,10 +53,7 @@ class Page extends Dir
 
 	public function renderDirs($levelLimit)
 	{
-		if (!empty($this->params[self::RENDER][0]))
-			$renderType = $this->params[self::RENDER][0];
-		else
-			$renderType = self::$defaults['render'];
+		$renderType = $this->params[self::RENDER][0];
 		$buffer = "<ul class=\"pages\">";
 		foreach ($this->getListDirs() as $id => $page) {
 			if (!$renderTypePage = $this->params->getCustomKey(self::RENDER, $page->getName()))
@@ -207,12 +193,12 @@ class Page extends Dir
 	{
 		if (!empty($this->params[self::RENDER]))
 			return count($this->params[self::RENDER]);
-		return 2;
+		return 0;
 	}
 
 	public function getDate()
 	{
-		$formats = self::$defaults['date formats'];
+		$formats = App::dateFormats();
 		$date = false;
 		if (!empty($this->params['date'])) {
 			$numFormat = 0;
@@ -229,9 +215,8 @@ class Page extends Dir
 	{
 		if (!empty($this->params[self::SORT][0]))
 			$sortParams = $this->params[self::SORT][0];
-		$type = !empty($sortParams['type']) ? $sortParams['type'] : self::$defaults['sort']['type'];
-		$order = !empty($sortParams['order']) ? $sortParams['order'] : self::$defaults['sort']['order'];
-		$order = $order == 'asc' ? SORT_ASC : SORT_DESC;
+		$type = $sortParams['type'];
+		$order = $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC;
 		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false; // not really used yet
 		switch ($type) {
 			case 'alpha':
@@ -301,18 +286,16 @@ class Page extends Dir
 		return $date1 > $date2 ? 1 : -1;
 	}
 
-	public function getChildrenParam($param, $child)
+	public function getHeritableParams($childName)
 	{
-		$levelDiff = $this->diffLevel($child);
-		if ($levelDiff == 1)
-			$directChild = $child;
-		else
-			$directChild = $child->getParent($levelDiff - 1);
-		if (!empty($this->params[$param][$levelDiff]) && array_search($directChild->getName(), $this->getIgnored()) === false)
-			return $this->params[$param][$levelDiff];
-		elseif (!empty($this->parent))
-			return $this->parent->getChildrenParam($param, $child);
-		return false;
+		$params = [];
+		if (array_search($childName, $this->getIgnored()) !== false) return $params;
+		foreach (self::HERITABLE_PARAMS as $param) {
+			if (count($this->params[$param]) > 1)
+				$params[$param] = array_slice($this->params[$param], 1);
+
+		}
+		return $params;
 	}
 
 	public function url($path, $type = false)
@@ -353,7 +336,7 @@ class Page extends Dir
 	public function addDir($path, $name)
 	{
 		parent::addDir($path, $name);
-		$this->files[$name]->init();
+		$this->files[$name]->init($this->getHeritableParams($name));
 	}
 
 	public function autoSetTitle()
@@ -367,12 +350,15 @@ class Page extends Dir
 		return $this;
 	}
 
+	/**
+	 * @return array heritable params
+	 */
 	public function autoSetParent()
 	{
 		parent::autoSetParent();
-		if (empty($this->parent)) return false;
+		if (empty($this->parent)) return [];
 		$this->parent->init();
-		return $this;
+		return $this->parent->getHeritableParams($this->name);
 	}
 
 }

@@ -24,15 +24,17 @@ class App
 				'name' => 'test',
 				'description' => 'a longer test'
 			],
+			'date formats' => ['Y-m-d H:i:s'],
 			'defaults' => [
 				'sort' => [
-					'type' => 'alpha',
-					'order' => 'asc'
+					0 => [
+						'type' => 'alpha',
+						'order' => 'asc'
+					]
 				],
-				'render' => 'title',
+				'render' => ['title'],
 				'layout' => 'default',
-				'favicon' => 'favicon',
-				'date formats' => ['Y-m-d H:i:s']
+				'favicon' => 'favicon'
 			],
 			'system' => [
 				'dirs' => [
@@ -53,6 +55,11 @@ class App
 	public static function siteDescription()
 	{
 		return self::$params['site']['description'];
+	}
+
+	public static function dateFormats()
+	{
+		return self::$params['date formats'];
 	}
 
 	public function run()

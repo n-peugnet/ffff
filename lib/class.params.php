@@ -56,19 +56,20 @@ class Params implements ArrayAccess
 			if (is_file($paramCachePath) && (filemtime($paramFilePath) <= filemtime($paramCachePath)))
 				$this->override(unserialize(file_get_contents($paramCachePath)), $numBehavior);
 			else {
-				$this->override(Spyc::YAMLLoad($paramFilePath), $numBehavior);
-				$this->cache($paramFile, $cachePath);
+				$paramFileValues = Spyc::YAMLLoad($paramFilePath);
+				$this->override($paramFileValues, $numBehavior);
+				$this->cache($paramFile, $cachePath, $paramFileValues);
 			}
 		}
 	}
 
-	public function cache($paramFile, $cachePath)
+	public function cache($paramFile, $cachePath, $values)
 	{
 		if (!is_dir($cachePath)) {
 			// dir doesn't exist, make it
 			mkdir($cachePath, 0777, true);
 		}
-		file_put_contents($cachePath . $paramFile . self::EXT, serialize($this->values));
+		file_put_contents($cachePath . $paramFile . self::EXT, serialize($values));
 	}
 
 	/**

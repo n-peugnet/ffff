@@ -4,16 +4,18 @@ site:
   description: A quick description of the website
 
 # advanced settings
+date formats:
+  - d/m/Y H:i:s
+  - d/m/Y H:i
+  - d/m/Y
+
 defaults:
   sort:
-    type: alpha
-    order: asc
-  render: title
+    - type: alpha
+      order: asc
+  render:
+    - title
   layout: default
-  date formats:
-    - d/m/Y H:i:s
-    - d/m/Y H:i
-    - d/m/Y
 
 # you don't really need to edit these settings
 system:
