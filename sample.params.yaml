@@ -9,15 +9,15 @@ date formats:
   - d/m/Y H:i
   - d/m/Y
 
-defaults:
+page defaults:
   sort:
     - type: alpha
       order: asc
   render:
     - title
   layout: default
+  assets dir: assets
 
 # you don't really need to edit these settings
 system:
-  dirs:
-    public: public
+  public dir: public

@@ -5,22 +5,15 @@ class Page extends Dir
 	protected $title;
 	protected $params;
 
-	protected static $defaults;
-
 	const SORT = 'sort';
 	const RENDER = 'render';
 	const UNSHIFT = 0;
 	const PUSH = 1;
 	const HERITABLE_PARAMS = [self::RENDER, self::SORT];
 
-	public static function setDefaults($defaults)
-	{
-		self::$defaults = $defaults;
-	}
-
 	public function init($heritedParams = [])
 	{
-		$this->params = new Params(self::$defaults);
+		$this->params = new Params(App::pageDefaults());
 		if (empty($this->name))
 			$this->autoSetName();
 		if (empty($this->parent))
@@ -55,7 +48,7 @@ class Page extends Dir
 	{
 		$renderType = $this->params[self::RENDER][0];
 		$buffer = "<ul class=\"pages\">";
-		foreach ($this->getListDirs() as $id => $page) {
+		foreach ($this->getListPages() as $id => $page) {
 			if (!$renderTypePage = $this->params->getCustomKey(self::RENDER, $page->getName()))
 				$renderTypePage = $renderType;
 			$url = $page->getRoute();
@@ -229,7 +222,7 @@ class Page extends Dir
 				$this->sortDate($order, $recursive);
 				break;
 		}
-		foreach ($this->getListDirs() as $subDir) {
+		foreach ($this->getListPages() as $subDir) {
 			if (!empty($subDir->params[self::SORT]))
 				$subDir->sort();
 			elseif (!empty($this->params[self::SORT][1]))
@@ -245,7 +238,7 @@ class Page extends Dir
 			return $order == SORT_ASC ? $cmp : !$cmp;
 		});
 		if ($recursive) {
-			foreach ($this->getListDirs() as $subDir)
+			foreach ($this->getListPages() as $subDir)
 				$subDir->sortDate($order, $recursive);
 		}
 		return $this;
@@ -308,6 +301,12 @@ class Page extends Dir
 			case FFRouter::ABSOLUTE:
 				return FFRouter::genUrl(substr($path, 1));
 				break;
+			case FFRouter::ASSET:
+				$assetsDir = $this->params['assets dir'];
+				$path = $this->path . $assetsDir . DIRECTORY_SEPARATOR . substr($path, 2);
+				if (is_file($path))
+					return FFRouter::genUrl($path);
+				break;
 			default:
 				return $path;
 				break;
@@ -330,13 +329,38 @@ class Page extends Dir
 
 	public function getIgnored()
 	{
-		return !empty($this->params['ignore']) ? $this->params['ignore'] : [];
+		$ignored = !empty($this->params['ignore']) ? $this->params['ignore'] : [];
+		array_push($ignored, $this->params['assets dir']);
+		return $ignored;
+	}
+
+	public function listAssets()
+	{
+		$name = $this->params['assets dir'];
+		$path = $this->path . $name;
+		if (is_dir($path)) {
+			$assetsDir = parent::addDir($path, $name);
+			$assetsDir->init();
+		}
+	}
+
+	public function getListPages()
+	{
+		$listDirs = parent::getListDirs();
+		unset($listDirs[$this->params['assets dir']]);  //removes assets dir
+		return $listDirs;
 	}
 
 	public function addDir($path, $name)
 	{
-		parent::addDir($path, $name);
-		$this->files[$name]->init($this->getHeritableParams($name));
+		$subDir = parent::addDir($path, $name);
+		$subDir->init($this->getHeritableParams($name));
+		$subDir->listAssets();
+	}
+
+	public function list_recursive($level = 0, $dirOnly = false, $ignore = [])
+	{
+		parent::list_recursive($level, $dirOnly, $this->getIgnored());
 	}
 
 	public function autoSetTitle()

@@ -83,18 +83,19 @@ date formats:
   - d/m/Y H:i
   - d/m/Y
 
-defaults:
+page defaults:
   sort:
     - type: alpha | lastModif | date
       order: asc | desc
   render:
     - title
   layout: default
+  favicon: favicon
+  assets dir: assets
 
 # you don't really need to edit these settings
 system:
-  dirs:
-    public: public
+  public dir: public
 ```
 
 You can also create it from `/sample.params.yaml`.

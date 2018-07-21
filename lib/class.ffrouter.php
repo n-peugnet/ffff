@@ -6,6 +6,7 @@ class FFRouter
 	const ABSOLUTE = 1;
 	const RELATIVE = 2;
 	const MAILTO = 3;
+	const ASSET = 4;
 
 	protected static $publicDir = "";
 	protected static $basePath = "";
@@ -25,16 +26,18 @@ class FFRouter
 		$url = str_replace('\\', self::SLASH, $url);
 		$slashNb = substr_count($url, self::SLASH);
 		$slashIndex = strpos($url, self::SLASH);
-		if ($slashNb >= 2                   // has at least 2 /
-		&& $slashIndex > 3                  // has room for the scheme
-		&& strlen($url) > $slashIndex + 2   // has room for a domain
-		&& $url[$slashIndex - 1] == ':'     // has : before
+		if ($slashNb >= 2                           // has at least 2 /
+		&& $slashIndex > 3                          // has room for the scheme
+		&& strlen($url) > $slashIndex + 2           // has room for a domain
+		&& $url[$slashIndex - 1] == ':'             // has : before
 		&& $url[$slashIndex + 1] == self::SLASH) {  // has / after
 			return self::EXTERNAL;
 		} elseif ($slashIndex === 0) {
 			return self::ABSOLUTE;
-		} elseif ($slashNb == 0 && substr($url, 0, 7) == 'mailto:') {
+		} elseif (substr($url, 0, 7) == 'mailto:') {
 			return self::MAILTO;
+		} elseif (substr($url, 0, 2) == '~/') {
+			return self::ASSET;
 		} else {
 			return self::RELATIVE;
 		}

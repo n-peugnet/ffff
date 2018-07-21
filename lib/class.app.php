@@ -11,9 +11,8 @@ class App
 	public function __construct($urlBase)
 	{
 		self::init();
-		$this->publicDir = self::$params['system']['dirs']['public'];
+		$this->publicDir = self::$params['system']['public dir'];
 		$this->urlBase = $urlBase;
-		self::init();
 		FFRouter::init($this->publicDir, $urlBase);
 	}
 
@@ -25,7 +24,7 @@ class App
 				'description' => 'a longer test'
 			],
 			'date formats' => ['Y-m-d H:i:s'],
-			'defaults' => [
+			'page defaults' => [
 				'sort' => [
 					0 => [
 						'type' => 'alpha',
@@ -34,17 +33,15 @@ class App
 				],
 				'render' => ['title'],
 				'layout' => 'default',
-				'favicon' => 'favicon'
+				'favicon' => 'favicon',
+				'assets dir' => 'assets'
 			],
 			'system' => [
-				'dirs' => [
-					'public' => 'public'
-				]
+				'public dir' => 'public'
 			]
 		];
 		self::$params = new Params($defaults);
 		self::$params->load(self::PARAM_FILE, '', Params::PUSH);
-		Page::setDefaults(self::$params['defaults']);
 	}
 
 	public static function siteName()
@@ -62,6 +59,11 @@ class App
 		return self::$params['date formats'];
 	}
 
+	public static function pageDefaults()
+	{
+		return self::$params['page defaults'];
+	}
+
 	public function run()
 	{
 		if ($path = FFRouter::matchRoute()) {
@@ -76,7 +78,7 @@ class App
 			// show the page
 			$page = new Page($path);
 			$page->init();
-			$page->list_recursive($page->getRenderLevel(), false, $page->getIgnored());
+			$page->list_recursive($page->getRenderLevel(), false);
 			$page->sort();
 			$page->show();
 		} else {

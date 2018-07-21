@@ -80,8 +80,9 @@ class Dir extends File
 
 	public function addDir($path, $name)
 	{
-		$this->files[$name] = new static($path, $name, $this->level + 1, $this);
-		return $this;
+		$dir = new static($path, $name, $this->level + 1, $this);
+		$this->files[$name] = $dir;
+		return $dir;
 	}
 
 	public function addFile($path, $name)
@@ -90,7 +91,7 @@ class Dir extends File
 		return $this;
 	}
 
-	function list_recursive($level = 0, $dirOnly = false, $ignore = [])
+	public function list_recursive($level = 0, $dirOnly = false, $ignore = [])
 	{
 		if ($dir = opendir($this->path)) {
 			while (($element = readdir($dir)) !== false) //pour tous les elements de ce dossier...
