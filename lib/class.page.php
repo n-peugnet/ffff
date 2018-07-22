@@ -4,6 +4,7 @@ class Page extends Dir
 	protected $layout;
 	protected $title;
 	protected $params;
+	protected $assets;
 
 	const SORT = 'sort';
 	const RENDER = 'render';
@@ -21,8 +22,11 @@ class Page extends Dir
 		$this->params->override($heritedParams);
 		$this->params->load(App::PARAM_FILE, $this->path, Params::OVERRIDE);
 		$this->autoSetTitle();
-		$layout = $this->params['layout'];
-		$this->layout = "tpl/layouts/$layout.php";
+		if ($this->level >= 0) {
+			$layout = $this->params['layout'];
+			$this->layout = "tpl/layouts/$layout.php";
+			$this->listAssets();
+		}
 	}
 
 	public function show()
@@ -173,9 +177,17 @@ class Page extends Dir
 
 	public function getCover()
 	{
-		if (!empty($this->params['cover']) && !empty($this->files[$this->params['cover']]))
-			return $this->files[$this->params['cover']];
-		foreach ($this->files as $file) {
+		if (!empty($this->params['cover'])) {
+			$coverName = $this->params['cover'];
+			if (FFRouter::analizeUrl($coverName) == FFRouter::ASSET && !empty($this->assets->files[substr($coverName, 2)]))
+				return $this->assets->files[substr($coverName, 2)];
+			elseif (!empty($this->files[$coverName]))
+				return $this->files[$coverName];
+		}
+		$files = $this->getListFiles();
+		if (!empty($this->assets))
+			$files = array_merge($this->assets->getListFiles(), $files);
+		foreach ($files as $file) {
 			if ($file->type() == 'image')
 				return $file;
 		}
@@ -337,10 +349,10 @@ class Page extends Dir
 	public function listAssets()
 	{
 		$name = $this->params['assets dir'];
-		$path = $this->path . $name;
+		$path = $this->path . $name . DIRECTORY_SEPARATOR;
 		if (is_dir($path)) {
-			$assetsDir = parent::addDir($path, $name);
-			$assetsDir->init();
+			$this->assets = new Dir($path, $name, $this->level + 1, $this);
+			$this->assets->list_recursive();
 		}
 	}
 
@@ -355,7 +367,6 @@ class Page extends Dir
 	{
 		$subDir = parent::addDir($path, $name);
 		$subDir->init($this->getHeritableParams($name));
-		$subDir->listAssets();
 	}
 
 	public function list_recursive($level = 0, $dirOnly = false, $ignore = [])
