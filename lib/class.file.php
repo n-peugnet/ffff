@@ -101,7 +101,7 @@ class File
 		return 'unknown';
 	}
 
-	public function getDateLastModif()
+	public function getLastModif()
 	{
 		$date = new DateTimeImmutable();
 		return $date->setTimestamp(filemtime($this->path));
@@ -111,13 +111,26 @@ class File
 	 * @param self $f1
 	 * @param self $f2
 	 */
-	public static function cmpLastModif($f1, $f2)
+	public static function compare($f1, $f2, $properties, $flags = 0)
 	{
-		$date1 = $f1->getDateLastModif();
-		$date2 = $f2->getDateLastModif();
-		if ($date1 == $date2)
+		$i1 = 0;
+		$i2 = 0;
+		$methods = array_map(function ($prop) {
+			return "get" . ucfirst($prop);
+		}, $properties);
+		while (!method_exists($f1, $methods[$i1]) && $i1 < count($methods))
+			$i1++;
+		while (!method_exists($f2, $methods[$i2]) && $i2 < count($methods))
+			$i2++;
+		$method1 = $methods[$i1];
+		$method2 = $methods[$i2];
+		$val1 = $f1->$method1();
+		$val2 = $f2->$method2();
+		if (is_string($val1) && $flags & SORT_NATURAL)
+			return strnatcmp($val1, $val2);
+		if ($val1 == $val2)
 			return 0;
-		return $date1 > $date2 ? 1 : -1;
+		return $val1 > $val2 ? 1 : -1;
 	}
 
 	public function diffLevel($file)

@@ -27,7 +27,7 @@ class App
 			'page defaults' => [
 				'sort' => [
 					0 => [
-						'type' => 'alpha',
+						'type' => 'title',
 						'order' => 'asc'
 					]
 				],

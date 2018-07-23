@@ -85,7 +85,7 @@ date formats:
 
 page defaults:
   sort:
-    - type: alpha | lastModif | date
+    - type: title | name | lastModif | date
       order: asc | desc
   render:
     - title
@@ -139,7 +139,7 @@ render:                # rendering method for subpages
   - cover              # method for subpages of level 2
 
 sort:                  # sort method for subpages
-  - type: alpha        # sort type for subpages of level 1
+  - type: name        # sort type for subpages of level 1
     order: asc         # sort order for subpages of level 1
   - type: lastModif    # sort type for subpages of level 2
     order: desc        # ...

@@ -6,7 +6,7 @@ ignore:
   - README.md
 
 sort:
-  - type: alpha
+  - type: title
     order: desc
   - type: date
     order: desc

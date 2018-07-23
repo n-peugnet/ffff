@@ -11,7 +11,7 @@ date formats:
 
 page defaults:
   sort:
-    - type: alpha
+    - type: title
       order: asc
   render:
     - title

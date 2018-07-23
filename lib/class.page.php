@@ -213,27 +213,31 @@ class Page extends Dir
 			}
 			return $date;
 		}
-		return $this->getDateLastModif();
+		return $this->getLastModif();
 	}
 
 	public function sort()
 	{
-		if (!empty($this->params[self::SORT][0]))
-			$sortParams = $this->params[self::SORT][0];
+		$sortParams = $this->params[self::SORT][0];
 		$type = $sortParams['type'];
 		$order = $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC;
-		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false; // not really used yet
+		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : 0; // not really used yet
 		switch ($type) {
-			case 'alpha':
-				$this->sortAlpha($order, $recursive);
-				break;
 			case 'lastModif':
-				$this->sortLastModif($order, $recursive);
+			case 'name':
+				$properties = [$type];
 				break;
 			case 'date':
-				$this->sortDate($order, $recursive);
+				$properties = [$type, 'lastModif'];
+				break;
+			case 'title':
+			default:
+				$properties = ['title', 'name'];
 				break;
 		}
+		$this->sort_recursive($properties, $order, $recursive);
+
+		// heritage
 		foreach ($this->getListPages() as $subDir) {
 			if (!empty($subDir->params[self::SORT]))
 				$subDir->sort();
@@ -241,19 +245,6 @@ class Page extends Dir
 				$subDir->sort($this->params[self::SORT][1]);
 		}
 		$this->sortCustom();
-	}
-
-	public function sortDate($order = SORT_DESC, $recursive = true)
-	{
-		uasort($this->files, function ($p1, $p2) use ($order) {
-			$cmp = self::cmpDate($p1, $p2);
-			return $order == SORT_ASC ? $cmp : !$cmp;
-		});
-		if ($recursive) {
-			foreach ($this->getListPages() as $subDir)
-				$subDir->sortDate($order, $recursive);
-		}
-		return $this;
 	}
 
 	public function sortCustom()
@@ -276,19 +267,6 @@ class Page extends Dir
 			}
 			$this->files = array_merge($unshift, $this->files, $push);
 		}
-	}
-
-	/**
-	 * @param self $p1
-	 * @param self $p2
-	 */
-	public static function cmpDate($p1, $p2)
-	{
-		$date1 = method_exists($p1, 'getDate') ? $p1->getDate() : $p1->getDateLastModif();
-		$date2 = method_exists($p2, 'getDate') ? $p2->getDate() : $p2->getDateLastModif();
-		if ($date1 == $date2)
-			return 0;
-		return $date1 > $date2 ? 1 : -1;
 	}
 
 	public function getHeritableParams($childName)

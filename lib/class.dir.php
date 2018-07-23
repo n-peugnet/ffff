@@ -91,7 +91,7 @@ class Dir extends File
 		return $this;
 	}
 
-	public function list_recursive($level = 0, $dirOnly = false, $ignore = [])
+	public function list_recursive($level = -1, $dirOnly = false, $ignore = [])
 	{
 		if ($dir = opendir($this->path)) {
 			while (($element = readdir($dir)) !== false) //pour tous les elements de ce dossier...
@@ -101,8 +101,8 @@ class Dir extends File
 					if (is_dir($this->path . $element)) //si c'est un dossier...
 					{
 						$this->addDir($path . DIRECTORY_SEPARATOR, $element);
-						if ($level == -1 || $this->level < $level)
-							$this->files[$element]->list_recursive($level, $dirOnly, $ignore);
+						if ($level !== 0)
+							$this->files[$element]->list_recursive($level - 1, $dirOnly, $ignore);
 					} elseif (!$dirOnly) {
 						$this->addFile($path, $element);
 					}
@@ -113,29 +113,15 @@ class Dir extends File
 		return $this;
 	}
 
-	public function sortAlpha($order = SORT_ASC, $recursive = true)
+	public function sort_recursive($properties, $order = SORT_ASC, $level = -1, $flags = SORT_NATURAL)
 	{
-		if ($order == SORT_ASC) {
-			ksort($this->files, SORT_NATURAL | SORT_FLAG_CASE);
-		} elseif ($order == SORT_DESC) {
-			krsort($this->files, SORT_NATURAL | SORT_FLAG_CASE);
-		}
-		if ($recursive) {
-			foreach ($this->getListDirs() as $subDir)
-				$subDir->sortAlpha($order, $recursive);
-		}
-		return $this;
-	}
-
-	public function sortLastModif($order = SORT_ASC, $recursive = true)
-	{
-		uasort($this->files, function ($f1, $f2) use ($order) {
-			$cmp = self::cmpLastModif($f1, $f2);
-			return $order == SORT_ASC ? $cmp : !$cmp;
+		uasort($this->files, function ($f1, $f2) use ($properties, $order, $flags) {
+			$cmp = self::compare($f1, $f2, $properties, $flags);
+			return $order == SORT_ASC ? $cmp : -$cmp;
 		});
-		if ($recursive) {
+		if ($level !== 0) {
 			foreach ($this->getListDirs() as $subDir)
-				$subDir->sortLastModif($order, $recursive);
+				$subDir->sort_recursive($properties, $order, $level - 1, $flags);
 		}
 		return $this;
 	}
