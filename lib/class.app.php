@@ -33,7 +33,6 @@ class App
 				],
 				'render' => ['title'],
 				'layout' => 'default',
-				'favicon' => 'favicon',
 				'assets dir' => 'assets'
 			],
 			'system' => [

@@ -24,8 +24,10 @@ class File
 		return $this->level;
 	}
 
-	public function getName()
+	public function getName($full = true)
 	{
+		if (!$full)
+			return substr($this->name, 0, strpos($this->name, '.'));
 		return $this->name;
 	}
 
@@ -85,8 +87,7 @@ class File
 
 	public function ext()
 	{
-		$pieces = explode('.', $this->name);
-		return strtolower(array_pop($pieces));
+		return strtolower(substr($this->name, strrpos($this->name, '.') + 1));
 	}
 
 	public function type()

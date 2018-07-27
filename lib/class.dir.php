@@ -3,12 +3,12 @@ class Dir extends File
 {
 	protected $files = [];
 
-	public function getListFiles()
+	public function getListFiles($ext = false)
 	{
 		$listFiles = [];
-		foreach ($this->files as $key => $value) {
-			if (get_class($value) == get_parent_class())
-				$listFiles[$key] = $value;
+		foreach ($this->files as $key => $file) {
+			if (get_class($file) == get_parent_class() && (!$ext || $ext == $file->ext()))
+				$listFiles[$key] = $file;
 		}
 		return $listFiles;
 	}
@@ -16,11 +16,30 @@ class Dir extends File
 	public function getListDirs()
 	{
 		$listDirs = [];
-		foreach ($this->files as $key => $value) {
-			if (get_class($value) == get_class($this))
-				$listDirs[$key] = $value;
+		foreach ($this->files as $key => $file) {
+			if (get_class($file) == get_class($this))
+				$listDirs[$key] = $file;
 		}
 		return $listDirs;
+	}
+
+	/**
+	 * @param string $name
+	 * @param bool $full
+	 * @return File
+	 */
+	public function getFile($name, $full = true)
+	{
+		if ($full) {
+			if (isset($this->files[$name]))
+				$this->files[$name];
+		} else {
+			foreach ($this->getListFiles() as $file) {
+				if ($file->getName(false) == $name)
+					return $file;
+			}
+		}
+		return false;
 	}
 
 	public function findParentPath()

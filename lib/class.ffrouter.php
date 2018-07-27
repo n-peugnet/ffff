@@ -2,11 +2,12 @@
 class FFRouter
 {
 	const SLASH = '/';
-	const EXTERNAL = 0;
-	const ABSOLUTE = 1;
-	const RELATIVE = 2;
-	const MAILTO = 3;
-	const ASSET = 4;
+	const EXTERNAL = 1;
+	const ABSOLUTE = 2;
+	const RELATIVE = 3;
+	const VALID_PATH = 4;
+	const MAILTO = 5;
+	const ASSET = 6;
 
 	protected static $publicDir = "";
 	protected static $basePath = "";
@@ -18,26 +19,28 @@ class FFRouter
 	}
 
 	/**
-	 * find the type of a given url
+	 * find the style of a given url :
+	 * - External   : ----://-----
+	 * - Absolute   : /-----------
+	 * - Mailto     : mailto:-----
+	 * - Asset      : ~/----------
+	 * - Valid Path : path ready to be used with self::genUrl()
+	 * - Relative   : everything else
 	 * @param string $url
 	 */
 	public static function analizeUrl($url)
 	{
-		$url = str_replace('\\', self::SLASH, $url);
-		$slashNb = substr_count($url, self::SLASH);
-		$slashIndex = strpos($url, self::SLASH);
-		if ($slashNb >= 2                           // has at least 2 /
-		&& $slashIndex > 3                          // has room for the scheme
-		&& strlen($url) > $slashIndex + 2           // has room for a domain
-		&& $url[$slashIndex - 1] == ':'             // has : before
-		&& $url[$slashIndex + 1] == self::SLASH) {  // has / after
+		$url = self::cleanSlash($url);
+		if (strpos($url, '://') > 3) {
 			return self::EXTERNAL;
-		} elseif ($slashIndex === 0) {
+		} elseif (substr($url, 0, 1) == self::SLASH) {
 			return self::ABSOLUTE;
 		} elseif (substr($url, 0, 7) == 'mailto:') {
 			return self::MAILTO;
 		} elseif (substr($url, 0, 2) == '~/') {
 			return self::ASSET;
+		} elseif (file_exists($url)) {
+			return self::VALID_PATH;
 		} else {
 			return self::RELATIVE;
 		}
@@ -75,7 +78,7 @@ class FFRouter
 
 	public static function genUrl($path)
 	{
-		$path = str_replace('\\', self::SLASH, $path); // replace '\' with '/' if on windows
+		$path = self::cleanSlash($path); // replace '\' with '/' if on windows
 		// if the path leads to a directory
 		if (is_dir($path)) {
 			$path = self::pubRelativePath($path);
@@ -100,6 +103,11 @@ class FFRouter
 	protected static function uri()
 	{
 		return isset($_SERVER['REQUEST_URI']) ? urldecode($_SERVER['REQUEST_URI']) : self::SLASH;
+	}
+
+	protected static function cleanSlash($url)
+	{
+		return str_replace('\\', self::SLASH, $url);
 	}
 }
 

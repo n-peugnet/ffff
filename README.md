@@ -23,9 +23,10 @@ The markup language used is yaml for it's human friendly syntax.
 ## Getting Started
 
 0. **Make sure** you have PHP >= 5.6.0
-1.  **Download** the [lastest release](https://github.com/n-peugnet/ffff/releases) or clone the [github repository](https://github.com/n-peugnet/ffff/).
+1.  **Download** the [latest release](https://github.com/n-peugnet/ffff/releases) and uncompress it or clone the [github repository](https://github.com/n-peugnet/ffff/).
 2.  **Copy** `/sample.params.yaml`, **rename** it into `/params.yaml` and **edit** it's content.
 3.  **Put** your content in `/public`.
+4.  **Put** your css files in `/inc/css` and your favicon in `/inc/img`.
 
 ## General Usage
 
@@ -90,7 +91,6 @@ page defaults:
   render:
     - title
   layout: default
-  favicon: favicon
   assets dir: assets
 
 # you don't really need to edit these settings
@@ -161,6 +161,8 @@ styles:                # adds stylesheets for this page
 scripts:               # adds scripts for this page
   - un-script.js
   - https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/p5.js
+
+favicon: image.png     # Overrides the default favicon
 ```
 
 ### Using The Templates

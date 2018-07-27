@@ -21,11 +21,13 @@ class Page extends Dir
 			$heritedParams = $this->autoSetParent();
 		$this->params->override($heritedParams);
 		$this->params->load(App::PARAM_FILE, $this->path, Params::OVERRIDE);
+		$this->initAssets();
 		$this->autoSetTitle();
 		if ($this->level >= 0) {
 			$layout = $this->params['layout'];
 			$this->layout = "tpl/layouts/$layout.php";
-			$this->listAssets();
+			if (is_dir($this->assets->getPath()))
+				$this->assets->list_recursive();
 		}
 	}
 
@@ -102,43 +104,46 @@ class Page extends Dir
 	public function genHead()
 	{
 		$buffer = "\n";
-		// ------------------------ include default .js files ----------------------------
+		// ------------------------ include .js script files -----------------------------
+		$jsFiles = array_map(function ($f) {
+			return $f->getPath();
+		}, $this->assets->getListFiles('js')); // scripts from assets
 		if (empty($this->params['bypass']['scripts'])) {
-			foreach (glob("inc/js/*.js") as $fileName) {
-				$buffer .= "\t<script src=\"" . FFRouter::genUrl($fileName) . "\" async ></script>\n";
-			}
+			$jsFiles = array_merge($jsFiles, glob("inc/js/*.js")); // scripts from /inc/js
 		}
-		// ----------------------- include specific .js files ----------------------------
 		if (!empty($this->params['scripts'])) {
-			foreach ($this->params['scripts'] as $script) {
-				$buffer .= "\t<script src=\"" . $this->url($script) . "\" async ></script>\n";
-			}
+			$jsFiles = array_merge($jsFiles, $this->params['scripts']); // scripts from page params
 		}
-		// ----------------------- include default stylesheets ---------------------------
+		foreach ($jsFiles as $filePath) {
+			$buffer .= "\t<script src=\"" . $this->url($filePath) . "\" async ></script>\n";
+		}
+		// ------------------------ include .css stylesheets -----------------------------
+		$cssFiles = array_map(function ($f) {
+			return $f->getPath();
+		}, $this->assets->getListFiles('css'));
 		if (empty($this->params['bypass']['styles'])) {
-			foreach (glob("inc/css/*.css") as $fileName) {
-				$buffer .= "\t<link rel=\"stylesheet\" href=\"" . FFRouter::genUrl($fileName) . "\" />\n";
-			}
+			$cssFiles = array_merge($cssFiles, glob("inc/css/*.css"));
 		}
-		// ----------------------- include specific stylesheets --------------------------
 		if (!empty($this->params['styles'])) {
-			foreach ($this->params['styles'] as $style) {
-				$buffer .= "\t<link rel=\"stylesheet\" href=\"" . $this->url($style) . "\" />\n";
-			}
+			$cssFiles = array_merge($cssFiles, $this->params['styles']);
+		}
+		foreach ($cssFiles as $filePath) {
+			$buffer .= "\t<link rel=\"stylesheet\" href=\"" . $this->url($filePath) . "\" />\n";
 		}
 		// ----------------------------- include favicon ---------------------------------
-		if (empty($this->params['favicon'])) {
-			$faviconFiles = glob("inc/img/favicon.{ico,png}", GLOB_BRACE);
-			if (isset($faviconFiles[0])) {
-				$favicon = $faviconFiles[0];
-				$faviconUrl = FFRouter::genUrl($favicon);
+		if (!empty($this->params['favicon']))
+			$faviconUrl = $this->url($this->params['favicon']);
+		else {
+			if ($faviconFile = $this->assets->getFile('favicon', false))
+				$faviconUrl = FFRouter::genUrl($faviconFile->getPath(), FFRouter::VALID_PATH);
+			else {
+				$faviconFiles = glob("inc/img/favicon.{ico,png}", GLOB_BRACE);
+				if (isset($faviconFiles[0]))
+					$faviconUrl = FFRouter::genUrl($faviconFiles[0]);
 			}
-		} else {
-			$favicon = $this->params['favicon'];
-			$faviconUrl = $this->url($favicon);
 		}
-		if (isset($favicon)) {
-			$ext = substr($favicon, strrpos($favicon, '.') + 1);
+		if (isset($faviconUrl)) {
+			$ext = substr($faviconUrl, strrpos($faviconUrl, '.') + 1);
 			$mime = 'image/' . ($ext == 'ico' ? 'x-icon' : $ext);
 			$buffer .= "\t<link rel=\"icon\" type=\"$mime\" href=\"$faviconUrl\" />\n";
 		}
@@ -188,7 +193,7 @@ class Page extends Dir
 		if (!empty($this->assets))
 			$files = array_merge($this->assets->getListFiles(), $files);
 		foreach ($files as $file) {
-			if ($file->type() == 'image')
+			if ($file->type() == 'image' && $file->getName(false) != 'favicon')
 				return $file;
 		}
 		return new File('inc/img/default-cover.png', 'default-cover');
@@ -276,7 +281,6 @@ class Page extends Dir
 		foreach (self::HERITABLE_PARAMS as $param) {
 			if (count($this->params[$param]) > 1)
 				$params[$param] = array_slice($this->params[$param], 1);
-
 		}
 		return $params;
 	}
@@ -292,10 +296,10 @@ class Page extends Dir
 				return FFRouter::genUrl(substr($path, 1));
 				break;
 			case FFRouter::ASSET:
-				$assetsDir = $this->params['assets dir'];
-				$path = $this->path . $assetsDir . DIRECTORY_SEPARATOR . substr($path, 2);
-				if (is_file($path))
-					return FFRouter::genUrl($path);
+				return FFRouter::genUrl($this->path . $this->params['assets dir'] . DIRECTORY_SEPARATOR . substr($path, 2));
+				break;
+			case FFRouter::VALID_PATH:
+				return FFRouter::genUrl($path);
 				break;
 			default:
 				return $path;
@@ -324,14 +328,11 @@ class Page extends Dir
 		return $ignored;
 	}
 
-	public function listAssets()
+	public function initAssets()
 	{
 		$name = $this->params['assets dir'];
 		$path = $this->path . $name . DIRECTORY_SEPARATOR;
-		if (is_dir($path)) {
-			$this->assets = new Dir($path, $name, $this->level + 1, $this);
-			$this->assets->list_recursive();
-		}
+		$this->assets = new Dir($path, $name, $this->level + 1, $this);
 	}
 
 	public function getListPages()
