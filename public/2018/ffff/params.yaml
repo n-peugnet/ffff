@@ -1,0 +1,6 @@
+title: FFFF
+
+custom:
+  sort:
+    - index.md
+    - *
