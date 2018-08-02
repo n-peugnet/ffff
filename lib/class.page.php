@@ -336,6 +336,13 @@ class Page extends Dir
 		$this->assets = new Dir($path, $name, $this->level + 1, $this);
 	}
 
+	public function isAssetDir()
+	{
+		if (empty($this->parent))
+			return false;
+		return $this->parent->params['assets dir'] == $this->name;
+	}
+
 	public function getListPages()
 	{
 		$listDirs = parent::getListDirs();

@@ -77,6 +77,8 @@ class App
 			// show the page
 			$page = new Page($path);
 			$page->init();
+			if ($page->isAssetDir())
+				$this->showNotFound();
 			$page->list_recursive($page->getRenderLevel(), false);
 			$page->sort();
 			$page->show();
@@ -91,6 +93,7 @@ class App
 		$page->init();
 		$page->list_recursive(0);
 		$page->show();
+		die;
 	}
 
 	public function redirectTo($url)
