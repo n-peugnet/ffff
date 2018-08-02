@@ -3,3 +3,4 @@ render:
   - cover
 
 ignore:
+  - veille
