@@ -60,9 +60,7 @@ class Page extends Dir
 			$url = $page->getRoute();
 			$title = $page->getTitle();
 			$longTitle = FFRouter::pubRelativePath($page->path);
-			$cover = $page->getCover();
-			$cover = $cover ? FFRouter::genUrl($cover->getPath()) : 'rien';
-
+			$cover = $page->getCoverUrl();
 			ob_start();
 			include "tpl/views/li.$renderTypePage.php";
 			$buffer .= ob_get_clean();
@@ -107,7 +105,7 @@ class Page extends Dir
 		// ------------------------ include .js script files -----------------------------
 		$jsFiles = array_map(function ($f) {
 			return $f->getPath();
-		}, $this->assets->getListFiles('js')); // scripts from assets
+		}, $this->assets->getListFiles(false, 'js')); // scripts from assets
 		if (empty($this->params['bypass']['scripts'])) {
 			$jsFiles = array_merge($jsFiles, glob("inc/js/*.js")); // scripts from /inc/js
 		}
@@ -120,7 +118,7 @@ class Page extends Dir
 		// ------------------------ include .css stylesheets -----------------------------
 		$cssFiles = array_map(function ($f) {
 			return $f->getPath();
-		}, $this->assets->getListFiles('css'));
+		}, $this->assets->getListFiles(false, 'css'));
 		if (empty($this->params['bypass']['styles'])) {
 			$cssFiles = array_merge($cssFiles, glob("inc/css/*.css"));
 		}
@@ -180,23 +178,26 @@ class Page extends Dir
 		return $this->title;
 	}
 
-	public function getCover()
+	public function getCoverUrl()
 	{
+		$cover = 'inc/img/default-cover.png';
 		if (!empty($this->params['cover'])) {
-			$coverName = $this->params['cover'];
-			if (FFRouter::analizeUrl($coverName) == FFRouter::ASSET && !empty($this->assets->files[substr($coverName, 2)]))
-				return $this->assets->files[substr($coverName, 2)];
-			elseif (!empty($this->files[$coverName]))
-				return $this->files[$coverName];
+			$pcover = $this->params['cover'];
+			$coverPathType = FFRouter::analizeUrl($pcover);
+			if (($coverPathType == FFRouter::ASSET && !empty($this->assets->getListFiles(true)[substr($pcover, 2)]))
+				|| !empty($this->getListFiles(true)[$pcover]))
+				return $this->url($pcover, $coverPathType);
 		}
-		$files = $this->getListFiles();
+		$files = $this->getListFiles(true);
 		if (!empty($this->assets))
-			$files = array_merge($this->assets->getListFiles(), $files);
+			$files = array_merge($this->assets->getListFiles(true), $files);
 		foreach ($files as $file) {
-			if ($file->type() == 'image' && $file->getName(false) != 'favicon')
-				return $file;
+			if ($file->type() == 'image' && $file->getName(false) != 'favicon') {
+				$cover = $file->getPath();
+				break;
+			}
 		}
-		return new File('inc/img/default-cover.png', 'default-cover');
+		return $this->url($cover, FFRouter::VALID_PATH);
 	}
 
 	public function getRenderLevel()
@@ -277,7 +278,7 @@ class Page extends Dir
 	public function getHeritableParams($childName)
 	{
 		$params = [];
-		if (array_search($childName, $this->getIgnored()) !== false) return $params;
+		if (array_search($childName, $this->ignoredList()) !== false) return $params;
 		foreach (self::HERITABLE_PARAMS as $param) {
 			if (count($this->params[$param]) > 1)
 				$params[$param] = array_slice($this->params[$param], 1);
@@ -321,7 +322,7 @@ class Page extends Dir
 		return FFRouter::genUrl($this->path);
 	}
 
-	public function getIgnored()
+	public function ignoredList()
 	{
 		$ignored = !empty($this->params['ignore']) ? $this->params['ignore'] : [];
 		array_push($ignored, $this->params['assets dir']);
@@ -342,15 +343,15 @@ class Page extends Dir
 		return $listDirs;
 	}
 
-	public function addDir($path, $name)
+	public function addDir($path, $name, $ignored = false)
 	{
-		$subDir = parent::addDir($path, $name);
+		$subDir = parent::addDir($path, $name, $ignored);
 		$subDir->init($this->getHeritableParams($name));
 	}
 
 	public function list_recursive($level = 0, $dirOnly = false, $ignore = [])
 	{
-		parent::list_recursive($level, $dirOnly, $this->getIgnored());
+		parent::list_recursive($level, $dirOnly, $this->ignoredList());
 	}
 
 	public function autoSetTitle()

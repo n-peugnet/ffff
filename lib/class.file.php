@@ -4,6 +4,7 @@ class File
 	protected $name;
 	protected $path;
 	protected $parent;
+	protected $ignored = false;
 
 	/**
 	 * @param string $path
@@ -11,12 +12,13 @@ class File
 	 * @param int $level
 	 * @param Dir $parent
 	 */
-	public function __construct($path, $name = "", $level = 0, &$parent = null)
+	public function __construct($path, $name = "", $level = 0, &$parent = null, $ignored = false)
 	{
 		$this->setName($name);
 		$this->level = $level;
 		$this->path = $path;
 		$this->parent = $parent;
+		$this->ignored = $ignored;
 	}
 
 	public function getLevel()
@@ -45,6 +47,11 @@ class File
 				return $this->parent;
 		}
 		return false;
+	}
+
+	public function getIgnored()
+	{
+		return $this->ignored;
 	}
 
 	protected function findParentPath()

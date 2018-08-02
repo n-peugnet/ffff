@@ -3,21 +3,21 @@ class Dir extends File
 {
 	protected $files = [];
 
-	public function getListFiles($ext = false)
+	public function getListFiles($all = false, $ext = false)
 	{
 		$listFiles = [];
 		foreach ($this->files as $key => $file) {
-			if (get_class($file) == get_parent_class() && (!$ext || $ext == $file->ext()))
+			if (($all || !$file->getIgnored()) && get_class($file) == get_parent_class() && (!$ext || $ext == $file->ext()))
 				$listFiles[$key] = $file;
 		}
 		return $listFiles;
 	}
 
-	public function getListDirs()
+	public function getListDirs($all = false)
 	{
 		$listDirs = [];
 		foreach ($this->files as $key => $file) {
-			if (get_class($file) == get_class($this))
+			if (($all || !$file->getIgnored()) && get_class($file) == get_class($this))
 				$listDirs[$key] = $file;
 		}
 		return $listDirs;
@@ -97,16 +97,16 @@ class Dir extends File
 		return count($this->getListFiles());
 	}
 
-	public function addDir($path, $name)
+	public function addDir($path, $name, $ignored = false)
 	{
-		$dir = new static($path, $name, $this->level + 1, $this);
+		$dir = new static($path, $name, $this->level + 1, $this, $ignored);
 		$this->files[$name] = $dir;
 		return $dir;
 	}
 
-	public function addFile($path, $name)
+	public function addFile($path, $name, $ignored = false)
 	{
-		$this->files[$name] = new File($path, $name, $this->level + 1, $this);
+		$this->files[$name] = new File($path, $name, $this->level + 1, $this, $ignored);
 		return $this;
 	}
 
@@ -115,15 +115,16 @@ class Dir extends File
 		if ($dir = opendir($this->path)) {
 			while (($element = readdir($dir)) !== false) //pour tous les elements de ce dossier...
 			{
-				if ($element != '.' && $element != '..' && array_search($element, $ignore) === false) {
+				if ($element != '.' && $element != '..') {
+					$ignored = array_search($element, $ignore) !== false;
 					$path = $this->path . $element;
 					if (is_dir($this->path . $element)) //si c'est un dossier...
 					{
-						$this->addDir($path . DIRECTORY_SEPARATOR, $element);
-						if ($level !== 0)
+						$this->addDir($path . DIRECTORY_SEPARATOR, $element, $ignored);
+						if (!$ignored && $level !== 0)
 							$this->files[$element]->list_recursive($level - 1, $dirOnly, $ignore);
 					} elseif (!$dirOnly) {
-						$this->addFile($path, $element);
+						$this->addFile($path, $element, $ignored);
 					}
 				}
 			}
