@@ -4,6 +4,7 @@ class File
 	protected $name;
 	protected $path;
 	protected $parent;
+	protected $ignored = false;
 
 	/**
 	 * @param string $path
@@ -11,12 +12,13 @@ class File
 	 * @param int $level
 	 * @param Dir $parent
 	 */
-	public function __construct($path, $name = "", $level = 0, &$parent = null)
+	public function __construct($path, $name = "", $level = 0, &$parent = null, $ignored = false)
 	{
 		$this->setName($name);
 		$this->level = $level;
 		$this->path = $path;
 		$this->parent = $parent;
+		$this->ignored = $ignored;
 	}
 
 	public function getLevel()
@@ -24,8 +26,10 @@ class File
 		return $this->level;
 	}
 
-	public function getName()
+	public function getName($full = true)
 	{
+		if (!$full)
+			return substr($this->name, 0, strpos($this->name, '.'));
 		return $this->name;
 	}
 
@@ -43,6 +47,11 @@ class File
 				return $this->parent;
 		}
 		return false;
+	}
+
+	public function getIgnored()
+	{
+		return $this->ignored;
 	}
 
 	protected function findParentPath()
@@ -85,8 +94,7 @@ class File
 
 	public function ext()
 	{
-		$pieces = explode('.', $this->name);
-		return strtolower(array_pop($pieces));
+		return strtolower(substr($this->name, strrpos($this->name, '.') + 1));
 	}
 
 	public function type()
@@ -101,7 +109,7 @@ class File
 		return 'unknown';
 	}
 
-	public function getDateLastModif()
+	public function getLastModif()
 	{
 		$date = new DateTimeImmutable();
 		return $date->setTimestamp(filemtime($this->path));
@@ -111,13 +119,26 @@ class File
 	 * @param self $f1
 	 * @param self $f2
 	 */
-	public static function cmpLastModif($f1, $f2)
+	public static function compare($f1, $f2, $properties, $flags = 0)
 	{
-		$date1 = $f1->getDateLastModif();
-		$date2 = $f2->getDateLastModif();
-		if ($date1 == $date2)
+		$i1 = 0;
+		$i2 = 0;
+		$methods = array_map(function ($prop) {
+			return "get" . ucfirst($prop);
+		}, $properties);
+		while (!method_exists($f1, $methods[$i1]) && $i1 < count($methods))
+			$i1++;
+		while (!method_exists($f2, $methods[$i2]) && $i2 < count($methods))
+			$i2++;
+		$method1 = $methods[$i1];
+		$method2 = $methods[$i2];
+		$val1 = $f1->$method1();
+		$val2 = $f2->$method2();
+		if (is_string($val1) && $flags & SORT_NATURAL)
+			return strnatcmp($val1, $val2);
+		if ($val1 == $val2)
 			return 0;
-		return $date1 > $date2 ? 1 : -1;
+		return $val1 > $val2 ? 1 : -1;
 	}
 
 	public function diffLevel($file)

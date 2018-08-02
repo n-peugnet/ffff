@@ -1,11 +1,16 @@
 # ffff
 _just another flat file cms I made for [my website](http://nicolas.club1.fr)_
 
-## Presentation
-The `public/` directory contains the public content of the website.
+## Concept
+
+ffff is a *flat file CMS*, which is a Content Management Software using the filesystem as only database. It's aim is to enable a quick & easy creation of personnal websites.
+
+## Principle
+
+The `/public` directory contains the public content of the website.
 Inside of it **every folder _is_ a page**. Thus **a page's url _is_ its folder's path** (after `public/`)
 
-In these folders you can put your content :
+In these folders you can put your content which will be automatically rendered :
 
 -   text files (html, markdown, txt...)
 -   images
@@ -15,41 +20,47 @@ Each folder/page has it's own parameter file : `params.yaml` which provides some
 like ignore files, set a different title for the page or the sort method.
 The markup language used is yaml for it's human friendly syntax.
 
-## Usage
+## Getting Started
 
-### Basic
+0. **Make sure** you have PHP >= 5.6.0
+1.  **Download** the [latest release](https://github.com/n-peugnet/ffff/releases) and uncompress it or clone the [github repository](https://github.com/n-peugnet/ffff/).
+2.  **Copy** `/sample.params.yaml`, **rename** it into `/params.yaml` and **edit** it's content.
+3.  **Put** your content in `/public`.
+4.  **Put** your css files in `/inc/css` and your favicon in `/inc/img`.
 
-As it is a flat file CMS. To get started you just need to put your folders and files in the public directory.
+## General Usage
+
+### Basic Rules
+
+As it is a *flat file CMS*. To get started you just need to put your folders and files in the `/public` directory.
 However there still are some rules :
 
-1.  As the path to a folder will become the url of the corresponding page you should avoid special characters, spaces and uppercase characters.
-2.  You should keep every folder or file (they are or will be used by the app)
+1.  **Keep every folder or file that comes with the sources**, they are or will be used by the app.
+2.  **Avoid special characters, spaces and uppercase characters in a folder's name**, as the path to a folder will become the url of the corresponding page.
 
 The name of the folder will also automaticly become the name of the page,
 but you can override it in the parameters file.
 
-### General
+### File Tree
 
-#### File tree
-
-```
+```bash
 ffff
 │   .gitignore
 │   .htaccess
 │   index.php
-│   params.yaml          # you will have to create it from the sample
+│   params.yaml          # You will have to create it from the sample.
 │   README.md
 │   sample.params.yaml
 │
-├───inc                  # the files you want to include on every pages
-│   ├───css                  # as your stylesheets,
-│   ├───img                  # some images (like the favicon)
-│   ├───js                   # a few scripts
-│   └───php                  # and php files
-├───lib                  # all the php classes of the CMS
-├───public               # the public directory containing your website
-├───tmp                  # temporary directory containing cache files
-└───tpl                  # the templates
+├───inc                  # The files you want to include on every pages
+│   ├───css              #     as your stylesheets,
+│   ├───img              #     some images (like the favicon),
+│   ├───js               #     a few scripts
+│   └───php              #     and php files.
+├───lib                  # All the php classes of the CMS.
+├───public               # The public directory containing your website.
+├───tmp                  # Temporary directory containing cache files.
+└───tpl                  # The templates
     ├───layouts
     │       default.php
     └───views
@@ -57,51 +68,57 @@ ffff
             li.title.php
 ```
 
-#### Configuration
+### Main Configuration
 
-At the root of th project you can add the general `params.yaml`
-configuration file containing these settings :
+At the root of the project you can add the general `/params.yaml` configuration file containing these settings (the order doesn't matter):
 
 ```yaml
+# general settings
 site:
   name: website-name
   description: A description
 
-defaults:
+# advanced settings
+date formats:
+  - d/m/Y H:i:s
+  - d/m/Y H:i
+  - d/m/Y
+
+page defaults:
   sort:
-    type: alpha
-    order: asc
-  render: title
+    - type: title | name | lastModif | date
+      order: asc | desc
+  render:
+    - title
   layout: default
-  date formats:
-    - d/m/Y H:i:s
-    - d/m/Y H:i
-    - d/m/Y
+  assets dir: assets
 
 # you don't really need to edit these settings
 system:
-  dirs:
-    public: public
-    temp: tmp
+  public dir: public
 ```
 
-(you can also create it from `sample.params.yaml`)
+You can also create it from `/sample.params.yaml`.
 
-#### Personalization
+(see [Page Configuration](#page-configuration) to understand how the advanced settings work)
 
-The `inc/` folder provides possibilities for personalization. It will
+### Personalization
+
+The `/inc` folder provides possibilities for personalization. It will
+
 add automatically on every pages :
 
--   All the **.css** stylesheets from `inc/css/`
--   All the **.js** scripts from `inc/js/`
--   The **favicon** .(png|ico) from `inc/img/`
--   Every **.php** files from `inc/php/`
+-   All the **.css** stylesheets from `/inc/css`
+-   All the **.js** scripts from `/inc/js`
+-   The **favicon** .(png|ico) from `/inc/img`
+-   Every **.php** files from `/inc/php`
 
+## Advanced Usage
 
-### Advanced
+###  Page Configuration
 
-In each folder you can add a `params.yaml` configuration file :
-Here are the parameters you can use in this file :
+In each page's folder you can add a `params.yaml` configuration file :
+Here are the parameters you can use in this file (the order doesn't matter):
 
 ```yaml
 title: Un Titre        # override the automatic title of the page
@@ -115,12 +132,14 @@ ignore:                # files or folders you want to ignore
   - un-autre
   - un-dossier
 
+layout: test-layout    # use a different PHP layout from /tpl/layouts
+
 render:                # rendering method for subpages
   - title              # method for subpages of level 1
   - cover              # method for subpages of level 2
 
 sort:                  # sort method for subpages
-  - type: alpha        # sort type for subpages of level 1
+  - type: name        # sort type for subpages of level 1
     order: asc         # sort order for subpages of level 1
   - type: lastModif    # sort type for subpages of level 2
     order: desc        # ...
@@ -142,4 +161,34 @@ styles:                # adds stylesheets for this page
 scripts:               # adds scripts for this page
   - un-script.js
   - https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/p5.js
+
+favicon: image.png     # Overrides the default favicon
 ```
+
+### Using The Templates
+
+The templates are stored in the `/tpl` directory. There are two kinds: the `layouts` and the `views`.
+
+#### Layouts
+
+A **layout** is the general structure of a page, you will most likely use only one for every page. One is allready there with the sources and is used by default: `default.php`.
+
+To use another template by default you must add a PHP file in `/tpl/layouts` and add it in your main `params.yaml` (see [Main Configuration](#main-configuration)).
+
+You can also use a layout for a specific page, just edit the [page's configuration](#page-configuration).
+
+#### Views
+
+The **views** are the differents ways to render the elements of a page. Views have a notation rule: 
+
+```
+<type>.<name>.php
+```
+
+For example a list item view named title will be `li.title.php`
+
+## Authors
+
+-   **Nicolas Peugnet** - *Initial work* - [Github](https://github.com/n-peugnet) - [Website](http://nicolas.club1.fr)
+
+See also the list of [contributors](https://github.com/n-peugnet/ffff/contributors) who participated in this project.

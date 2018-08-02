@@ -8,12 +8,12 @@ class App
 
 	const PARAM_FILE = 'params.yaml';
 
-	public function __construct($publicDir, $urlBase)
+	public function __construct($urlBase)
 	{
-		$this->publicDir = $publicDir;
-		$this->urlBase = $urlBase;
 		self::init();
-		FFRouter::init($publicDir, $urlBase);
+		$this->publicDir = self::$params['system']['public dir'];
+		$this->urlBase = $urlBase;
+		FFRouter::init($this->publicDir, $urlBase);
 	}
 
 	public static function init()
@@ -23,26 +23,24 @@ class App
 				'name' => 'test',
 				'description' => 'a longer test'
 			],
-			'defaults' => [
+			'date formats' => ['Y-m-d H:i:s'],
+			'page defaults' => [
 				'sort' => [
-					'type' => 'alpha',
-					'order' => 'asc'
+					0 => [
+						'type' => 'title',
+						'order' => 'asc'
+					]
 				],
-				'render' => 'title',
+				'render' => ['title'],
 				'layout' => 'default',
-				'favicon' => 'favicon',
-				'date formats' => ['Y-m-d H:i:s']
+				'assets dir' => 'assets'
 			],
 			'system' => [
-				'dir' => [
-					'public' => 'public',
-					'temp' => 'tmp'
-				]
+				'public dir' => 'public'
 			]
 		];
 		self::$params = new Params($defaults);
 		self::$params->load(self::PARAM_FILE, '', Params::PUSH);
-		Page::setDefaults(self::$params['defaults']);
 	}
 
 	public static function siteName()
@@ -53,6 +51,16 @@ class App
 	public static function siteDescription()
 	{
 		return self::$params['site']['description'];
+	}
+
+	public static function dateFormats()
+	{
+		return self::$params['date formats'];
+	}
+
+	public static function pageDefaults()
+	{
+		return self::$params['page defaults'];
 	}
 
 	public function run()
@@ -69,7 +77,7 @@ class App
 			// show the page
 			$page = new Page($path);
 			$page->init();
-			$page->list_recursive($page->getRenderLevel(), false, $page->getIgnored());
+			$page->list_recursive($page->getRenderLevel(), false);
 			$page->sort();
 			$page->show();
 		} else {

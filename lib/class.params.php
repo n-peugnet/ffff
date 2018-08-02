@@ -42,8 +42,9 @@ class Params implements ArrayAccess
 
 	/**
 	 * Loads a configuration from cache if it is up to date, or else, from the parameter file and then cache it.
-	 * @param string $path Path to the directory of the param file.
 	 * @param string $paramFile Name of the param file. (default : params.yaml)
+	 * @param string $path Path to the directory of the param file.
+	 * @param int    $numBehavior Merging behavior of the loading
 	 * @param string $tmpDir Name of the temporary directory. (default : tmp)
 	 */
 	public function load($paramFile, $path = '', $numBehavior = self::OVERRIDE, $tmpDir = 'tmp')
@@ -55,19 +56,20 @@ class Params implements ArrayAccess
 			if (is_file($paramCachePath) && (filemtime($paramFilePath) <= filemtime($paramCachePath)))
 				$this->override(unserialize(file_get_contents($paramCachePath)), $numBehavior);
 			else {
-				$this->override(Spyc::YAMLLoad($paramFilePath), $numBehavior);
-				$this->cache($paramFile, $cachePath);
+				$paramFileValues = Spyc::YAMLLoad($paramFilePath);
+				$this->override($paramFileValues, $numBehavior);
+				$this->cache($paramFile, $cachePath, $paramFileValues);
 			}
 		}
 	}
 
-	public function cache($paramFile, $cachePath)
+	public function cache($paramFile, $cachePath, $values)
 	{
 		if (!is_dir($cachePath)) {
 			// dir doesn't exist, make it
 			mkdir($cachePath, 0777, true);
 		}
-		file_put_contents($cachePath . $paramFile . self::EXT, serialize($this->values));
+		file_put_contents($cachePath . $paramFile . self::EXT, serialize($values));
 	}
 
 	/**

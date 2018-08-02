@@ -4,8 +4,7 @@ class Page extends Dir
 	protected $layout;
 	protected $title;
 	protected $params;
-
-	protected static $defaults;
+	protected $assets;
 
 	const SORT = 'sort';
 	const RENDER = 'render';
@@ -13,34 +12,23 @@ class Page extends Dir
 	const PUSH = 1;
 	const HERITABLE_PARAMS = [self::RENDER, self::SORT];
 
-	public static function setDefaults($defaults)
+	public function init($heritedParams = [])
 	{
-		self::$defaults = $defaults;
-	}
-
-	public function init()
-	{
-		$this->params = new Params();
+		$this->params = new Params(App::pageDefaults());
 		if (empty($this->name))
 			$this->autoSetName();
 		if (empty($this->parent))
-			$this->autoSetParent();
-		$this->loadParams();
+			$heritedParams = $this->autoSetParent();
+		$this->params->override($heritedParams);
+		$this->params->load(App::PARAM_FILE, $this->path, Params::OVERRIDE);
+		$this->initAssets();
 		$this->autoSetTitle();
-		$layout = !empty($this->params['layout']) ? $this->params['layout'] : self::$defaults['layout'];
-		$this->layout = "tpl/layouts/$layout.php";
-	}
-
-	public function loadParams()
-	{
-		$params = [];
-		if ($this->parent != null) {
-			foreach (self::HERITABLE_PARAMS as $param) {
-				$params[$param] = [$this->parent->getChildrenParam($param, $this)];
-			}
+		if ($this->level >= 0) {
+			$layout = $this->params['layout'];
+			$this->layout = "tpl/layouts/$layout.php";
+			if (is_dir($this->assets->getPath()))
+				$this->assets->list_recursive();
 		}
-		$this->params->override($params);
-		$this->params->load(App::PARAM_FILE, $this->path);
 	}
 
 	public function show()
@@ -64,20 +52,15 @@ class Page extends Dir
 
 	public function renderDirs($levelLimit)
 	{
-		if (!empty($this->params[self::RENDER][0]))
-			$renderType = $this->params[self::RENDER][0];
-		else
-			$renderType = self::$defaults['render'];
+		$renderType = $this->params[self::RENDER][0];
 		$buffer = "<ul class=\"pages\">";
-		foreach ($this->getListDirs() as $id => $page) {
+		foreach ($this->getListPages() as $id => $page) {
 			if (!$renderTypePage = $this->params->getCustomKey(self::RENDER, $page->getName()))
 				$renderTypePage = $renderType;
 			$url = $page->getRoute();
 			$title = $page->getTitle();
 			$longTitle = FFRouter::pubRelativePath($page->path);
-			$cover = $page->getCover();
-			$cover = $cover ? FFRouter::genUrl($cover->getPath()) : 'rien';
-
+			$cover = $page->getCoverUrl();
 			ob_start();
 			include "tpl/views/li.$renderTypePage.php";
 			$buffer .= ob_get_clean();
@@ -119,43 +102,46 @@ class Page extends Dir
 	public function genHead()
 	{
 		$buffer = "\n";
-		// ------------------------ include default .js files ----------------------------
+		// ------------------------ include .js script files -----------------------------
+		$jsFiles = array_map(function ($f) {
+			return $f->getPath();
+		}, $this->assets->getListFiles(false, 'js')); // scripts from assets
 		if (empty($this->params['bypass']['scripts'])) {
-			foreach (glob("inc/js/*.js") as $fileName) {
-				$buffer .= "\t<script src=\"" . FFRouter::genUrl($fileName) . "\" async ></script>\n";
-			}
+			$jsFiles = array_merge($jsFiles, glob("inc/js/*.js")); // scripts from /inc/js
 		}
-		// ----------------------- include specific .js files ----------------------------
 		if (!empty($this->params['scripts'])) {
-			foreach ($this->params['scripts'] as $script) {
-				$buffer .= "\t<script src=\"" . $this->url($script) . "\" async ></script>\n";
-			}
+			$jsFiles = array_merge($jsFiles, $this->params['scripts']); // scripts from page params
 		}
-		// ----------------------- include default stylesheets ---------------------------
+		foreach ($jsFiles as $filePath) {
+			$buffer .= "\t<script src=\"" . $this->url($filePath) . "\" async ></script>\n";
+		}
+		// ------------------------ include .css stylesheets -----------------------------
+		$cssFiles = array_map(function ($f) {
+			return $f->getPath();
+		}, $this->assets->getListFiles(false, 'css'));
 		if (empty($this->params['bypass']['styles'])) {
-			foreach (glob("inc/css/*.css") as $fileName) {
-				$buffer .= "\t<link rel=\"stylesheet\" href=\"" . FFRouter::genUrl($fileName) . "\" />\n";
-			}
+			$cssFiles = array_merge($cssFiles, glob("inc/css/*.css"));
 		}
-		// ----------------------- include specific stylesheets --------------------------
 		if (!empty($this->params['styles'])) {
-			foreach ($this->params['styles'] as $style) {
-				$buffer .= "\t<link rel=\"stylesheet\" href=\"" . $this->url($style) . "\" />\n";
-			}
+			$cssFiles = array_merge($cssFiles, $this->params['styles']);
+		}
+		foreach ($cssFiles as $filePath) {
+			$buffer .= "\t<link rel=\"stylesheet\" href=\"" . $this->url($filePath) . "\" />\n";
 		}
 		// ----------------------------- include favicon ---------------------------------
-		if (empty($this->params['favicon'])) {
-			$faviconFiles = glob("inc/img/favicon.{ico,png}", GLOB_BRACE);
-			if (isset($faviconFiles[0])) {
-				$favicon = $faviconFiles[0];
-				$faviconUrl = FFRouter::genUrl($favicon);
+		if (!empty($this->params['favicon']))
+			$faviconUrl = $this->url($this->params['favicon']);
+		else {
+			if ($faviconFile = $this->assets->getFile('favicon', false))
+				$faviconUrl = FFRouter::genUrl($faviconFile->getPath(), FFRouter::VALID_PATH);
+			else {
+				$faviconFiles = glob("inc/img/favicon.{ico,png}", GLOB_BRACE);
+				if (isset($faviconFiles[0]))
+					$faviconUrl = FFRouter::genUrl($faviconFiles[0]);
 			}
-		} else {
-			$favicon = $this->params['favicon'];
-			$faviconUrl = $this->url($favicon);
 		}
-		if (isset($favicon)) {
-			$ext = substr($favicon, strrpos($favicon, '.') + 1);
+		if (isset($faviconUrl)) {
+			$ext = substr($faviconUrl, strrpos($faviconUrl, '.') + 1);
 			$mime = 'image/' . ($ext == 'ico' ? 'x-icon' : $ext);
 			$buffer .= "\t<link rel=\"icon\" type=\"$mime\" href=\"$faviconUrl\" />\n";
 		}
@@ -192,27 +178,38 @@ class Page extends Dir
 		return $this->title;
 	}
 
-	public function getCover()
+	public function getCoverUrl()
 	{
-		if (!empty($this->params['cover']) && !empty($this->files[$this->params['cover']]))
-			return $this->files[$this->params['cover']];
-		foreach ($this->files as $file) {
-			if ($file->type() == 'image')
-				return $file;
+		$cover = 'inc/img/default-cover.png';
+		if (!empty($this->params['cover'])) {
+			$pcover = $this->params['cover'];
+			$coverPathType = FFRouter::analizeUrl($pcover);
+			if (($coverPathType == FFRouter::ASSET && !empty($this->assets->getListFiles(true)[substr($pcover, 2)]))
+				|| !empty($this->getListFiles(true)[$pcover]))
+				return $this->url($pcover, $coverPathType);
 		}
-		return new File('inc/img/default-cover.png', 'default-cover');
+		$files = $this->getListFiles(true);
+		if (!empty($this->assets))
+			$files = array_merge($this->assets->getListFiles(true), $files);
+		foreach ($files as $file) {
+			if ($file->type() == 'image' && $file->getName(false) != 'favicon') {
+				$cover = $file->getPath();
+				break;
+			}
+		}
+		return $this->url($cover, FFRouter::VALID_PATH);
 	}
 
 	public function getRenderLevel()
 	{
 		if (!empty($this->params[self::RENDER]))
 			return count($this->params[self::RENDER]);
-		return 2;
+		return 0;
 	}
 
 	public function getDate()
 	{
-		$formats = self::$defaults['date formats'];
+		$formats = App::dateFormats();
 		$date = false;
 		if (!empty($this->params['date'])) {
 			$numFormat = 0;
@@ -222,48 +219,38 @@ class Page extends Dir
 			}
 			return $date;
 		}
-		return $this->getDateLastModif();
+		return $this->getLastModif();
 	}
 
 	public function sort()
 	{
-		if (!empty($this->params[self::SORT][0]))
-			$sortParams = $this->params[self::SORT][0];
-		$type = !empty($sortParams['type']) ? $sortParams['type'] : self::$defaults['sort']['type'];
-		$order = !empty($sortParams['order']) ? $sortParams['order'] : self::$defaults['sort']['order'];
-		$order = $order == 'asc' ? SORT_ASC : SORT_DESC;
-		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : false; // not really used yet
+		$sortParams = $this->params[self::SORT][0];
+		$type = $sortParams['type'];
+		$order = $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC;
+		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : 0; // not really used yet
 		switch ($type) {
-			case 'alpha':
-				$this->sortAlpha($order, $recursive);
-				break;
 			case 'lastModif':
-				$this->sortLastModif($order, $recursive);
+			case 'name':
+				$properties = [$type];
 				break;
 			case 'date':
-				$this->sortDate($order, $recursive);
+				$properties = [$type, 'lastModif'];
+				break;
+			case 'title':
+			default:
+				$properties = ['title', 'name'];
 				break;
 		}
-		foreach ($this->getListDirs() as $subDir) {
+		$this->sort_recursive($properties, $order, $recursive);
+
+		// heritage
+		foreach ($this->getListPages() as $subDir) {
 			if (!empty($subDir->params[self::SORT]))
 				$subDir->sort();
 			elseif (!empty($this->params[self::SORT][1]))
 				$subDir->sort($this->params[self::SORT][1]);
 		}
 		$this->sortCustom();
-	}
-
-	public function sortDate($order = SORT_DESC, $recursive = true)
-	{
-		uasort($this->files, function ($p1, $p2) use ($order) {
-			$cmp = self::cmpDate($p1, $p2);
-			return $order == SORT_ASC ? $cmp : !$cmp;
-		});
-		if ($recursive) {
-			foreach ($this->getListDirs() as $subDir)
-				$subDir->sortDate($order, $recursive);
-		}
-		return $this;
 	}
 
 	public function sortCustom()
@@ -288,31 +275,15 @@ class Page extends Dir
 		}
 	}
 
-	/**
-	 * @param self $p1
-	 * @param self $p2
-	 */
-	public static function cmpDate($p1, $p2)
+	public function getHeritableParams($childName)
 	{
-		$date1 = method_exists($p1, 'getDate') ? $p1->getDate() : $p1->getDateLastModif();
-		$date2 = method_exists($p2, 'getDate') ? $p2->getDate() : $p2->getDateLastModif();
-		if ($date1 == $date2)
-			return 0;
-		return $date1 > $date2 ? 1 : -1;
-	}
-
-	public function getChildrenParam($param, $child)
-	{
-		$levelDiff = $this->diffLevel($child);
-		if ($levelDiff == 1)
-			$directChild = $child;
-		else
-			$directChild = $child->getParent($levelDiff - 1);
-		if (!empty($this->params[$param][$levelDiff]) && array_search($directChild->getName(), $this->getIgnored()) === false)
-			return $this->params[$param][$levelDiff];
-		elseif (!empty($this->parent))
-			return $this->parent->getChildrenParam($param, $child);
-		return false;
+		$params = [];
+		if (array_search($childName, $this->ignoredList()) !== false) return $params;
+		foreach (self::HERITABLE_PARAMS as $param) {
+			if (count($this->params[$param]) > 1)
+				$params[$param] = array_slice($this->params[$param], 1);
+		}
+		return $params;
 	}
 
 	public function url($path, $type = false)
@@ -324,6 +295,12 @@ class Page extends Dir
 				break;
 			case FFRouter::ABSOLUTE:
 				return FFRouter::genUrl(substr($path, 1));
+				break;
+			case FFRouter::ASSET:
+				return FFRouter::genUrl($this->path . $this->params['assets dir'] . DIRECTORY_SEPARATOR . substr($path, 2));
+				break;
+			case FFRouter::VALID_PATH:
+				return FFRouter::genUrl($path);
 				break;
 			default:
 				return $path;
@@ -345,15 +322,36 @@ class Page extends Dir
 		return FFRouter::genUrl($this->path);
 	}
 
-	public function getIgnored()
+	public function ignoredList()
 	{
-		return !empty($this->params['ignore']) ? $this->params['ignore'] : [];
+		$ignored = !empty($this->params['ignore']) ? $this->params['ignore'] : [];
+		array_push($ignored, $this->params['assets dir']);
+		return $ignored;
 	}
 
-	public function addDir($path, $name)
+	public function initAssets()
 	{
-		parent::addDir($path, $name);
-		$this->files[$name]->init();
+		$name = $this->params['assets dir'];
+		$path = $this->path . $name . DIRECTORY_SEPARATOR;
+		$this->assets = new Dir($path, $name, $this->level + 1, $this);
+	}
+
+	public function getListPages()
+	{
+		$listDirs = parent::getListDirs();
+		unset($listDirs[$this->params['assets dir']]);  //removes assets dir
+		return $listDirs;
+	}
+
+	public function addDir($path, $name, $ignored = false)
+	{
+		$subDir = parent::addDir($path, $name, $ignored);
+		$subDir->init($this->getHeritableParams($name));
+	}
+
+	public function list_recursive($level = 0, $dirOnly = false, $ignore = [])
+	{
+		parent::list_recursive($level, $dirOnly, $this->ignoredList());
 	}
 
 	public function autoSetTitle()
@@ -367,12 +365,15 @@ class Page extends Dir
 		return $this;
 	}
 
+	/**
+	 * @return array heritable params
+	 */
 	public function autoSetParent()
 	{
 		parent::autoSetParent();
-		if (empty($this->parent)) return false;
+		if (empty($this->parent)) return [];
 		$this->parent->init();
-		return $this;
+		return $this->parent->getHeritableParams($this->name);
 	}
 
 }

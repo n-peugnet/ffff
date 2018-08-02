@@ -1,20 +1,23 @@
+# general settings
 site:
   name: Nicolas Peugnet
   description: A quick description of the website
 
-defaults:
+# advanced settings
+date formats:
+  - d/m/Y H:i:s
+  - d/m/Y H:i
+  - d/m/Y
+
+page defaults:
   sort:
-    type: alpha
-    order: asc
-  render: title
+    - type: title
+      order: asc
+  render:
+    - title
   layout: default
-  date formats:
-    - d/m/Y H:i:s
-    - d/m/Y H:i
-    - d/m/Y
+  assets dir: assets
 
 # you don't really need to edit these settings
 system:
-  dirs:
-    public: public
-    temp: tmp
+  public dir: public
