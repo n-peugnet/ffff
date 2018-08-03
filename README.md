@@ -86,11 +86,12 @@ date formats:
   - d/m/Y
 
 page defaults:
+  cover: /inc/img/default-cover.png
   sort:
     - type: title | name | lastModif | date
       order: asc | desc
   render:
-    - title
+    - cover | title
   layout: default
   assets dir: assets
 

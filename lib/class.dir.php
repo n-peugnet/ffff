@@ -32,7 +32,7 @@ class Dir extends File
 	{
 		if ($full) {
 			if (isset($this->files[$name]))
-				$this->files[$name];
+				return $this->files[$name];
 		} else {
 			foreach ($this->getListFiles() as $file) {
 				if ($file->getName(false) == $name)

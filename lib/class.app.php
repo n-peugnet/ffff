@@ -25,13 +25,14 @@ class App
 			],
 			'date formats' => ['Y-m-d H:i:s'],
 			'page defaults' => [
+				'cover' => '/inc/img/default-cover.png',
 				'sort' => [
 					0 => [
 						'type' => 'title',
 						'order' => 'asc'
 					]
 				],
-				'render' => ['title'],
+				'render' => ['cover'],
 				'layout' => 'default',
 				'assets dir' => 'assets'
 			],
@@ -58,9 +59,16 @@ class App
 		return self::$params['date formats'];
 	}
 
-	public static function pageDefaults()
+	public static function pageDefaults($key = false)
 	{
-		return self::$params['page defaults'];
+		$defaults = self::$params['page defaults'];
+		if ($key) {
+			if (isset($defaults[$key]))
+				return $defaults[$key];
+			else
+				return false;
+		}
+		return $defaults;
 	}
 
 	public function run()

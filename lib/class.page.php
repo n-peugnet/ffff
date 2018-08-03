@@ -180,12 +180,12 @@ class Page extends Dir
 
 	public function getCoverUrl()
 	{
-		$cover = 'inc/img/default-cover.png';
-		if (!empty($this->params['cover'])) {
+		$cover = $this->params['cover'];
+		if ($cover != App::pageDefaults('cover')) {
 			$pcover = $this->params['cover'];
 			$coverPathType = FFRouter::analizeUrl($pcover);
-			if (($coverPathType == FFRouter::ASSET && !empty($this->assets->getListFiles(true)[substr($pcover, 2)]))
-				|| !empty($this->getListFiles(true)[$pcover]))
+			if (($coverPathType == FFRouter::ASSET && $this->assets->getFile(substr($pcover, 2)))
+				|| $this->getFile($pcover))
 				return $this->url($pcover, $coverPathType);
 		}
 		$files = $this->getListFiles(true);
@@ -197,7 +197,7 @@ class Page extends Dir
 				break;
 			}
 		}
-		return $this->url($cover, FFRouter::VALID_PATH);
+		return $this->url($cover);
 	}
 
 	public function getRenderLevel()
