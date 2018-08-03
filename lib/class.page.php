@@ -24,7 +24,7 @@ class Page extends Dir
 		$this->initAssets();
 		$this->autoSetTitle();
 		if ($this->level >= 0) {
-			$layout = $this->params['layout'];
+			$layout = $this->params->get('layout');
 			$this->layout = "tpl/layouts/$layout.php";
 			if (is_dir($this->assets->getPath()))
 				$this->assets->list_recursive();
@@ -43,7 +43,7 @@ class Page extends Dir
 
 	public function render()
 	{
-		$level = !empty($this->params[self::RENDER]) ? count($this->params[self::RENDER]) : 1;
+		$level = $this->getRenderLevel();
 		$content = "";
 		$content .= $this->renderFiles();
 		$content .= $this->renderDirs($level);
@@ -52,10 +52,10 @@ class Page extends Dir
 
 	public function renderDirs($levelLimit)
 	{
-		$renderType = $this->params[self::RENDER][0];
+		$renderType = $this->params->get(self::RENDER, 0);
 		$buffer = "<ul class=\"pages\">";
 		foreach ($this->getListPages() as $id => $page) {
-			if (!$renderTypePage = $this->params->getCustomKey(self::RENDER, $page->getName()))
+			if (!$renderTypePage = $this->params->get('custom', self::RENDER, $page->getName()))
 				$renderTypePage = $renderType;
 			$url = $page->getRoute();
 			$title = $page->getTitle();
@@ -106,11 +106,11 @@ class Page extends Dir
 		$jsFiles = array_map(function ($f) {
 			return $f->getPath();
 		}, $this->assets->getListFiles(false, 'js')); // scripts from assets
-		if (empty($this->params['bypass']['scripts'])) {
+		if (empty($this->params->get('bypass', 'scripts'))) {
 			$jsFiles = array_merge($jsFiles, glob("inc/js/*.js")); // scripts from /inc/js
 		}
-		if (!empty($this->params['scripts'])) {
-			$jsFiles = array_merge($jsFiles, $this->params['scripts']); // scripts from page params
+		if (!empty($this->params->get('scripts'))) {
+			$jsFiles = array_merge($jsFiles, $this->params->get('scripts')); // scripts from page params
 		}
 		foreach ($jsFiles as $filePath) {
 			$buffer .= "\t<script src=\"" . $this->url($filePath) . "\" async ></script>\n";
@@ -119,18 +119,18 @@ class Page extends Dir
 		$cssFiles = array_map(function ($f) {
 			return $f->getPath();
 		}, $this->assets->getListFiles(false, 'css'));
-		if (empty($this->params['bypass']['styles'])) {
+		if (empty($this->params->get('bypass', 'styles'))) {
 			$cssFiles = array_merge($cssFiles, glob("inc/css/*.css"));
 		}
-		if (!empty($this->params['styles'])) {
-			$cssFiles = array_merge($cssFiles, $this->params['styles']);
+		if (!empty($this->params->get('styles'))) {
+			$cssFiles = array_merge($cssFiles, $this->params->get('styles'));
 		}
 		foreach ($cssFiles as $filePath) {
 			$buffer .= "\t<link rel=\"stylesheet\" href=\"" . $this->url($filePath) . "\" />\n";
 		}
 		// ----------------------------- include favicon ---------------------------------
-		if (!empty($this->params['favicon']))
-			$faviconUrl = $this->url($this->params['favicon']);
+		if (!empty($this->params->get('favicon')))
+			$faviconUrl = $this->url($this->params->get('favicon'));
 		else {
 			if ($faviconFile = $this->assets->getFile('favicon', false))
 				$faviconUrl = FFRouter::genUrl($faviconFile->getPath(), FFRouter::VALID_PATH);
@@ -146,7 +146,7 @@ class Page extends Dir
 			$buffer .= "\t<link rel=\"icon\" type=\"$mime\" href=\"$faviconUrl\" />\n";
 		}
 		// ----------------------- include external links arrow --------------------------
-		if (!isset($this->params['external links arrow']) || $this->params['external links arrow']) {
+		if (!$this->params->isset('external links arrow') || $this->params->get('external links arrow')) {
 			$buffer .= "\t<style>
 		a[href^=\"http\"]:not([href^=\"" . FFRouter::getBasePath() . "\"]) {
 			background-image: url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2010%2010%22%3E%3Cg%20fill%3D%22blue%22%3E%3Cg%20xmlns%3Adefault%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M8.9%208.9H1.1V1.1h2.8V0H1.1C.5%200%200%20.5%200%201.1v7.8C0%209.5.5%2010%201.1%2010h7.8c.6%200%201.1-.5%201.1-1.1V6.1H8.9v2.8z%22%2F%3E%3Cpath%20d%3D%22M10%200H5.6l1.8%201.8L4.2%205l.8.8%203.2-3.2L10%204.4V0z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E);
@@ -180,9 +180,9 @@ class Page extends Dir
 
 	public function getCoverUrl()
 	{
-		$cover = $this->params['cover'];
+		$cover = $this->params->get('cover');
 		if ($cover != App::pageDefaults('cover')) {
-			$pcover = $this->params['cover'];
+			$pcover = $this->params->get('cover');
 			$coverPathType = FFRouter::analizeUrl($pcover);
 			if (($coverPathType == FFRouter::ASSET && $this->assets->getFile(substr($pcover, 2)))
 				|| $this->getFile($pcover))
@@ -202,8 +202,8 @@ class Page extends Dir
 
 	public function getRenderLevel()
 	{
-		if (!empty($this->params[self::RENDER]))
-			return count($this->params[self::RENDER]);
+		if (is_array($this->params->get(self::RENDER)))
+			return count($this->params->get(self::RENDER));
 		return 0;
 	}
 
@@ -211,10 +211,10 @@ class Page extends Dir
 	{
 		$formats = App::dateFormats();
 		$date = false;
-		if (!empty($this->params['date'])) {
+		if (!empty($this->params->get('date'))) {
 			$numFormat = 0;
 			while (!$date) {
-				$date = DateTimeImmutable::createFromFormat($formats[$numFormat], $this->params['date']);
+				$date = DateTimeImmutable::createFromFormat($formats[$numFormat], $this->params->get('date'));
 				$numFormat++;
 			}
 			return $date;
@@ -224,7 +224,7 @@ class Page extends Dir
 
 	public function sort()
 	{
-		$sortParams = $this->params[self::SORT][0];
+		$sortParams = $this->params->get(self::SORT, 0);
 		$type = $sortParams['type'];
 		$order = $sortParams['order'] == 'asc' ? SORT_ASC : SORT_DESC;
 		$recursive = isset($sortParams['recursive']) ? $sortParams['recursive'] : 0; // not really used yet
@@ -245,17 +245,17 @@ class Page extends Dir
 
 		// heritage
 		foreach ($this->getListPages() as $subDir) {
-			if (!empty($subDir->params[self::SORT]))
+			if (!empty($subDir->params->get(self::SORT)))
 				$subDir->sort();
-			elseif (!empty($this->params[self::SORT][1]))
-				$subDir->sort($this->params[self::SORT][1]);
+			elseif (!empty($this->params->get(self::SORT, 1)))
+				$subDir->sort($this->params->get(self::SORT, 1));
 		}
 		$this->sortCustom();
 	}
 
 	public function sortCustom()
 	{
-		if ($sort = $this->params->getCustom(self::SORT)) {
+		if ($sort = $this->params->get('custom', self::SORT)) {
 			$mode = self::UNSHIFT;
 			$unshift = [];
 			$push = [];
@@ -280,8 +280,8 @@ class Page extends Dir
 		$params = [];
 		if (array_search($childName, $this->ignoredList()) !== false) return $params;
 		foreach (self::HERITABLE_PARAMS as $param) {
-			if (count($this->params[$param]) > 1)
-				$params[$param] = array_slice($this->params[$param], 1);
+			if (count($this->params->get($param)) > 1)
+				$params[$param] = array_slice($this->params->get($param), 1);
 		}
 		return $params;
 	}
@@ -297,7 +297,7 @@ class Page extends Dir
 				return FFRouter::genUrl(substr($path, 1));
 				break;
 			case FFRouter::ASSET:
-				return FFRouter::genUrl($this->path . $this->params['assets dir'] . DIRECTORY_SEPARATOR . substr($path, 2));
+				return FFRouter::genUrl($this->path . $this->params->get('assets dir') . DIRECTORY_SEPARATOR . substr($path, 2));
 				break;
 			case FFRouter::VALID_PATH:
 				return FFRouter::genUrl($path);
@@ -324,14 +324,14 @@ class Page extends Dir
 
 	public function ignoredList()
 	{
-		$ignored = !empty($this->params['ignore']) ? $this->params['ignore'] : [];
-		array_push($ignored, $this->params['assets dir']);
+		$ignored = !empty($this->params->get('ignore')) ? $this->params->get('ignore') : [];
+		array_push($ignored, $this->params->get('assets dir'));
 		return $ignored;
 	}
 
 	public function initAssets()
 	{
-		$name = $this->params['assets dir'];
+		$name = $this->params->get('assets dir');
 		$path = $this->path . $name . DIRECTORY_SEPARATOR;
 		$this->assets = new Dir($path, $name, $this->level + 1, $this);
 	}
@@ -340,13 +340,13 @@ class Page extends Dir
 	{
 		if (empty($this->parent))
 			return false;
-		return $this->parent->params['assets dir'] == $this->name;
+		return $this->parent->params->get('assets dir') == $this->name;
 	}
 
 	public function getListPages()
 	{
 		$listDirs = parent::getListDirs();
-		unset($listDirs[$this->params['assets dir']]);  //removes assets dir
+		unset($listDirs[$this->params->get('assets dir')]);  //removes assets dir
 		return $listDirs;
 	}
 
@@ -363,8 +363,8 @@ class Page extends Dir
 
 	public function autoSetTitle()
 	{
-		if (!empty($this->params['title']))
-			$title = $this->params['title'];
+		if (!empty($this->params->get('title')))
+			$title = $this->params->get('title');
 		else {
 			$title = $this->name;
 		}

@@ -11,7 +11,7 @@ class App
 	public function __construct($urlBase)
 	{
 		self::init();
-		$this->publicDir = self::$params['system']['public dir'];
+		$this->publicDir = self::$params->get('system', 'public dir');
 		$this->urlBase = $urlBase;
 		FFRouter::init($this->publicDir, $urlBase);
 	}
@@ -46,22 +46,22 @@ class App
 
 	public static function siteName()
 	{
-		return self::$params['site']['name'];
+		return self::$params->get('site', 'name');
 	}
 
 	public static function siteDescription()
 	{
-		return self::$params['site']['description'];
+		return self::$params->get('site', 'description');
 	}
 
 	public static function dateFormats()
 	{
-		return self::$params['date formats'];
+		return self::$params->get('date formats');
 	}
 
 	public static function pageDefaults($key = false)
 	{
-		$defaults = self::$params['page defaults'];
+		$defaults = self::$params->get('page defaults');
 		if ($key) {
 			if (isset($defaults[$key]))
 				return $defaults[$key];
