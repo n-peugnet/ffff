@@ -106,10 +106,10 @@ class Page extends Dir
 		$jsFiles = array_map(function ($f) {
 			return $f->getPath();
 		}, $this->assets->getListFiles(false, 'js')); // scripts from assets
-		if (empty($this->params->get('bypass', 'scripts'))) {
+		if ($this->params->empty('bypass', 'scripts')) {
 			$jsFiles = array_merge($jsFiles, glob("inc/js/*.js")); // scripts from /inc/js
 		}
-		if (!empty($this->params->get('scripts'))) {
+		if (!$this->params->empty('scripts')) {
 			$jsFiles = array_merge($jsFiles, $this->params->get('scripts')); // scripts from page params
 		}
 		foreach ($jsFiles as $filePath) {
@@ -119,17 +119,17 @@ class Page extends Dir
 		$cssFiles = array_map(function ($f) {
 			return $f->getPath();
 		}, $this->assets->getListFiles(false, 'css'));
-		if (empty($this->params->get('bypass', 'styles'))) {
+		if ($this->params->empty('bypass', 'styles')) {
 			$cssFiles = array_merge($cssFiles, glob("inc/css/*.css"));
 		}
-		if (!empty($this->params->get('styles'))) {
+		if (!$this->params->empty('styles')) {
 			$cssFiles = array_merge($cssFiles, $this->params->get('styles'));
 		}
 		foreach ($cssFiles as $filePath) {
 			$buffer .= "\t<link rel=\"stylesheet\" href=\"" . $this->url($filePath) . "\" />\n";
 		}
 		// ----------------------------- include favicon ---------------------------------
-		if (!empty($this->params->get('favicon')))
+		if (!$this->params->empty('favicon'))
 			$faviconUrl = $this->url($this->params->get('favicon'));
 		else {
 			if ($faviconFile = $this->assets->getFile('favicon', false))
@@ -211,7 +211,7 @@ class Page extends Dir
 	{
 		$formats = App::dateFormats();
 		$date = false;
-		if (!empty($this->params->get('date'))) {
+		if (!$this->params->empty('date')) {
 			$numFormat = 0;
 			while (!$date) {
 				$date = DateTimeImmutable::createFromFormat($formats[$numFormat], $this->params->get('date'));
@@ -245,9 +245,9 @@ class Page extends Dir
 
 		// heritage
 		foreach ($this->getListPages() as $subDir) {
-			if (!empty($subDir->params->get(self::SORT)))
+			if (!($subDir->params->empty(self::SORT)))
 				$subDir->sort();
-			elseif (!empty($this->params->get(self::SORT, 1)))
+			elseif (!($this->params->empty(self::SORT, 1)))
 				$subDir->sort($this->params->get(self::SORT, 1));
 		}
 		$this->sortCustom();
@@ -263,7 +263,7 @@ class Page extends Dir
 				$name = utf8_decode($name);
 				if ($name == '*')
 					$mode = self::PUSH;
-				elseif (!empty($this->files[$name])) {
+				elseif ($this->fileExist($name)) {
 					if ($mode == self::UNSHIFT)
 						$unshift[$name] = $this->files[$name];
 					else
@@ -324,7 +324,7 @@ class Page extends Dir
 
 	public function ignoredList()
 	{
-		$ignored = !empty($this->params->get('ignore')) ? $this->params->get('ignore') : [];
+		$ignored = !$this->params->empty('ignore') ? $this->params->get('ignore') : [];
 		array_push($ignored, $this->params->get('assets dir'));
 		return $ignored;
 	}
@@ -363,7 +363,7 @@ class Page extends Dir
 
 	public function autoSetTitle()
 	{
-		if (!empty($this->params->get('title')))
+		if (!$this->params->empty('title'))
 			$title = $this->params->get('title');
 		else {
 			$title = $this->name;

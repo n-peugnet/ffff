@@ -42,6 +42,11 @@ class Dir extends File
 		return false;
 	}
 
+	public function fileExist($name)
+	{
+		return !empty($this->files[$name]);
+	}
+
 	public function findParentPath()
 	{
 		return substr(parent::findParentPath(), 0, -1);

@@ -84,6 +84,11 @@ class Params
 		return $this->fetch($this->values, $params, 'isset');
 	}
 
+	public function empty(...$params)
+	{
+		return $this->fetch($this->values, $params, 'value') === null ? true : false;
+	}
+
 	private function fetch($array, $keys, $mode)
 	{
 		$key = array_shift($keys);
