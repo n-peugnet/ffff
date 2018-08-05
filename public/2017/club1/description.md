@@ -1,3 +1,12 @@
+## L'installation d'un server@home sous ubuntu 16.04.3
+
+De le recherche du matériel à la mise en place de PhpMyAdmin, en passant
+par l'installation du pilote de la carte réseau, ce projet aura été
+riche en nouveautées et une expérience très formatrice.
+
+![installation d'ubuntu serveur](~/install_ubuntu_server.png)
+![configuration de la carte réseau](~/config_ubuntu_server.png)
+
 ### Compétences mises en oeuvre
 
 #### A1.1.2 Étude de l'impact de l'intégration d'un service sur le système informatique
@@ -17,7 +26,7 @@ des configurations répondant à notre cahier des charges
 
 -   Paramétrage du BIOS pour un redémarrage "on power in"
 -   Paramétrage de systemd pour relancer les services au démarrage
--   Installation et configuration de NUT pour recevoir les alertes de l'UPS ![ssh nut config](4-ups.PNG)
+-   Installation et configuration de NUT pour recevoir les alertes de l'UPS ![ssh nut config](~/ups.png)
 
 #### A1.3.4 Déploiement d'un service
 
@@ -45,7 +54,7 @@ en prenant en compte sa consommation électrique
 
 #### A5.2.2 Veille technologique
 
-Micro blog de [synthèse des résultats de veille](a-propos/veille/)
+Micro blog de [synthèse des résultats de veille](/a-propos/veille/)
 
 #### A5.2.3 Repérage des compléments de formation ou d'auto-formation
 
