@@ -37,6 +37,7 @@ class Page extends Dir
 		$title = $this->title;
 		$breadcrumb = $this->genBreadcrumb();
 		$siteName = App::siteName();
+		$date = $this->getDate();
 		$content = $this->render();
 		include $this->layout;
 	}
@@ -207,6 +208,9 @@ class Page extends Dir
 		return 0;
 	}
 
+	/**
+	 * @return DateTimeImmutable
+	 */
 	public function getDate()
 	{
 		$formats = App::dateFormats();

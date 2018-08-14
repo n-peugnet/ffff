@@ -2,7 +2,7 @@ site:
   name: Nicolas Peugnet
   description: A quick description of the website
 
-defaults:
+page defaults:
   sort:
     type: alpha
     order: asc

@@ -3,7 +3,7 @@
 }
 
 /* Typos et couleurs communes */
-h1, h1 a, h2, h3, h4, h5, h6, a, p, li, input, textarea, label {
+h1, h1 a, h2, h3, h4, h5, h6, a, p, li, input, textarea, label, a.title {
 	font-family: Source Code Pro, consolas, Monospace, sans-serif;
 	color:rgb(77, 77, 77);
 }
@@ -91,11 +91,15 @@ code {
 	font-size:18px;
 }
 
-a:hover {
-	text-decoration: underline; 
+a.title{
+	text-decoration: underline;
 }
 
-h1 a:hover {
+a:hover {
+	text-decoration: underline;
+}
+
+h1 a:hover, a.title:hover {
 	color: black;
 }
 
@@ -149,6 +153,10 @@ ul.pages {
 /* ul.dirs ul {
 	padding-left: 10px;
 } */
+
+p.date {
+	font-style: italic;
+}
 
 .couverture {
 	display: inline-block;

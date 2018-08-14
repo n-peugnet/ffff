@@ -19,9 +19,9 @@ render:
 
 custom:
   render:
-    test: cover
+    club1: cover
   sort:
+    - club1
     - *
-    - 2014
 
 title: Nicolas Peugnet

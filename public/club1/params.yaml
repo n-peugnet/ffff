@@ -1,0 +1,11 @@
+title: CLUB1
+
+ignore:
+  - hardware
+  - minitel
+
+custom:
+  sort:
+    - hardware
+    - software
+    - minitel
