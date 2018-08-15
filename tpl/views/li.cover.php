@@ -1,6 +1,4 @@
-<li class="couverture level<?= $page->level ?>" id="projet-<?= $longTitle ?>">
-	<a href="<?= $url ?>">
-		<div><?= $title ?></div>
-		<img src="<?= $cover ?>" alt="cover-<?= $title ?>" />
-	</a>
-</li>
+<a class="cover" href="<?= $url ?>">
+	<p><?= $title ?></p>
+	<img src="<?= $cover ?>" alt="cover-<?= $title ?>" />
+</a>
