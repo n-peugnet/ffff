@@ -37,6 +37,7 @@ class Page extends Dir
 		$title = $this->title;
 		$breadcrumb = $this->genBreadcrumb();
 		$siteName = App::siteName();
+		$date = $this->getDate();
 		$content = $this->render();
 		include $this->layout;
 	}
@@ -213,13 +214,12 @@ class Page extends Dir
 		$date = false;
 		if (!$this->params->empty('date')) {
 			$numFormat = 0;
-			while (!$date) {
+			while (!$date && $numFormat < count($formats)) {
 				$date = DateTimeImmutable::createFromFormat($formats[$numFormat], $this->params->get('date'));
 				$numFormat++;
 			}
-			return $date;
 		}
-		return $this->getLastModif();
+		return $date ? $date : $this->getLastModif();
 	}
 
 	public function sort()
