@@ -7,14 +7,13 @@ page defaults:
     type: alpha
     order: asc
   render: title
-  layout: default
-  date formats:
-    - d/m/Y H:i:s
-    - d/m/Y H:i
-    - d/m/Y
+  layout: page
+
+date formats:
+  - d/m/Y H:i:s
+  - d/m/Y H:i
+  - d/m/Y
 
 # you don't really need to edit these settings
 system:
-  dirs:
-    public: public
-    temp: tmp
+  public dir: public

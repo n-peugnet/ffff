@@ -21,7 +21,9 @@
 				<a class="nav-links" href="<?= $this->url('/a-propos/cv/') ?>">CV</a>
 			</h2>
 		</div>
-			<p class="date">dernière édition : <?= $date->format('d/m/Y') ?></p>
+<?php if (!$this->params->empty('date')) : ?>
+			<p class="date">date : <?= $date->format('d/m/Y') ?>, dernière édition : <?= $this->getLastModif()->format('d/m/Y') ?></p>
+<?php endif; ?>
 			<?= $content ?>
 	</section>
 </body>

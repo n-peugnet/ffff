@@ -1,59 +1,42 @@
+## Système d'exploitation
+
+La partie software a consisté dans un premier temps à installer une version de GNU/linux. Je choisis d'utiliser **ubuntu server** pour plusieurs raisons :
+
+-   sa 'minimal install' ne contenant pas de GUI
+-   sa grande communauté
+-   son suivi et mises-à-jour
+-   son grand nombre de packets disponible
+-   son installeur textuel pas à pas
+
+Vient ensuite le choix de la version, je m'oriente vers la dernière version <abbr title="Long-Term Support" >LTS</abbr> : à ce moment là **16.04**. Tout allait bien jusqu'à la configuration du réseau. Malheureusement la carte mère était tellement récente que les drivers Intel compatibles n'étaient pas encore présents cette version d'ubuntu.
+La version 17.10 aurait résolu ce problème mais il ne s'agit pas d'une LTS.
+
 ![installation d'ubuntu serveur](~/install_ubuntu_server.png)
 ![configuration de la carte réseau](~/config_ubuntu_server.png)
 
-### Compétences mises en oeuvre
+Mais heureusement un [article de ServerTheHome](https://www.servethehome.com/day-0-with-intel-atom-c3000-getting-nics-working/) correspondant exactement à ce problème ainsi qu'une <abbr title="Intelligent Platform Management Interface">IPMI</abbr> gérant les disque virtuels m'ont permit de faire fonctionner la carte réseau avec ubuntu 16.04.
 
-#### A1.1.2 Étude de l'impact de l'intégration d'un service sur le système informatique
+## Logiciels
 
 La mise en place de ce serveur avait notamment pour but de remplacer
 mon actuel hebergement web, partagé avec mon frère. Il fallait donc le
 mettre au niveau.
-[Une liste](https://keep.google.com/#LIST/1611cfef855.bfcece6ba2254d64)
-récapitule les services à installer.
 
-#### A1.2.1 Élaboration et présentation d'un dossier de choix de solution technique
+La première chose à faire pour cela a été d'installer un serveur HTTP, dans mon cas Apache2.
 
-À l'occasion du choix de la solution matérielle, j'ai dressé [un tableau comparatif](https://docs.google.com/spreadsheets/d/1fqC80WLydTdOhbI8A3uf50F9sOipqHA9acqcoDRrncw/edit#gid=0)
-des configurations répondant à notre cahier des charges
+### Déploiement d'applications
 
-#### A1.3.2 Définition des éléments nécessaires à la continuité d'un service
-
--   Paramétrage du BIOS pour un redémarrage "on power in"
--   Paramétrage de systemd pour relancer les services au démarrage
--   Installation et configuration de NUT pour recevoir les alertes de l'UPS ![ssh nut config](~/ups.png)
-
-#### A1.3.4 Déploiement d'un service
-
-Mise en place d'un grand nombre de services :
+Mise en place d'un certain nombre de services :
 
 -   [GitLab](http://gitlab.club1.fr)
 -   [Plex](http://club1.fr:32400/web/)
 -   [PhpMyAdmin](http://club1.fr/phpmyadmin)
 -   [Froxlor](http://club1.fr/froxlor)
 
-#### A3.2.1 Installation et configuration d'éléments d'infrastructure
+## Continuité de service
 
--   Sélection, montage et installation des composants du serveur.
--   Installation d'Ubuntu serveur 16.04.3 et des pilotes necéssaires au
-    fonctionnement de la carte réseau.
--   Connection d'un minitel en tant que terminal.
--   Configuration d'une UPS avec NUT.
--   Configuration du pare-feu du routeur et des redirections NAT
+Afin d'assurer une continuité de service plusieurs solutions ont été mises en oeuvre. La plus importante a été la mise en place d'une <abbr title="Ulimited Power Supply">UPS</abbr>. Pour en recevoir les alertes, il a fallu installer et configurer NUT.
+![ssh nut config](~/ups.png)
 
-#### A5.1.6 Évaluation d'un investissement informatique
-
-Calcul de la différence entre le cout d'un abonnement mensuel à un service
-d'hebergement mutualisé plus celui d'un VPS et l'investissement du serveur
-en prenant en compte sa consommation électrique
-
-#### A5.2.2 Veille technologique
-
-Micro blog de [synthèse des résultats de veille](/a-propos/veille/)
-
-#### A5.2.3 Repérage des compléments de formation ou d'auto-formation
-
-Réalisation d'un
-[fichier récapitulatif](https://docs.google.com/document/d/1FStutJIX12AZzZb_YYt_TVha7wh8uWrZ9WYdOEaU6MM/edit#)
-des besoins de formations et des cours suivis ou à suivre.
-
-#### A5.2.4 Étude d'une technologie, d'un composant, d'un outil ou d'une méthode
+Dans le cas d'une trop longue coupure de courant le serveur s'éteint de lui même avant que la batterie de l'UPS ne sépuise, le BIOS a ensuite été paramétré pour un redémarrage "on power in".
+A l'aide de systemd j'ai pu faire en sorte de relancer tous mes services lors du démarrage.
