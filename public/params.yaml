@@ -19,7 +19,7 @@ render:
 
 custom:
   render:
-    club1: cover
+    club1: banner
   sort:
     - club1
     - *
