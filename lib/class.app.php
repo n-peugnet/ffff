@@ -11,7 +11,7 @@ class App
 	public function __construct($urlBase)
 	{
 		self::init();
-		$this->publicDir = self::$params['system']['public dir'];
+		$this->publicDir = self::$params->get('system', 'public dir');
 		$this->urlBase = $urlBase;
 		FFRouter::init($this->publicDir, $urlBase);
 	}
@@ -25,13 +25,14 @@ class App
 			],
 			'date formats' => ['Y-m-d H:i:s'],
 			'page defaults' => [
+				'cover' => '/inc/img/default-cover.png',
 				'sort' => [
 					0 => [
 						'type' => 'title',
 						'order' => 'asc'
 					]
 				],
-				'render' => ['title'],
+				'render' => ['cover'],
 				'layout' => 'default',
 				'assets dir' => 'assets'
 			],
@@ -45,22 +46,29 @@ class App
 
 	public static function siteName()
 	{
-		return self::$params['site']['name'];
+		return self::$params->get('site', 'name');
 	}
 
 	public static function siteDescription()
 	{
-		return self::$params['site']['description'];
+		return self::$params->get('site', 'description');
 	}
 
 	public static function dateFormats()
 	{
-		return self::$params['date formats'];
+		return self::$params->get('date formats');
 	}
 
-	public static function pageDefaults()
+	public static function pageDefaults($key = false)
 	{
-		return self::$params['page defaults'];
+		$defaults = self::$params->get('page defaults');
+		if ($key) {
+			if (isset($defaults[$key]))
+				return $defaults[$key];
+			else
+				return false;
+		}
+		return $defaults;
 	}
 
 	public function run()
@@ -77,6 +85,8 @@ class App
 			// show the page
 			$page = new Page($path);
 			$page->init();
+			if ($page->isAssetDir())
+				$this->showNotFound();
 			$page->list_recursive($page->getRenderLevel(), false);
 			$page->sort();
 			$page->show();
@@ -91,6 +101,7 @@ class App
 		$page->init();
 		$page->list_recursive(0);
 		$page->show();
+		die;
 	}
 
 	public function redirectTo($url)

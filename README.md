@@ -8,25 +8,27 @@ ffff is a *flat file CMS*, which is a Content Management Software using the file
 ## Principle
 
 The `/public` directory contains the public content of the website.
-Inside of it **every folder _is_ a page**. Thus **a page's url _is_ its folder's path** (after `public/`)
+Inside of it **every folder _is_ a page**. Thus **a page's URL _is_ its folder's path** (after `public/`)
 
-In these folders you can put your content which will be automatically rendered :
+A page's content is rendered automaticly from the files it contains:
 
--   text files (html, markdown, txt...)
+-   text files (html, markdown, txt)
 -   images
 -   another folder/page
 
-Each folder/page has it's own parameter file : `params.yaml` which provides some options for each folder,
-like ignore files, set a different title for the page or the sort method.
-The markup language used is yaml for it's human friendly syntax.
+There are only two exceptions to this principle, each folder/page can have a **parameters file** and an **assets folder**:
+
+-   the **parameters file**: `params.yaml` which provides some options for each folder, like ignore files, set a different title for the page or the sort method.
+    The markup language used is YAML for it's human friendly syntax. (see more details in [Page Configuration](#page-configuration))
+-   the **assets folder**: by default `assets` is where you can put content that will be used by your page but not automatically rendered.
 
 ## Getting Started
 
 0. **Make sure** you have PHP >= 5.6.0
 1.  **Download** the [latest release](https://github.com/n-peugnet/ffff/releases) and uncompress it or clone the [github repository](https://github.com/n-peugnet/ffff/).
-2.  **Copy** `/sample.params.yaml`, **rename** it into `/params.yaml` and **edit** it's content.
-3.  **Put** your content in `/public`.
-4.  **Put** your css files in `/inc/css` and your favicon in `/inc/img`.
+2.  **Copy** `/sample.params.yaml`, **rename** it into `/params.yaml` and **edit** it's content. (see [Main Configuration](#main-configuration))
+3.  **Add** your content in `/public`. (see [Add Content](#add-content))
+4.  **Put** your css files in `/inc/css` and your favicon in `/inc/img`. (see [Personalization](#personalization))
 
 ## General Usage
 
@@ -36,10 +38,7 @@ As it is a *flat file CMS*. To get started you just need to put your folders and
 However there still are some rules :
 
 1.  **Keep every folder or file that comes with the sources**, they are or will be used by the app.
-2.  **Avoid special characters, spaces and uppercase characters in a folder's name**, as the path to a folder will become the url of the corresponding page.
-
-The name of the folder will also automaticly become the name of the page,
-but you can override it in the parameters file.
+2.  **Avoid special characters, spaces and uppercase characters in a folder's name**, as the path to a folder will become the URL of the corresponding page.
 
 ### File Tree
 
@@ -52,8 +51,8 @@ ffff
 │   README.md
 │   sample.params.yaml
 │
-├───inc                  # The files you want to include on every pages
-│   ├───css              #     as your stylesheets,
+├───inc                  # The files you want to include on every pages, like:
+│   ├───css              #     your stylesheets,
 │   ├───img              #     some images (like the favicon),
 │   ├───js               #     a few scripts
 │   └───php              #     and php files.
@@ -70,7 +69,9 @@ ffff
 
 ### Main Configuration
 
-At the root of the project you can add the general `/params.yaml` configuration file containing these settings (the order doesn't matter):
+At the root of the project you can add the general configuration file: `/params.yaml `  It is there, for instance that you can edit the website's name.
+
+Here are all the settings you can define inside (the order doesn't matter). There is sample of this file that you can copy and edit to create your own configuration: `/sample.params.yaml`.
 
 ```yaml
 # general settings
@@ -85,11 +86,12 @@ date formats:
   - d/m/Y
 
 page defaults:
+  cover: /inc/img/default-cover.png
   sort:
     - type: title | name | lastModif | date
       order: asc | desc
   render:
-    - title
+    - cover | title
   layout: default
   assets dir: assets
 
@@ -98,9 +100,20 @@ system:
   public dir: public
 ```
 
-You can also create it from `/sample.params.yaml`.
+### Add Content
 
-(see [Page Configuration](#page-configuration) to understand how the advanced settings work)
+The content is stored inside the public directory whose name can be defined in the main configuration. the default one is `/public`.
+
+#### Create a Page
+
+To create a page, all you need to do is **create a folder** inside the **public directory**. The name of the folder will also automatically become the name of that page, but you can override it in the page parameters file. You can then add the content of this page inside this folder.
+
+#### Page Content
+
+There are two possibilities to organize the content inside a page depending on the constitution of the page:
+
+-   If the page is **mainly constituted of images**, you can directly put all the files inside the page's directory. This will create a gallery of images. You can then play with the sort system in the parameter file. (see [Page Configuration](#page-configuration))
+-   if the page is **mainly constituted of text**, you should use markdown or HTML files that you put directly inside the page's directory combined with image files in the assets folder of this page. (see [Assets Directory](#assets-directory))
 
 ### Personalization
 
@@ -146,8 +159,10 @@ sort:                  # sort method for subpages
 
 custom:                # custom settings
   render:              # custom rendering
-    un-fichier: cover  # renders `un-fichier` as a cover
-  sort:                # custom sort : make 2014 last
+    un-fichier: cover  # render `un-fichier` as a cover
+  sort:                # custom sort : start with 'hello' then 'world' and end with '2014'
+    - hello
+    - world
     - *
     - 2014
 
@@ -155,15 +170,29 @@ bypass:
   styles: true         # bypass default styles
   scripts: true        # bypass default scripts
 
-styles:                # adds stylesheets for this page
+styles:                # add stylesheets for this page
   - un-fichier.css
 
-scripts:               # adds scripts for this page
+scripts:               # add scripts for this page
   - un-script.js
   - https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/p5.js
 
-favicon: image.png     # Overrides the default favicon
+favicon: image.png     # override the default favicon
+
+assets dir: assets     # override the default assets dir name
 ```
+
+### Assets Directory
+
+The assets folder is a special folder that can be created in every pages. It has a few specificities:
+
+-   It is not rendered as a subpage
+-   the `.css` and `.js` files it contains will be automatically added to the page
+-   the `favicon.(ico|png)` file it contains will automatically override the default one
+-   the images files it contains will not be rendered automatically but can be used as the automatic cover of the page
+-   all the files it contains can be accessible with the prefix `~/` 
+
+The name of the assets folder of each page can be defined in it's params.
 
 ### Using The Templates
 

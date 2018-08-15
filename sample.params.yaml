@@ -10,11 +10,12 @@ date formats:
   - d/m/Y
 
 page defaults:
+  cover: /inc/img/default-cover.png
   sort:
     - type: title
       order: asc
   render:
-    - title
+    - cover
   layout: default
   assets dir: assets
 

@@ -1,7 +1,6 @@
 <?php
-class Params implements ArrayAccess
+class Params
 {
-	private $position = 0;
 	private $values = [];
 
 	const EXT = '.cache';
@@ -11,11 +10,6 @@ class Params implements ArrayAccess
 	public function __construct($values = [])
 	{
 		$this->values = $values;
-	}
-
-	public function __isset($key)
-	{
-		return isset($this->values[$key]);
 	}
 
 	/**
@@ -80,56 +74,31 @@ class Params implements ArrayAccess
 		$this->values = self::merge_recursive($this->values, $params, $numBehavior);
 	}
 
-	public function get($param, $level = -1)
+	public function get(...$params)
 	{
-		if (!empty($this->values[$param])) {
-			if ($level >= 0) {
-				if (!empty($this->values[$param][$level])) {
-					return $this->values[$param][$level];
-				}
-				return false;
+		return $this->fetch($this->values, $params, 'value');
+	}
+
+	public function isset(...$params)
+	{
+		return $this->fetch($this->values, $params, 'isset');
+	}
+
+	public function empty(...$params)
+	{
+		return $this->fetch($this->values, $params, 'value') === null ? true : false;
+	}
+
+	private function fetch($array, $keys, $mode)
+	{
+		$key = array_shift($keys);
+		if (($mode == 'value' && !empty($array[$key])) || ($mode == 'isset' && isset($array[$key]))) {
+			if (count($keys) > 0) {
+				return $this->fetch($array[$key], $keys, $mode);
 			}
-			return $this->values[$param];
+			return $mode == 'value' ? $array[$key] : true;
 		}
-		return false;
-	}
-
-	public function getCustom($param)
-	{
-		if (!empty($this['custom'][$param]))
-			return $this['custom'][$param];
-		return false;
-	}
-
-	public function getCustomKey($param, $key)
-	{
-		if ($param = $this->getCustom($param)) {
-			if (!empty($param[$key]))
-				return $param[$key];
-		}
-		return false;
-	}
-
-	///////////////////////////////////////////////////////
-	//                    INTEFACES                      //
-	///////////////////////////////////////////////////////
-
-	// ArrayAccess functions
-	public function offsetExists($key)
-	{
-		return isset($this->values[$key]);
-	}
-	public function offsetGet($key)
-	{
-		return isset($this->values[$key]) ? $this->values[$key] : false;
-	}
-	public function offsetSet($key, $value)
-	{
-		$this->values[$key] = $value;
-	}
-	public function offsetUnset($key)
-	{
-		unset($this->values[$key]);
+		return $mode == 'value' ? null : false;
 	}
 }
 ?>
