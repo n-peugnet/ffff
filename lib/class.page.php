@@ -33,10 +33,11 @@ class Page extends Dir
 
 	public function show()
 	{
+		$page = $this;
 		$head = $this->genHead();
 		$title = $this->title;
-		$breadcrumb = $this->genBreadcrumb();
 		$siteName = App::siteName();
+		$date = $this->params->empty('date') ? false : $this->getDate();
 		$content = $this->render();
 		include $this->layout;
 	}
@@ -160,14 +161,14 @@ class Page extends Dir
 		return $buffer;
 	}
 
-	public function genBreadcrumb()
+	public function genBreadcrumb($separator = " › ")
 	{
 		$p = $this->parent;
 		$buffer = "";
 		if (!empty($p)) {
 			$url = $p->getRoute();
 			$title = $p->getTitle();
-			$buffer = "<a class=\"nav-links\" href=\"$url\">$title</a> › ";
+			$buffer = "<a class=\"nav-links\" href=\"$url\">$title</a>$separator";
 			$buffer = $p->genBreadcrumb() . $buffer;
 		}
 		return $buffer;
