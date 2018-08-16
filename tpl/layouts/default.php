@@ -13,7 +13,7 @@
 </head>
 <body>
 	<section id="accueil">
-			<h1><?= $page->genBreadCrumb() . $title ?></h1>
+			<h1><?= $this->breadCrumb() . $title ?></h1>
 <?php if ($date) : ?>
 			<p class="date">date: <?= $date->format('d/m/Y') ?></p>
 <?php endif; ?>

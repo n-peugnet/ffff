@@ -89,7 +89,8 @@ class App
 				$this->showNotFound();
 			$page->list_recursive($page->getRenderLevel(), false);
 			$page->sort();
-			$page->show();
+			$engine = new FFEngine($page);
+			$engine->show();
 		} else {
 			$this->showNotFound();
 		}
@@ -100,7 +101,8 @@ class App
 		$page = new Page($this->publicDir . DIRECTORY_SEPARATOR . '404' . DIRECTORY_SEPARATOR);
 		$page->init();
 		$page->list_recursive(0);
-		$page->show();
+		$engine = new FFEngine($page);
+		$engine->show();
 		die;
 	}
 
