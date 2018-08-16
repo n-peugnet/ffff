@@ -2,6 +2,7 @@
 class File
 {
 	protected $name;
+	protected $level;
 	protected $path;
 	protected $parent;
 	protected $ignored = false;
@@ -19,6 +20,13 @@ class File
 		$this->path = $path;
 		$this->parent = $parent;
 		$this->ignored = $ignored;
+	}
+
+	public function __get($prop)
+	{
+		$method = "get" . ucfirst($prop);
+		if (method_exists($this, $method))
+			return $this->$method();
 	}
 
 	public function getLevel()

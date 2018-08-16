@@ -56,20 +56,18 @@ class Page extends Dir
 		$renderType = $this->params->get(self::RENDER, 0);
 		$buffer = "<ul class=\"pages\">";
 		foreach ($this->getListPages() as $id => $page) {
-			if (!$renderTypePage = $this->params->get('custom', self::RENDER, $page->getName()))
-				$renderTypePage = $renderType;
+			if (!$viewName = $this->params->get('custom', self::RENDER, $page->getName()))
+				$viewName = $renderType;
 			$url = $page->getRoute();
 			$title = $page->getTitle();
-			$longTitle = FFRouter::pubRelativePath($page->path);
+			$titleLong = FFRouter::pubRelativePath($page->path);
 			$cover = $page->getCoverUrl();
-			$buffer .= "<li class=\"$renderTypePage level$page->level\">";
-			ob_start();
-			include "tpl/views/li.$renderTypePage.php";
-			$buffer .= ob_get_clean();
+			$data = compact("url", "title", "titleLong", "cover", "page", "viewName");
+			$View = new View('li', $viewName, $data);
 
 			if ($page->level < $levelLimit)
-				$buffer .= $page->renderDirs($levelLimit);
-			$buffer .= "</li>";
+				$View->insert($page->renderDirs($levelLimit));
+			$buffer .= $View;
 		}
 		return $buffer . "</ul>";
 	}
