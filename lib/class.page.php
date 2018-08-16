@@ -62,12 +62,11 @@ class Page extends Dir
 			$title = $page->getTitle();
 			$longTitle = FFRouter::pubRelativePath($page->path);
 			$cover = $page->getCoverUrl();
-			ob_start();
-			include "tpl/views/li.$renderTypePage.php";
-			$buffer .= ob_get_clean();
+			$view = new View('li', $renderTypePage, 'test');
 
 			if ($page->level < $levelLimit)
-				$buffer .= $page->renderDirs($levelLimit);
+				$view->insert($page->renderDirs($levelLimit));
+			$buffer .= $view->render();
 		}
 		return $buffer . "</ul>";
 	}
