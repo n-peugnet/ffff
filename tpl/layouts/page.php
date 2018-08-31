@@ -2,6 +2,7 @@
 <html>
 <head>
 	<?= $head ?>
+	<link href="https://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet">
 	<title><?= $title ?> - <?= $siteName ?></title>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width" />
