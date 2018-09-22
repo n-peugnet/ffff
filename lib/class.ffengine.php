@@ -131,15 +131,10 @@ class FFEngine
 		}
 		// ----------------------- include external links arrow --------------------------
 		if (!$this->page->params->isset('external links arrow') || $this->page->params->get('external links arrow')) {
-			$buffer .= "\t<style>
-		a[href^=\"http\"]:not([href^=\"" . FFRouter::getBasePath() . "\"]) {
-			background-image: url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2010%2010%22%3E%3Cg%20fill%3D%22blue%22%3E%3Cg%20xmlns%3Adefault%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M8.9%208.9H1.1V1.1h2.8V0H1.1C.5%200%200%20.5%200%201.1v7.8C0%209.5.5%2010%201.1%2010h7.8c.6%200%201.1-.5%201.1-1.1V6.1H8.9v2.8z%22%2F%3E%3Cpath%20d%3D%22M10%200H5.6l1.8%201.8L4.2%205l.8.8%203.2-3.2L10%204.4V0z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E);
-			background-size: 10px 10px;
-			background-repeat: no-repeat;
-			background-position: center right;
-			padding-right: 13px;
-		}
-	</style>\n";
+			$buffer .= "\t<link rel=\"stylesheet\" href=\"" . $this->url('res/styles/external-links.css') . "\" />\n";
+			ob_start();
+			include "res/styles/external-links.php";
+			$buffer .= ob_get_clean();
 		}
 		return $buffer;
 	}

@@ -58,6 +58,9 @@ ffff
 │   └───php              #     and php files.
 ├───lib                  # All the php classes of the CMS.
 ├───public               # The public directory containing your website.
+├───res                  # Ressource files used by the CMS.
+│   └───styles           #     styles files (css or php)
+│       └───fonts        #         Fonts files
 ├───tmp                  # Temporary directory containing cache files.
 └───tpl                  # The templates
     ├───layouts
