@@ -67,7 +67,7 @@ class FFEngine
 				$ext = $file->ext();
 				switch ($ext) {
 					case 'md':
-						$mdParser = new MarkdownFF_Parser($this);
+						$mdParser = new MarkdownFF_Parser($this->page);
 						$contenu = $mdParser->transform($contenu);
 						break;
 					case 'txt':
@@ -130,7 +130,7 @@ class FFEngine
 			$buffer .= "\t<link rel=\"icon\" type=\"$mime\" href=\"$faviconUrl\" />\n";
 		}
 		// ----------------------- include external links arrow --------------------------
-		if (!$this->page->params->isset('external links arrow') || $this->page->params->get('external links arrow')) {
+		if ($this->page->params->get('external links', 'arrow')) {
 			$buffer .= "\t<link rel=\"stylesheet\" href=\"" . $this->url('res/styles/external-links.css') . "\" />\n";
 			ob_start();
 			include "res/styles/external-links.php";

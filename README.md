@@ -97,6 +97,9 @@ page defaults:
     - cover | title
   layout: default
   assets dir: assets
+  external links:
+    arrow: true
+    new tab: true
 
 # you don't really need to edit these settings
 system:

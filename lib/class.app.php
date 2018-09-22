@@ -34,7 +34,11 @@ class App
 				],
 				'render' => ['cover'],
 				'layout' => 'default',
-				'assets dir' => 'assets'
+				'assets dir' => 'assets',
+				'external links' => [
+					'arrow' => true,
+					'new tab' => true
+				]
 			],
 			'system' => [
 				'public dir' => 'public'
