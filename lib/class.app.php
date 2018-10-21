@@ -87,61 +87,71 @@ class App
 		return $defaults;
 	}
 
+	/**
+	 * Analyse the request and displays the appropriate answer
+	 */
 	public function run()
 	{
 		if (http_response_code() == 403) {
-			$this->showForbidden();
+			$this->showError(403);
 		}
 		if ($path = FFRouter::matchRoute()) {
-			// adds trailing slash
-			if (substr($path, -1) != DIRECTORY_SEPARATOR) {
-				$this->redirectToRoute($path . DIRECTORY_SEPARATOR);
-			}
-			// include personnal php scripts
-			foreach (glob("inc/*.php") as $fileName) {
-				include_once $fileName;
-			}
-			// show the page
+			$this->addTrailingSlash($path);
 			$page = new Page($path);
 			$page->init();
 			if ($page->isAssetDir()) {
-				$this->showNotFound();
+				$this->showError(404);
 			} else {
-				$this->showPage($page);
+				$this->incPhpScripts();
+				$this->showPage($page, 200);
 			}
 		} else {
-			$this->showNotFound();
+			$this->showError(404);
 		}
 	}
 
-	public function showPage($page)
+	/**
+	 * Redirect 'xxxxx' to 'xxxxx/'
+	 * @param string $path
+	 */
+	protected function addTrailingSlash($path)
 	{
-		http_response_code(200);
-		$page->list_recursive($page->getRenderLevel(), false);
-		$page->sort();
+		if (substr($path, -1) != DIRECTORY_SEPARATOR) {
+			$this->redirectToRoute($path . DIRECTORY_SEPARATOR);
+		}
+	}
+
+	/**
+	 * Includes personnal php script from /inc/php
+	 */
+	protected function incPhpScripts()
+	{
+		foreach (glob("inc/*.php") as $fileName) {
+			include_once $fileName;
+		}
+	}
+
+	/**
+	 * Shows a Page
+	 * @param Page $page
+	 * @param int $code
+	 */
+	protected function showPage($page, $code)
+	{
+		http_response_code($code);
 		$engine = new FFEngine($page);
 		$engine->show();
 	}
 
-	public function showForbidden()
+	/**
+	 * Shows an error Page
+	 * @param int $code
+	 */
+	protected function showError($code)
 	{
-		http_response_code(403);
-		$page = new Page($this->publicDir . DIRECTORY_SEPARATOR . '403' . DIRECTORY_SEPARATOR);
+		$page = new Page($this->publicDir . DIRECTORY_SEPARATOR . $code . DIRECTORY_SEPARATOR);
 		$page->init();
-		$page->list_recursive(0);
-		$engine = new FFEngine($page);
-		$engine->show();
-		die;
-	}
-
-	public function showNotFound()
-	{
-		http_response_code(404);
-		$page = new Page($this->publicDir . DIRECTORY_SEPARATOR . '404' . DIRECTORY_SEPARATOR);
-		$page->init();
-		$page->list_recursive(0);
-		$engine = new FFEngine($page);
-		$engine->show();
+		$this->showPage($page, $code);
 		die;
 	}
 

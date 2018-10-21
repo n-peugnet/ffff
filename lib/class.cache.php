@@ -17,12 +17,8 @@ class Cache extends File
 		parent::__construct($path, $name, $level, $parent, $ignored);
 	}
 
-	public function write($content)
+	static public function setDir($str)
 	{
-		if (!is_dir($this->getParentPath())) {
-			// dir doesn't exist, make it
-			mkdir($this->getParentPath(), 0777, true);
-		}
-		parent::write($content);
+		self::$dir = $str;
 	}
 }

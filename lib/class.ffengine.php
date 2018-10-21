@@ -19,6 +19,7 @@ class FFEngine
 	 */
 	public function __construct($page)
 	{
+		$page->list_recursive($page->getRenderLevel(), false);
 		$this->page = $page;
 		$this->cache = new Cache($page->getPath() . "content.html");
 		$layout = $this->page->getParam('layout');
@@ -32,18 +33,24 @@ class FFEngine
 			$this->layout->getLastModif() <= $this->cache->getLastModif()) {
 			echo $this->cache->read();
 		} else {
-			$page = $this->page;
-			$head = $this->genHead();
-			$title = $page->getTitle();
-			$siteName = App::siteName();
-			$date = $page->getParam('date') === null ? false : $page->getDate();
-			$content = $this->renderContent();
-			ob_start();
-			include $this->layout->getPath();
-			$html = ob_get_clean();
+			$this->page->sort();
+			$html = $this->render();
 			$this->cache->write($html);
 			echo $html;
 		}
+	}
+
+	protected function render()
+	{
+		$page = $this->page;
+		$head = $this->genHead();
+		$title = $page->getTitle();
+		$siteName = App::siteName();
+		$date = $page->getParam('date') === null ? false : $page->getDate();
+		$content = $this->renderContent();
+		ob_start();
+		include $this->layout->getPath();
+		return ob_get_clean();
 	}
 
 	protected function renderContent()

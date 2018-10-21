@@ -124,6 +124,10 @@ class File
 	 */
 	public function write($content)
 	{
+		if (!is_dir($this->getParentPath())) {
+			// dir doesn't exist, make it
+			mkdir($this->getParentPath(), 0777, true);
+		}
 		return file_put_contents($this->getPath(), $content);
 	}
 
