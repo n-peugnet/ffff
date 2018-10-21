@@ -158,4 +158,3 @@ class Dir extends File
 		return $this;
 	}
 }
-?>

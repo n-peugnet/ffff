@@ -110,5 +110,3 @@ class FFRouter
 		return str_replace('\\', self::SLASH, $url);
 	}
 }
-
-?>

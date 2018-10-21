@@ -171,5 +171,3 @@ class FFEngine
 		return $this->page->url($path, $type);
 	}
 }
-
-?>

@@ -3,13 +3,21 @@ class Params
 {
 	private $values = [];
 
+	/** @var File */
+	private $fileOrigin;
+
+	/** @var Cache */
+	private $fileCached;
+
 	const EXT = '.cache';
 	const PUSH = 0;
 	const OVERRIDE = 1;
 
-	public function __construct($values = [])
+	public function __construct($values = [], $filePath)
 	{
 		$this->values = $values;
+		$this->fileOrigin = new File($filePath);
+		$this->fileCached = new Cache($filePath);
 	}
 
 	/**
@@ -41,29 +49,22 @@ class Params
 	 * @param int    $numBehavior Merging behavior of the loading
 	 * @param string $tmpDir Name of the temporary directory. (default : tmp)
 	 */
-	public function load($paramFile, $path = '', $numBehavior = self::OVERRIDE, $tmpDir = 'tmp')
+	public function load($numBehavior = self::OVERRIDE)
 	{
-		$cachePath = $tmpDir . DIRECTORY_SEPARATOR . $path;
-		$paramFilePath = $path . $paramFile;
-		$paramCachePath = $cachePath . $paramFile . self::EXT;
-		if (is_file($paramFilePath)) {
-			if (is_file($paramCachePath) && (filemtime($paramFilePath) <= filemtime($paramCachePath)))
-				$this->override(unserialize(file_get_contents($paramCachePath)), $numBehavior);
+		if ($this->fileOrigin->exist()) {
+			if ($this->fileCached->exist() && $this->fileOrigin->getLastModif() <= $this->fileCached->getLastModif())
+				$this->override(unserialize($this->fileCached->read()), $numBehavior);
 			else {
-				$paramFileValues = Spyc::YAMLLoad($paramFilePath);
+				$paramFileValues = Spyc::YAMLLoad($this->fileOrigin->getPath());
 				$this->override($paramFileValues, $numBehavior);
-				$this->cache($paramFile, $cachePath, $paramFileValues);
+				$this->cache($paramFileValues);
 			}
 		}
 	}
 
-	public function cache($paramFile, $cachePath, $values)
+	public function cache($values)
 	{
-		if (!is_dir($cachePath)) {
-			// dir doesn't exist, make it
-			mkdir($cachePath, 0777, true);
-		}
-		file_put_contents($cachePath . $paramFile . self::EXT, serialize($values));
+		$this->fileCached->write(serialize($values));
 	}
 
 	/**
@@ -101,4 +102,3 @@ class Params
 		return $mode == 'value' ? null : false;
 	}
 }
-?>

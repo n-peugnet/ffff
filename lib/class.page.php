@@ -13,13 +13,13 @@ class Page extends Dir
 
 	public function init($heritedParams = [])
 	{
-		$this->params = new Params(App::pageDefaults());
+		$this->params = new Params(App::pageDefaults(), $this->path . App::PARAM_FILE);
 		if (empty($this->name))
 			$this->autoSetName();
 		if (empty($this->parent))
 			$heritedParams = $this->autoSetParent();
 		$this->params->override($heritedParams);
-		$this->params->load(App::PARAM_FILE, $this->path, Params::OVERRIDE);
+		$this->params->load(Params::OVERRIDE);
 		$this->initAssets();
 		$this->autoSetTitle();
 		if ($this->level >= 0) {
@@ -244,4 +244,3 @@ class Page extends Dir
 	}
 }
 
-?>

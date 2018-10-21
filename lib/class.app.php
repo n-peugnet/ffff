@@ -44,8 +44,8 @@ class App
 				'public dir' => 'public'
 			]
 		];
-		self::$params = new Params($defaults);
-		self::$params->load(self::PARAM_FILE, '', Params::PUSH);
+		self::$params = new Params($defaults, self::PARAM_FILE);
+		self::$params->load(Params::PUSH);
 	}
 
 	public static function siteName()
@@ -121,4 +121,3 @@ class App
 		$this->redirectTo($url);
 	}
 }
-?>

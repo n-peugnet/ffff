@@ -79,4 +79,3 @@ class MarkdownFF_Parser extends Markdown_Parser
 		return "\n" . $this->hashBlock($block) . "\n\n";
 	}
 }
-?>

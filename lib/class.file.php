@@ -13,11 +13,14 @@ class File
 	 * @param int $level
 	 * @param Dir $parent
 	 */
-	public function __construct($path, $name = "", $level = 0, &$parent = null, $ignored = false)
+	public function __construct($path, $name = null, $level = 0, &$parent = null, $ignored = false)
 	{
-		$this->setName($name);
-		$this->level = $level;
-		$this->path = $path;
+		$this->setPath($path);
+		if ($name != null)
+			$this->setName($name);
+		else
+			$this->autoSetName();
+		$this->setLevel($level);
 		$this->parent = $parent;
 		$this->ignored = $ignored;
 	}
@@ -34,6 +37,16 @@ class File
 		return $this->level;
 	}
 
+	protected function setLevel($level)
+	{
+		$this->level = $level;
+	}
+
+	/**
+	 * Get the name of the file without the path
+	 * @param boolean $full - with or without the extension
+	 * @return string
+	 */
 	public function getName($full = true)
 	{
 		if (!$full)
@@ -41,11 +54,31 @@ class File
 		return $this->name;
 	}
 
+	public function setName($str)
+	{
+		$this->name = utf8_encode($str);
+		return $this;
+	}
+
+	/**
+	 * Get the full path of the file including its name
+	 * @return string
+	 */
 	public function getPath()
 	{
 		return $this->path;
 	}
 
+	protected function setPath($str)
+	{
+		$this->path = str_replace('/', DIRECTORY_SEPARATOR, $str);
+		return $this;
+	}
+
+	/**
+	 * Get the parent dir of the file
+	 * @return Dir|false
+	 */
 	public function getParent($level = 1)
 	{
 		if (!empty($this->parent)) {
@@ -57,14 +90,46 @@ class File
 		return false;
 	}
 
+	public function getParentPath()
+	{
+		if (!empty($this->parent))
+			return $this->parent->getPath();
+		else
+			return $this->findParentPath();
+	}
+
 	public function getIgnored()
 	{
 		return $this->ignored;
 	}
 
+	public function exist()
+	{
+		return is_file($this->getPath());
+	}
+
+	/**
+	 * Reads the content of the file
+	 * @return string
+	 */
+	public function read()
+	{
+		return file_get_contents($this->getPath());
+	}
+
+	/**
+	 * Write the given content in the file
+	 * @param string $content
+	 * @return int
+	 */
+	public function write($content)
+	{
+		return file_put_contents($this->getPath(), $content);
+	}
+
 	protected function findParentPath()
 	{
-		return substr($this->path, 0, -mb_strlen($this->name));
+		return substr($this->getPath(), 0, -mb_strlen($this->name));
 	}
 
 	public function autoSetParent()
@@ -89,14 +154,8 @@ class File
 
 	public function autoSetName()
 	{
-		$pieces = preg_split('/[\\' . DIRECTORY_SEPARATOR . ']/', $this->path, -1, PREG_SPLIT_NO_EMPTY);
+		$pieces = preg_split('/[\\' . DIRECTORY_SEPARATOR . ']/', $this->getPath(), -1, PREG_SPLIT_NO_EMPTY);
 		$this->setName($pieces[count($pieces) - 1]);
-		return $this;
-	}
-
-	public function setName($str)
-	{
-		$this->name = utf8_encode($str);
 		return $this;
 	}
 
@@ -120,12 +179,14 @@ class File
 	public function getLastModif()
 	{
 		$date = new DateTimeImmutable();
-		return $date->setTimestamp(filemtime($this->path));
+		return $date->setTimestamp(filemtime($this->getPath()));
 	}
 
 	/**
+	 * Comparision function useful for array sorting functions
 	 * @param self $f1
 	 * @param self $f2
+	 * @return int
 	 */
 	public static function compare($f1, $f2, $properties, $flags = 0)
 	{
@@ -154,5 +215,3 @@ class File
 		return $file->level - $this->level;
 	}
 }
-
-?>
