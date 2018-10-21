@@ -52,9 +52,11 @@ class Params
 	public function load($numBehavior = self::OVERRIDE)
 	{
 		if ($this->fileOrigin->exist()) {
-			if ($this->fileCached->exist() && $this->fileOrigin->getLastModif() <= $this->fileCached->getLastModif())
-				$this->override(unserialize($this->fileCached->read()), $numBehavior);
-			else {
+			if ($this->fileCached->exist() && $this->fileOrigin->getLastModif() <= $this->fileCached->getLastModif()) {
+				$content = $this->fileCached->read();
+				$array = json_decode($content, true);
+				$this->override($array, $numBehavior);
+			} else {
 				$paramFileValues = Spyc::YAMLLoad($this->fileOrigin->getPath());
 				$this->override($paramFileValues, $numBehavior);
 				$this->cache($paramFileValues);
@@ -64,7 +66,7 @@ class Params
 
 	public function cache($values)
 	{
-		$this->fileCached->write(serialize($values));
+		$this->fileCached->write(json_encode($values));
 	}
 
 	/**
