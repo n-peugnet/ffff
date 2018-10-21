@@ -89,6 +89,9 @@ class App
 
 	public function run()
 	{
+		if (http_response_code() == 403) {
+			$this->showForbidden();
+		}
 		if ($path = FFRouter::matchRoute()) {
 			// adds trailing slash
 			if (substr($path, -1) != DIRECTORY_SEPARATOR) {
@@ -118,6 +121,17 @@ class App
 		$page->sort();
 		$engine = new FFEngine($page);
 		$engine->show();
+	}
+
+	public function showForbidden()
+	{
+		http_response_code(403);
+		$page = new Page($this->publicDir . DIRECTORY_SEPARATOR . '403' . DIRECTORY_SEPARATOR);
+		$page->init();
+		$page->list_recursive(0);
+		$engine = new FFEngine($page);
+		$engine->show();
+		die;
 	}
 
 	public function showNotFound()

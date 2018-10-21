@@ -1,6 +1,7 @@
 # project Relative
 tmp/*
 !tmp/README.md
+!tmp/.htaccess
 
 public/*
 public/*/*
@@ -12,9 +13,11 @@ public/*/*
 inc/*
 inc/*/*
 !inc/*/README.md
+!inc/php/.htaccess
 
 tpl/*
 tpl/*/*
+!tpl/.htaccess
 !tpl/views/li.title.php
 !tpl/views/li.cover.php
 !tpl/layouts/default.php

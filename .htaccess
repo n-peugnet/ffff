@@ -16,6 +16,9 @@
 
 	# rewrite everything else to ./index.php
 	RewriteRule .? %{ENV:BASE_PATH}/index.php [L]
+
+	# FixMe: doesnt work if the project is in a subdirectory.
+	ErrorDocument 403 /index.php
 </IfModule>
 
 <IfModule !mod_rewrite.c>
@@ -23,6 +26,7 @@
 	# might be edited to match the correct path of index.php relative to the root
 	# of the VirtualHost.
 	ErrorDocument 404 /index.php
+	ErrorDocument 403 /index.php
 </IfModule>
 
 # php5 activation (for free.fr)
