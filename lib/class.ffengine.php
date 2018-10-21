@@ -1,7 +1,9 @@
 <?php
 class FFEngine
 {
+	/** @var Page */
 	protected $page;
+
 	protected $layout = "tpl/layouts/default.php";
 
 	/**
@@ -63,7 +65,7 @@ class FFEngine
 			if ($type == 'image') {
 				$buffer .= '<img class="CadrePhoto" src="' . FFRouter::genUrl($file->getPath()) . '" alt="' . $file->getName() . '"/>';
 			} elseif ($type == 'text') {
-				$contenu = file_get_contents($file->getPath());
+				$contenu = $file->read();
 				$ext = $file->ext();
 				switch ($ext) {
 					case 'md':

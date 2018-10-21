@@ -1,17 +1,37 @@
-RewriteEngine On
+<IfModule mod_rewrite.c>
+	RewriteEngine On
 
-# Determine the RewriteBase automatically and set it as environment variable.
-# If you are using Apache aliases to do mass virtual hosting or installed the
-# project in a subdirectory, the base path will be prepended to allow proper
-# resolution of the index.php file and to redirect to the correct URI. It will
-# work in environments without path prefix as well, providing a safe, one-size
-# fits all solution.
-RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
-RewriteRule ^(.*) - [E=BASE_PATH:%1]
+	# Determine the RewriteBase automatically and set it as environment variable.
+	# If you are using Apache aliases to do mass virtual hosting or installed the
+	# project in a subdirectory, the base path will be prepended to allow proper
+	# resolution of the index.php file and to redirect to the correct URI. It will
+	# work in environments without path prefix as well, providing a safe, one-size
+	# fits all solution.
+	RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
+	RewriteRule ^(.*) - [E=BASE_PATH:%1]
 
-# No rewrite on static files
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule .? - [L]
+	# No rewrite on static files
+	RewriteCond %{REQUEST_FILENAME} -f
+	RewriteRule .? - [L]
 
-# rewrite everything else to ./index.php
-RewriteRule .? %{ENV:BASE_PATH}/index.php [L]
+	# rewrite everything else to ./index.php
+	RewriteRule .? %{ENV:BASE_PATH}/index.php [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+	# Fallback hack when RewriteModule is not enabled. The value of ErrorDocument
+	# might be edited to match the correct path of index.php relative to the root
+	# of the VirtualHost.
+	ErrorDocument 404 /index.php
+</IfModule>
+
+# php5 activation (for free.fr)
+<ifDefine Free>
+	PHP56 1
+</ifDefine>
+
+# .htaccess file protection
+<Files .htaccess>
+	Order Deny,Allow
+	Deny from all
+</Files>

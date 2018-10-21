@@ -3,6 +3,11 @@ class Dir extends File
 {
 	protected $files = [];
 
+	/**
+	 * @param bool $all - return ignored files or not
+	 * @param bool $ext - file names with extention or not
+	 * @return File[]
+	 */
 	public function getListFiles($all = false, $ext = false)
 	{
 		$listFiles = [];
