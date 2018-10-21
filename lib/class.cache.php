@@ -2,12 +2,19 @@
 
 class Cache extends File
 {
-	static $ext = 'cache';
+	static $ext = '';
 	static $dir = 'tmp';
 
-	public function getPath()
+	/**
+	 * @param string $path
+	 * @param string $name
+	 * @param int $level
+	 * @param Dir $parent
+	 */
+	public function __construct($path, $name = null, $level = 0, &$parent = null, $ignored = false)
 	{
-		return Cache::$dir . DIRECTORY_SEPARATOR . $this->path . "." . Cache::$ext;
+		$path = Cache::$dir . DIRECTORY_SEPARATOR . $path . Cache::$ext;
+		parent::__construct($path, $name, $level, $parent, $ignored);
 	}
 
 	public function write($content)

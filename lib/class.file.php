@@ -44,13 +44,13 @@ class File
 
 	/**
 	 * Get the name of the file without the path
-	 * @param boolean $full - with or without the extension
+	 * @param boolean $ext - with or without the extension
 	 * @return string
 	 */
-	public function getName($full = true)
+	public function getName($ext = true)
 	{
-		if (!$full)
-			return substr($this->name, 0, strpos($this->name, '.'));
+		if (!$ext)
+			return substr($this->name, 0, strrpos($this->name, '.'));
 		return $this->name;
 	}
 

@@ -20,7 +20,7 @@ class FFEngine
 	public function __construct($page)
 	{
 		$this->page = $page;
-		$this->cache = new Cache($page->getPath() . "html");
+		$this->cache = new Cache($page->getPath() . "content.html");
 		$layout = $this->page->getParam('layout');
 		$this->layout = new File("tpl/layouts/$layout.php");
 	}

@@ -9,15 +9,14 @@ class Params
 	/** @var Cache */
 	private $fileCached;
 
-	const EXT = '.cache';
 	const PUSH = 0;
 	const OVERRIDE = 1;
 
 	public function __construct($values = [], $filePath)
 	{
 		$this->values = $values;
-		$this->fileOrigin = new File($filePath);
-		$this->fileCached = new Cache($filePath);
+		$this->fileOrigin = new File("$filePath.yaml");
+		$this->fileCached = new Cache("$filePath.json");
 	}
 
 	/**

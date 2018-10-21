@@ -6,7 +6,7 @@ class App
 	protected $router;
 	protected static $params;
 
-	const PARAM_FILE = 'params.yaml';
+	const PARAM_FILE = 'params';
 
 	public function __construct($urlBase)
 	{
