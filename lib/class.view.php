@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * Class to render HTML li blocs from Page Objects. It's main goal is to support
+ * recursivity of Pages and generate indented lists blocs.
+ */
 class View
 {
 	const PATH = 'tpl/views/';

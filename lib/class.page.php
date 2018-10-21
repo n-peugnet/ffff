@@ -1,9 +1,17 @@
 <?php
+
+/**
+ * Class representing a Page as an extension of a directory. It is limited to
+ * functions concerning the files and dirs it contains, such as sorting and
+ * properties loading and other files related functions.
+ */
 class Page extends Dir
 {
 	protected $title;
-	protected $params;
 	protected $assets;
+
+	/** @var Params */
+	protected $params;
 
 	const SORT = 'sort';
 	const RENDER = 'render';
@@ -70,6 +78,11 @@ class Page extends Dir
 	public function getParam(...$param)
 	{
 		return $this->params->get(...$param);
+	}
+
+	public function emptyParam(...$param)
+	{
+		return $this->params->empty(...$param);
 	}
 
 	public function getAssets()
@@ -203,6 +216,10 @@ class Page extends Dir
 		return $this->parent->params->get('assets dir') == $this->name;
 	}
 
+	/**
+	 * Get all the subpages
+	 * @return Page[]
+	 */
 	public function getListPages()
 	{
 		$listDirs = parent::getListDirs();

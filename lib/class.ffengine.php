@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Class to render a full HTML page from a Page Object.
+ */
 class FFEngine
 {
 	/** @var Page */
@@ -51,14 +55,24 @@ class FFEngine
 		return $buffer;
 	}
 
+	/**
+	 * Renders HTML bloc of a page's subpages
+	 * @param Page $p
+	 * @param int $levelLimit
+	 * @return string HTML content
+	 */
 	protected function renderDirs($p, $levelLimit)
 	{
 		$renderType = $p->getParam(Page::RENDER)[0];
 		$buffer = "<ul class=\"pages\">";
-		foreach ($p->getListPages() as $id => $page) {
-			if (!$viewName = $p->getParam('custom', Page::RENDER, $page->getName()))
+		foreach ($p->getListPages() as $page) {
+			if (!$viewName = $p->getParam('custom', Page::RENDER, $page->getName())) {
 				$viewName = $renderType;
+			}
 			$url = $page->getRoute();
+			if (!$page->emptyParam('new tab')) {
+				$url .= "\" target=\"_blank";
+			}
 			$title = $page->getTitle();
 			$titleLong = FFRouter::pubRelativePath($page->path);
 			$cover = $page->getCoverUrl();

@@ -1,7 +1,6 @@
 # project Relative
 tmp/*
 !tmp/README.md
-!tmp/.htaccess
 
 public/*
 public/*/*
