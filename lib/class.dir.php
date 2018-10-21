@@ -18,6 +18,11 @@ class Dir extends File
 		return $listFiles;
 	}
 
+	/**
+	 * Get the Dirs from the list of files
+	 * @param bool $all - return ignored dirs or not
+	 * @return Dir[]
+	 */
 	public function getListDirs($all = false)
 	{
 		$listDirs = [];
@@ -95,6 +100,22 @@ class Dir extends File
 	public function type()
 	{
 		return 'dir';
+	}
+
+	public function getLastModif($level = 0)
+	{
+		$date = parent::getLastModif();
+		foreach ($this->getListFiles() as $file) {
+			$fileDate = $file->getLastModif();
+			$date = $fileDate > $date ? $fileDate : $date;
+		}
+		if ($level !== 0) {
+			foreach ($this->getListDirs() as $subDir) {
+				$subDirDate = $subDir->getLastModif($level - 1);
+				$date = $subDirDate > $date ? $subDirDate : $date;
+			}
+		}
+		return $date;
 	}
 
 	public function nbDirs()

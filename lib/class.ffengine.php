@@ -4,7 +4,11 @@ class FFEngine
 	/** @var Page */
 	protected $page;
 
-	protected $layout = "tpl/layouts/default.php";
+	/** @var Cache */
+	protected $cache;
+
+	/** @var File */
+	protected $layout;
 
 	/**
 	 * @param Page $page
@@ -12,22 +16,33 @@ class FFEngine
 	public function __construct($page)
 	{
 		$this->page = $page;
-		$layout = $page->getParam('layout');
-		$this->layout = "tpl/layouts/$layout.php";
+		$this->cache = new Cache($page->getPath() . "html");
+		$layout = $this->page->getParam('layout');
+		$this->layout = new File("tpl/layouts/$layout.php");
 	}
 
 	public function show()
 	{
-		$page = $this->page;
-		$head = $this->genHead();
-		$title = $page->getTitle();
-		$siteName = App::siteName();
-		$date = $page->getParam('date') === null ? false : $page->getDate();
-		$content = $this->renderContent();
-		include $this->layout;
+		if ($this->cache->exist() &&
+			$this->page->getLastModif(-1) <= $this->cache->getLastModif() &&
+			$this->layout->getLastModif() <= $this->cache->getLastModif()) {
+			echo $this->cache->read();
+		} else {
+			$page = $this->page;
+			$head = $this->genHead();
+			$title = $page->getTitle();
+			$siteName = App::siteName();
+			$date = $page->getParam('date') === null ? false : $page->getDate();
+			$content = $this->renderContent();
+			ob_start();
+			include $this->layout->getPath();
+			$html = ob_get_clean();
+			$this->cache->write($html);
+			echo $html;
+		}
 	}
 
-	public function renderContent()
+	protected function renderContent()
 	{
 		$level = $this->page->getRenderLevel();
 		$buffer = "";
@@ -36,7 +51,7 @@ class FFEngine
 		return $buffer;
 	}
 
-	public function renderDirs($p, $levelLimit)
+	protected function renderDirs($p, $levelLimit)
 	{
 		$renderType = $p->getParam(Page::RENDER)[0];
 		$buffer = "<ul class=\"pages\">";
@@ -57,7 +72,7 @@ class FFEngine
 		return $buffer . "</ul>";
 	}
 
-	public function renderFiles()
+	protected function renderFiles()
 	{
 		$buffer = "";
 		foreach ($this->page->getListFiles() as $index => $file) {
@@ -85,7 +100,7 @@ class FFEngine
 		return $buffer;
 	}
 
-	public function genHead()
+	protected function genHead()
 	{
 		$buffer = "\n";
 		// ------------------------ include .js script files -----------------------------
@@ -141,7 +156,7 @@ class FFEngine
 		return $buffer;
 	}
 
-	public function breadCrumb($separator = " › ")
+	protected function breadCrumb($separator = " › ")
 	{
 		return $this->genBreadcrumb($this->page, $separator);
 	}
@@ -159,6 +174,11 @@ class FFEngine
 		return $buffer;
 	}
 
+	/**
+	 * Adapt HTML content's urls to fit the CMS File tree
+	 * @param string $content - HTML content
+	 * @return string The same content with correct urls
+	 */
 	private function adaptUrls($content)
 	{
 		$content = preg_replace_callback('/(src|href)=[\'"](.+?)[\'"]/', function ($matches) {
@@ -168,7 +188,7 @@ class FFEngine
 		return $content;
 	}
 
-	public function url($path, $type = false)
+	protected function url($path, $type = false)
 	{
 		return $this->page->url($path, $type);
 	}
