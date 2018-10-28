@@ -102,6 +102,18 @@ class File
 		return $this->ignored;
 	}
 
+	/**
+	 * To know if if a file is from the same class or not
+	 * Classname::isSameClass($file) => $file is Classname
+	 *      self::isSameClass($file) => $file is Class where self is written
+	 *    static::isSameClass($file) => $file is Class from which static is called
+	 * @param File $file
+	 */
+	static public function isSameClass($file)
+	{
+		return get_class($file) == get_called_class();
+	}
+
 	static public function existAt($path)
 	{
 		return is_file($path);

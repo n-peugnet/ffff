@@ -1,6 +1,7 @@
 <?php
 class Dir extends File
 {
+	/** @var File[] */
 	protected $files = [];
 
 	/**
@@ -27,7 +28,7 @@ class Dir extends File
 	{
 		$listDirs = [];
 		foreach ($this->files as $key => $file) {
-			if (($all || !$file->getIgnored()) && get_class($file) == get_class($this))
+			if (($all || !$file->getIgnored()) && static::isSameClass($file))
 				$listDirs[$key] = $file;
 		}
 		return $listDirs;
@@ -55,7 +56,7 @@ class Dir extends File
 	public function setPath($path)
 	{
 		parent::setPath($path);
-		if (substr($path, -1) != DIRECTORY_SEPARATOR) {
+		if (substr($this->path, -1) != DIRECTORY_SEPARATOR) {
 			$this->path .= DIRECTORY_SEPARATOR;
 		}
 	}
@@ -190,19 +191,24 @@ class Dir extends File
 		return $this;
 	}
 
-	public function map_recursive($function, $flat = false)
+	/**
+	 * @param int $level
+	 * @param bool $dirOnly
+	 * @param callable $function A method to apply to every element
+	 * @return File[]|static
+	 */
+	public function flatten($level = -1, $dirOnly = false, $function = null)
 	{
-		$array = [$this->getName() => $function($this)];
-		$map = array_map(function ($subdir) use ($function, $flat) {
-			return $subdir->map_recursive($function, $flat);
-		}, $this->getListDirs());
-		if ($flat) {
-			foreach ($map as $key => $value) {
-				$array += $value;
+		$array = [];
+		foreach ($this->files as $key => $file) {
+			$isDir = static::isSameClass($file);
+			if (!$dirOnly || $isDir) {
+				$value = is_callable($function) ? $function($file) : $file;
+				$array[$file->getPath()] = $value;
+				if ($isDir && $level !== 0) {
+					$array = array_merge($array, $file->flatten($level - 1, $dirOnly, $function));
+				}
 			}
-		} else {
-			$class = get_class($this);
-			$array["list${class}s"] = $map;
 		}
 		return $array;
 	}
