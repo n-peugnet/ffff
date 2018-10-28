@@ -16,7 +16,8 @@ class Params
 	{
 		$this->values = $values;
 		$this->fileOrigin = new File("$filePath.yaml");
-		$this->fileCached = new Cache("$filePath.json");
+		$parentPath = $this->fileOrigin->getParentPath();
+		$this->fileCached = new Cache("$parentPath.json");
 	}
 
 	/**

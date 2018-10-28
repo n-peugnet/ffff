@@ -3,7 +3,8 @@ class App
 {
 	protected $publicDir = "public";
 	protected $urlBase = "";
-	protected $router;
+
+	/** @var Params */
 	protected static $params;
 
 	const PARAM_FILE = 'params';
@@ -152,7 +153,7 @@ class App
 		$page = new Page($this->publicDir . DIRECTORY_SEPARATOR . $code . DIRECTORY_SEPARATOR);
 		$page->init();
 		$this->showPage($page, $code);
-		die;
+		// die;
 	}
 
 	public function redirectTo($url)

@@ -52,6 +52,19 @@ class Dir extends File
 		return false;
 	}
 
+	public function setPath($path)
+	{
+		parent::setPath($path);
+		if (substr($path, -1) != DIRECTORY_SEPARATOR) {
+			$this->path .= DIRECTORY_SEPARATOR;
+		}
+	}
+
+	static public function existAt($path)
+	{
+		return is_dir($path);
+	}
+
 	public function fileExist($name)
 	{
 		return !empty($this->files[$name]);
@@ -175,6 +188,23 @@ class Dir extends File
 				$subDir->sort_recursive($properties, $order, $level - 1, $flags);
 		}
 		return $this;
+	}
+
+	public function map_recursive($function, $flat = false)
+	{
+		$array = [$this->getName() => $function($this)];
+		$map = array_map(function ($subdir) use ($function, $flat) {
+			return $subdir->map_recursive($function, $flat);
+		}, $this->getListDirs());
+		if ($flat) {
+			foreach ($map as $key => $value) {
+				$array += $value;
+			}
+		} else {
+			$class = get_class($this);
+			$array["list${class}s"] = $map;
+		}
+		return $array;
 	}
 
 

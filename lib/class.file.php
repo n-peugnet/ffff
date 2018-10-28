@@ -18,8 +18,6 @@ class File
 		$this->setPath($path);
 		if ($name != null)
 			$this->setName($name);
-		else
-			$this->autoSetName();
 		$this->setLevel($level);
 		$this->parent = $parent;
 		$this->ignored = $ignored;
@@ -72,6 +70,7 @@ class File
 	protected function setPath($str)
 	{
 		$this->path = str_replace('/', DIRECTORY_SEPARATOR, $str);
+		$this->autoSetName();
 		return $this;
 	}
 
@@ -103,9 +102,14 @@ class File
 		return $this->ignored;
 	}
 
+	static public function existAt($path)
+	{
+		return is_file($path);
+	}
+
 	public function exist()
 	{
-		return is_file($this->getPath());
+		return static::existAt($this->getPath());
 	}
 
 	/**
@@ -133,6 +137,7 @@ class File
 
 	protected function findParentPath()
 	{
+		// FixMe : pas top de trouver le parent par rapport au nom
 		return substr($this->getPath(), 0, -mb_strlen($this->name));
 	}
 

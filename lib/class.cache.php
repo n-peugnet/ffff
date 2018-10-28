@@ -13,8 +13,10 @@ class Cache extends File
 	 */
 	public function __construct($path, $name = null, $level = 0, &$parent = null, $ignored = false)
 	{
-		$path = Cache::$dir . DIRECTORY_SEPARATOR . $path . Cache::$ext;
 		parent::__construct($path, $name, $level, $parent, $ignored);
+		$path = hash('md5', $this->getParentPath() . $this->getName(false));
+		$path .= ".{$this->ext()}";
+		$this->setPath(Cache::$dir . DIRECTORY_SEPARATOR . $path . Cache::$ext);
 	}
 
 	static public function setDir($str)

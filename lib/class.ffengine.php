@@ -21,7 +21,7 @@ class FFEngine
 	{
 		$page->list_recursive($page->getRenderLevel(), false);
 		$this->page = $page;
-		$this->cache = new Cache($page->getPath() . "content.html");
+		$this->cache = new Cache($page->getPath() . ".html");
 		$layout = $this->page->getParam('layout');
 		$this->layout = new File("tpl/layouts/$layout.php");
 	}
