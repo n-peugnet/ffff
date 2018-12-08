@@ -1,6 +1,10 @@
 
 <?php
-$urlBase = $_SERVER['BASE_PATH']; // comes from the .htaccess
+$urlBase = "";
+if (isset($_SERVER['BASE_PATH'])) {
+	$urlBase = $_SERVER['BASE_PATH']; // comes from the .htaccess
+}
+
 
 function autoload($className)
 {

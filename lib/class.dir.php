@@ -3,6 +3,11 @@ class Dir extends File
 {
 	protected $files = [];
 
+	/**
+	 * @param bool $all - return ignored files or not
+	 * @param bool $ext - file names with extention or not
+	 * @return File[]
+	 */
 	public function getListFiles($all = false, $ext = false)
 	{
 		$listFiles = [];
@@ -13,6 +18,11 @@ class Dir extends File
 		return $listFiles;
 	}
 
+	/**
+	 * Get the Dirs from the list of files
+	 * @param bool $all - return ignored dirs or not
+	 * @return Dir[]
+	 */
 	public function getListDirs($all = false)
 	{
 		$listDirs = [];
@@ -92,6 +102,22 @@ class Dir extends File
 		return 'dir';
 	}
 
+	public function getLastModif($level = 0)
+	{
+		$date = parent::getLastModif();
+		foreach ($this->getListFiles() as $file) {
+			$fileDate = $file->getLastModif();
+			$date = $fileDate > $date ? $fileDate : $date;
+		}
+		if ($level !== 0) {
+			foreach ($this->getListDirs() as $subDir) {
+				$subDirDate = $subDir->getLastModif($level - 1);
+				$date = $subDirDate > $date ? $subDirDate : $date;
+			}
+		}
+		return $date;
+	}
+
 	public function nbDirs()
 	{
 		return count($this->getListDirs());
@@ -158,4 +184,3 @@ class Dir extends File
 		return $this;
 	}
 }
-?>

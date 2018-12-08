@@ -1,19 +1,19 @@
 <?php
 class App
 {
-	protected $publicDir = "";
+	protected $publicDir = "public";
 	protected $urlBase = "";
 	protected $router;
 	protected static $params;
 
-	const PARAM_FILE = 'params.yaml';
+	const PARAM_FILE = 'params';
 
 	public function __construct($urlBase)
 	{
 		self::init();
 		$this->publicDir = self::$params->get('system', 'public dir');
-		$this->urlBase = $urlBase;
-		FFRouter::init($this->publicDir, $urlBase);
+		$this->setUrlBase($urlBase);
+		FFRouter::init($this->publicDir, $this->urlBase);
 	}
 
 	public static function init()
@@ -34,14 +34,30 @@ class App
 				],
 				'render' => ['cover'],
 				'layout' => 'default',
-				'assets dir' => 'assets'
+				'assets dir' => 'assets',
+				'external links' => [
+					'arrow' => true,
+					'new tab' => true
+				]
 			],
 			'system' => [
 				'public dir' => 'public'
 			]
 		];
-		self::$params = new Params($defaults);
-		self::$params->load(self::PARAM_FILE, '', Params::PUSH);
+		self::$params = new Params($defaults, self::PARAM_FILE);
+		self::$params->load(Params::PUSH);
+	}
+
+	protected function setUrlBase($urlBase)
+	{
+		if (http_response_code() != 404) {
+			$this->urlBase = $urlBase;
+		} else {
+			// fallback hack when RewriteModule is not enabled
+			$htaccess = file_get_contents('.htaccess');
+			preg_match('/ErrorDocument 404 (\/.+?)\/index.php/', $htaccess, $matches);
+			$this->urlBase = isset($matches[1]) ? $matches[1] : "";
+		}
 	}
 
 	public static function siteName()
@@ -73,6 +89,9 @@ class App
 
 	public function run()
 	{
+		if (http_response_code() == 403) {
+			$this->showForbidden();
+		}
 		if ($path = FFRouter::matchRoute()) {
 			// adds trailing slash
 			if (substr($path, -1) != DIRECTORY_SEPARATOR) {
@@ -85,22 +104,44 @@ class App
 			// show the page
 			$page = new Page($path);
 			$page->init();
-			if ($page->isAssetDir())
+			if ($page->isAssetDir()) {
 				$this->showNotFound();
-			$page->list_recursive($page->getRenderLevel(), false);
-			$page->sort();
-			$page->show();
+			} else {
+				$this->showPage($page);
+			}
 		} else {
 			$this->showNotFound();
 		}
 	}
 
-	function showNotFound()
+	public function showPage($page)
 	{
+		http_response_code(200);
+		$page->list_recursive($page->getRenderLevel(), false);
+		$page->sort();
+		$engine = new FFEngine($page);
+		$engine->show();
+	}
+
+	public function showForbidden()
+	{
+		http_response_code(403);
+		$page = new Page($this->publicDir . DIRECTORY_SEPARATOR . '403' . DIRECTORY_SEPARATOR);
+		$page->init();
+		$page->list_recursive(0);
+		$engine = new FFEngine($page);
+		$engine->show();
+		die;
+	}
+
+	public function showNotFound()
+	{
+		http_response_code(404);
 		$page = new Page($this->publicDir . DIRECTORY_SEPARATOR . '404' . DIRECTORY_SEPARATOR);
 		$page->init();
 		$page->list_recursive(0);
-		$page->show();
+		$engine = new FFEngine($page);
+		$engine->show();
 		die;
 	}
 
@@ -115,4 +156,3 @@ class App
 		$this->redirectTo($url);
 	}
 }
-?>

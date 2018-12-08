@@ -1,0 +1,9 @@
+@font-face {
+	font-family: 'external-links';
+	src: url('fonts/external-links.eot?oxktbx');
+	src: url('fonts/external-links.eot?oxktbx#iefix') format('embedded-opentype'),
+		url('fonts/external-links.ttf?oxktbx') format('truetype'),
+		url('fonts/external-links.woff?oxktbx') format('woff');
+	font-weight: normal;
+	font-style: normal;
+}

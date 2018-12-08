@@ -3,13 +3,20 @@ class Params
 {
 	private $values = [];
 
-	const EXT = '.cache';
+	/** @var File */
+	private $fileOrigin;
+
+	/** @var Cache */
+	private $fileCached;
+
 	const PUSH = 0;
 	const OVERRIDE = 1;
 
-	public function __construct($values = [])
+	public function __construct($values = [], $filePath)
 	{
 		$this->values = $values;
+		$this->fileOrigin = new File("$filePath.yaml");
+		$this->fileCached = new Cache("$filePath.json");
 	}
 
 	/**
@@ -41,29 +48,24 @@ class Params
 	 * @param int    $numBehavior Merging behavior of the loading
 	 * @param string $tmpDir Name of the temporary directory. (default : tmp)
 	 */
-	public function load($paramFile, $path = '', $numBehavior = self::OVERRIDE, $tmpDir = 'tmp')
+	public function load($numBehavior = self::OVERRIDE)
 	{
-		$cachePath = $tmpDir . DIRECTORY_SEPARATOR . $path;
-		$paramFilePath = $path . $paramFile;
-		$paramCachePath = $cachePath . $paramFile . self::EXT;
-		if (is_file($paramFilePath)) {
-			if (is_file($paramCachePath) && (filemtime($paramFilePath) <= filemtime($paramCachePath)))
-				$this->override(unserialize(file_get_contents($paramCachePath)), $numBehavior);
-			else {
-				$paramFileValues = Spyc::YAMLLoad($paramFilePath);
+		if ($this->fileOrigin->exist()) {
+			if ($this->fileCached->exist() && $this->fileOrigin->getLastModif() <= $this->fileCached->getLastModif()) {
+				$content = $this->fileCached->read();
+				$array = json_decode($content, true);
+				$this->override($array, $numBehavior);
+			} else {
+				$paramFileValues = Spyc::YAMLLoad($this->fileOrigin->getPath());
 				$this->override($paramFileValues, $numBehavior);
-				$this->cache($paramFile, $cachePath, $paramFileValues);
+				$this->cache($paramFileValues);
 			}
 		}
 	}
 
-	public function cache($paramFile, $cachePath, $values)
+	public function cache($values)
 	{
-		if (!is_dir($cachePath)) {
-			// dir doesn't exist, make it
-			mkdir($cachePath, 0777, true);
-		}
-		file_put_contents($cachePath . $paramFile . self::EXT, serialize($values));
+		$this->fileCached->write(json_encode($values));
 	}
 
 	/**
@@ -101,4 +103,3 @@ class Params
 		return $mode == 'value' ? null : false;
 	}
 }
-?>

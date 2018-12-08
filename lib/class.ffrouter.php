@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Static class to resolve url troug the whole project
+ */
 class FFRouter
 {
 	const SLASH = '/';
@@ -12,7 +16,7 @@ class FFRouter
 	protected static $publicDir = "";
 	protected static $basePath = "";
 
-	public static function init($publicDir = "public", $basePath = "")
+	public static function init($publicDir, $basePath = "")
 	{
 		self::$publicDir = $publicDir;
 		self::$basePath = $basePath;
@@ -110,5 +114,3 @@ class FFRouter
 		return str_replace('\\', self::SLASH, $url);
 	}
 }
-
-?>

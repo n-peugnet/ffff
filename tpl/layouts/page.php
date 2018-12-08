@@ -15,15 +15,15 @@
 <body>
 	<section id="accueil">
 		<div class="titre">
-			<h1><?= $breadcrumb . $title ?></h1>
+			<h1><?= $this->breadCrumb() . $title ?></h1>
 			<h2 class="nav">
 				<a class="nav-links" href="<?= $this->url('/a-propos/') ?>">à propos</a> |
 				<a class="nav-links" href="<?= $this->url('/contact/') ?>">Contact</a> |
 				<a class="nav-links" href="<?= $this->url('/a-propos/cv/') ?>">CV</a>
 			</h2>
 		</div>
-<?php if (!$this->params->empty('date')) : ?>
-			<p class="date">date : <?= $date->format('d/m/Y') ?>, dernière édition : <?= $this->getLastModif()->format('d/m/Y') ?></p>
+<?php if (!$this->page->emptyParam('date')) : ?>
+			<p class="date">date : <?= $date->format('d/m/Y') ?>, dernière édition : <?= $this->page->getLastModif()->format('d/m/Y') ?></p>
 <?php endif; ?>
 			<?= $content ?>
 	</section>
