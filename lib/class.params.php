@@ -77,6 +77,9 @@ class Params
 		$this->values = self::merge_recursive($this->values, $params, $numBehavior);
 	}
 
+	/**
+	 * Get a param if exist else null
+	 */
 	public function get(...$params)
 	{
 		return $this->fetch($this->values, $params, 'value');

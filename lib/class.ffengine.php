@@ -28,9 +28,8 @@ class FFEngine
 
 	public function show()
 	{
-		if ($this->cache->exist() &&
-			$this->page->getLastModif(-1) <= $this->cache->getLastModif() &&
-			$this->layout->getLastModif() <= $this->cache->getLastModif()) {
+		$lastModif = $this->involvedFiles()[0]->getLastModif();
+		if ($this->cache->exist() && $lastModif <= $this->cache->getLastModif()) {
 			echo $this->cache->read();
 		} else {
 			$this->page->sort();
@@ -212,5 +211,19 @@ class FFEngine
 	protected function url($path, $type = false)
 	{
 		return $this->page->url($path, $type);
+	}
+
+	/**
+	 * @return File[]
+	 */
+	protected function involvedFiles()
+	{
+		$files = [
+			$this->page,
+			$this->layout,
+		];
+		$files = array_merge($files, $this->page->getViews());
+		File::usort($files, ['lastModif'], SORT_DESC);
+		return $files;
 	}
 }

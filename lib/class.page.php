@@ -70,6 +70,20 @@ class Page extends Dir
 		return 0;
 	}
 
+	/**
+	 * @return View[]
+	 */
+	public function getViews()
+	{
+		$views = $this->params->get(self::RENDER);
+		foreach ($this->params->get('custom', self::RENDER) as $value) {
+			array_push($views, $value);
+		}
+		return array_map(function ($name) {
+			return new View('li', $name);
+		}, array_unique($views));
+	}
+
 	public function getParams()
 	{
 		return $this->params;
@@ -90,6 +104,9 @@ class Page extends Dir
 		return $this->assets;
 	}
 
+	/**
+	 * @return DateTimeImmutable
+	 */
 	public function getDate()
 	{
 		$formats = App::dateFormats();

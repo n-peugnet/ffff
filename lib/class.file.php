@@ -231,6 +231,39 @@ class File
 		return $val1 > $val2 ? 1 : -1;
 	}
 
+	/**
+	 * Sort an array, of files from an array of theirs properties
+	 * keep the key => value association
+	 * @param File[] $files
+	 * @param string[] $properties
+	 * @param int $order
+	 * @param int $flags
+	 * @return File[]
+	 */
+	public static function uasort(&$files, $properties, $order = SORT_ASC, $flags = 0)
+	{
+		uasort($files, function ($f1, $f2) use ($properties, $order, $flags) {
+			$cmp = self::compare($f1, $f2, $properties, $flags);
+			return $order == SORT_ASC ? $cmp : -$cmp;
+		});
+	}
+
+	/**
+	 * Sort an array, of files from an array of theirs properties
+	 * @param File[] $files
+	 * @param string[] $properties
+	 * @param int $order
+	 * @param int $flags
+	 * @return File[]
+	 */
+	public static function usort(&$files, $properties, $order = SORT_ASC, $flags = 0)
+	{
+		usort($files, function ($f1, $f2) use ($properties, $order, $flags) {
+			$cmp = self::compare($f1, $f2, $properties, $flags);
+			return $order == SORT_ASC ? $cmp : -$cmp;
+		});
+	}
+
 	public function diffLevel($file)
 	{
 		return $file->level - $this->level;

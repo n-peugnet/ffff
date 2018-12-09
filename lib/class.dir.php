@@ -116,7 +116,7 @@ class Dir extends File
 		return 'dir';
 	}
 
-	public function getLastModif($level = 0)
+	public function getLastModif($level = -1)
 	{
 		$date = parent::getLastModif();
 		foreach ($this->getListFiles() as $file) {
@@ -180,10 +180,7 @@ class Dir extends File
 
 	public function sort_recursive($properties, $order = SORT_ASC, $level = -1, $flags = SORT_NATURAL)
 	{
-		uasort($this->files, function ($f1, $f2) use ($properties, $order, $flags) {
-			$cmp = self::compare($f1, $f2, $properties, $flags);
-			return $order == SORT_ASC ? $cmp : -$cmp;
-		});
+		File::uasort($this->files, $properties, $order, $flags);
 		if ($level !== 0) {
 			foreach ($this->getListDirs() as $subDir)
 				$subDir->sort_recursive($properties, $order, $level - 1, $flags);

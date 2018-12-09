@@ -4,7 +4,7 @@
  * Class to render HTML li blocs from Page Objects. It's main goal is to support
  * recursivity of Pages and generate indented lists blocs.
  */
-class View
+class View extends File
 {
 	const PATH = 'tpl/views/';
 	const VOID_ELEMENTS = [
@@ -26,24 +26,30 @@ class View
 		'wbr'
 	];
 	protected $tag;
-	protected $view;
 	protected $data;
-	protected $html;
+	protected $html = null;
 
-	public function __construct($tag, $view, $data)
+	public function __construct($tag, $view, $data = [])
 	{
+		parent::__construct(self::PATH . "$tag.$view.php");
 		$this->tag = $tag;
-		$this->view = $view;
 		$this->data = $data;
-		$this->evalHtml();
+	}
+
+	public function getHtml()
+	{
+
+		if ($this->html === null) {
+			$this->evalHtml();
+		}
+		return $this->html;
 	}
 
 	protected function evalHtml()
 	{
-		$viewPath = self::PATH . "$this->tag.$this->view.php";
 		extract($this->data);
 		ob_start();
-		include $viewPath;
+		include $this->path;
 		$this->html = ob_get_clean();
 	}
 
@@ -56,11 +62,13 @@ class View
 
 	protected function split()
 	{
-		if (!$endTag = $this->endTag())
+		if (!$endTag = $this->endTag()) {
 			return false;
-		$index = strrpos($this->html, $endTag);
-		$start = substr($this->html, 0, $index);
-		$end = substr($this->html, $index);
+		}
+		$html = $this->getHtml();
+		$index = strrpos($html, $endTag);
+		$start = substr($html, 0, $index);
+		$end = substr($html, $index);
 		return [$start, $end];
 	}
 
@@ -74,7 +82,7 @@ class View
 
 	public function __toString()
 	{
-		return $this->html;
+		return $this->getHtml();
 	}
 }
 
