@@ -82,6 +82,9 @@ canvas {
 pre {
 	margin-top: 0;
 	border: solid 1px #aaa;
+	border-radius: 2px;
+	padding: 5px;
+	background-color: #e9e9e9;
 }
 
 code {

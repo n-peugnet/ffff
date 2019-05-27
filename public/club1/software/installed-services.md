@@ -14,7 +14,8 @@
 -   pm2
 -   default-jdk (2018-09-22)
 -   fail2ban (2018-10-10)
--   corefreq ()
+-   corefreq (2018-11-08)
+-   memcached (2019-01-05)
 
 ### Commandes
 
