@@ -24,7 +24,7 @@ There are only two exceptions to this principle, each folder/page can have a **p
 
 ## Getting Started
 
-0. **Make sure** you have PHP >= 5.6.0
+0.  **Make sure** you have PHP >= 5.6.0
 1.  **Download** the [latest release](https://github.com/n-peugnet/ffff/releases) and uncompress it or clone the [github repository](https://github.com/n-peugnet/ffff/).
 2.  **Copy** `/sample.params.yaml`, **rename** it into `/params.yaml` and **edit** it's content. (see [Main Configuration](#main-configuration))
 3.  **Add** your content in `/public`. (see [Add Content](#add-content))
@@ -134,7 +134,7 @@ add automatically on every pages :
 
 ## Advanced Usage
 
-###  Page Configuration
+### Page Configuration
 
 In each page's folder you can add a `params.yaml` configuration file :
 Here are the parameters you can use in this file (the order doesn't matter):
@@ -221,6 +221,16 @@ The **views** are the differents ways to render the elements of a page. Views ha
 ```
 
 For example a list item view named title will be `li.title.php`
+
+### About The Cache
+
+Each time a page is rendered, **ffff** will generate a cache for this page to speed up the future renderings.
+
+Each time a page is shown, **ffff** will check in the cache (`/tmp`) if a cache exists for this page. If id does then no need to render it, it is served directly from the cache. If it doesn't or if it is outdated, then the page will be rendered again.
+
+There is command to efficiently clear the cache:
+
+    bin/console cache clear
 
 ## Authors
 
