@@ -1,0 +1,51 @@
+#!/usr/bin/env php
+<?php
+define('PROJECT_ROOT', realpath(__DIR__ . '/..'));
+require PROJECT_ROOT . '/lib/docopt.php';
+
+$doc = <<<DOC
+ffff console.
+
+Usage:
+  bin/console cache clear
+
+Options:declare
+  -h --help     Show this screen.
+  --version     Show version.
+  -v            Be verbose
+
+DOC;
+
+$args = Docopt::handle($doc, array('version' => 'ffff console 1.1'));
+
+if ($args['cache']) {
+	if ($args['clear']) {
+		$readme = file_get_contents(path('/tmp/README.md'));
+		rmrf(path('/tmp/*'));
+		file_put_contents(path('/tmp/README.md'), $readme);
+	}
+}
+
+/**
+ * Get a path relative to the project's root.
+ * @param string $path (must start with /)
+ * @return string absolute path, relative to the project root.
+ */
+function path($path) {
+	return PROJECT_ROOT . $path;
+}
+
+/**
+ * Remove the directory and its content (all files and subdirectories).
+ * @param string $dir the directory name
+ */
+function rmrf($dir) {
+    foreach (glob($dir) as $file) {
+        if (is_dir($file)) {
+            rmrf("$file/*");
+            rmdir($file);
+        } else {
+            unlink($file);
+        }
+    }
+}
