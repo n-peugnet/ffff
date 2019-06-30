@@ -1,0 +1,3 @@
+[submodule "public/random/add-dates-to-bash-prompt"]
+	path = public/random/add-dates-to-bash-prompt
+	url = git@gist.github.com:66ae5d42eef7888a396f0d7e35af6d79.git
