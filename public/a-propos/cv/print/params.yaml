@@ -16,4 +16,5 @@ styles:
 scripts:
   - print.js
 
-external links arrow: false
+external links:
+  - arrow: false
