@@ -97,9 +97,6 @@
 	width: 130px;
 	min-width: 60px
 }
-#cv td.langage {
-	text-align: center;
-}
 
 #cv table.troisCol td.details {
 	min-width: 165px;
