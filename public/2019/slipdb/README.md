@@ -5,6 +5,7 @@
 
 A distributed, index based, search engine.
 
+[github](https://github.com/slipsoft/slipdb)
 
 ## Getting Started
 

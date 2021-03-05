@@ -2,6 +2,8 @@
 
 Ultimate spam detector
 
+[github](https://github.com/slipsoft/slipspam)
+
 ![algorithms benchmark chart](~/benchmark4.png)
 ![interleaved confusion matrix](~/confusion-matrix1.png)
 
