@@ -5,6 +5,7 @@ ignore:
   - contact
   - README.md
   - live-youtube
+  - soiree
 
 sort:
   - type: alpha
