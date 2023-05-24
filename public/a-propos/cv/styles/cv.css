@@ -52,19 +52,12 @@
 
 #cv td {
 	min-width: 80px;
-	padding-bottom: 8px;
+	padding-bottom: 9px;
 }
 
 #cv ul {
 	margin: 0;
 	padding-left: 20px;
-	text-indent: -16px;
-	list-style: none;
-}
-
-#cv li:before {
-	content: "-";
-	padding-right: 10px;
 }
 
 #cv .entete {
@@ -84,6 +77,10 @@
 
 #cv .date, #cv .niveau, #cv .ecole {
 	font-family: HelveticaNeueLTCom-Lt, 'helveticaLt';
+}
+
+#cv td.langage {
+	padding-bottom: 14px;
 }
 
 #cv td.date, #cv td.langage {
