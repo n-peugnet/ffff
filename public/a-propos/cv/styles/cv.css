@@ -1,3 +1,7 @@
+* {
+	box-sizing: border-box;
+}
+
 @font-face {
 	font-family: 'helveticaBoldObl';
 	src: url('HelveticaNeueLTCom-BdExO.ttf');
@@ -34,7 +38,7 @@
 #cv h2 {
 	font-size: 18px;
 	font-family: HelveticaNeueLTCom-BdExO, 'helveticaBoldObl', sans-serif;
-	margin: 17px 0 8px 115px;
+	margin: 17px 0 8px 110px;
 }
 
 #cv p, #cv a, #cv td, #cv li {
@@ -52,7 +56,7 @@
 
 #cv td {
 	min-width: 80px;
-	padding-bottom: 9px;
+	padding-bottom: 10px;
 }
 
 #cv ul {
@@ -86,7 +90,7 @@
 #cv td.date, #cv td.langage {
 	width: 110px;
 	min-width: 50px;
-	padding-right: 10px;
+	padding-right: 15px;
 	text-align: right;
 }
 
@@ -95,6 +99,10 @@
 	text-align: center;
 	width: 130px;
 	min-width: 60px
+}
+
+#cv table {
+	border-collapse: collapse;
 }
 
 #cv table.troisCol td.details {
